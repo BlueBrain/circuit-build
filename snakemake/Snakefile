@@ -1,0 +1,512 @@
+CIRCUIT_DIR = '.'
+
+BIONAME = os.path.abspath(os.path.dirname(workflow.overwrite_configfile))
+
+def bioname_path(filename):
+    return os.path.join(BIONAME, filename)
+
+BUILDER_RECIPE = bioname_path("builderRecipeAllPathways.xml")
+MORPHDB = bioname_path("extNeuronDB.dat")
+
+ATLAS = config['common']['atlas']
+ATLAS_CACHE_DIR = ".atlas"
+
+MORPH_RELEASE = config['common']['morph_release']
+EMODEL_RELEASE = config['common']['emodel_release']
+
+NRN_FILES = [
+    'nrn.h5',
+    'nrn_efferent.h5',
+    'nrn_positions.h5',
+    'nrn_positions_efferent.h5',
+    'nrn_summary.h5',
+]
+
+INDEX_FILES = [
+    '_index.dat',
+    '_index.idx',
+    '_payload.dat',
+]
+
+LOGS_DIR = "logs"
+
+SEGMENT_INDEX = expand('SEGMENT{filename}', filename=INDEX_FILES)
+
+TOUCHES_DIR = "connectome/touches"
+
+NRN_FUNCTIONAL_DIR = "connectome/functional"
+NRN_FUNCTIONAL_DATA = expand(NRN_FUNCTIONAL_DIR + '/{filename}', filename=NRN_FILES)
+NRN_FUNCTIONAL_INDEX = expand(NRN_FUNCTIONAL_DIR + '/SYNAPSE{filename}', filename=INDEX_FILES)
+
+NRN_STRUCTURAL_DIR = "connectome/structural"
+NRN_STRUCTURAL_DATA = expand(NRN_STRUCTURAL_DIR + '/{filename}', filename=NRN_FILES)
+
+PRE_FUNCTIONAL = [
+    'CircuitConfig',
+    'circuit.mvd3',
+    NRN_FUNCTIONAL_DIR + '/start.target',
+]
+
+
+def log_path(name):
+    return os.path.abspath(os.path.join(LOGS_DIR, name + ".log"))
+
+
+def template_path(name):
+    return os.path.join(workflow.basedir, 'templates', name + ".j2")
+
+
+def bbp_env(modules, command):
+    full_cmd = []
+
+    sw_release = config['common']['sw_release']
+    if sw_release is not None:
+        full_cmd.append(
+            "export MODULEPATH=/nix/var/nix/profiles/per-user/modules/lugano-viz-x86_64/archive-modules/%s/release/share/modulefiles/" % sw_release
+        )
+
+    if modules:
+        full_cmd.extend([
+            "module purge",
+            "module load " + " ".join(modules),
+            "export LD_LIBRARY_PATH="
+        ])
+
+    full_cmd.append(" ".join(map(str, command)))
+
+    return " && ".join(full_cmd)
+
+
+localrules:
+    all,
+    sbatch,
+    functional,
+    functional_all,
+    structural,
+    circuitconfig,
+    circuitconfig_struct,
+    sbatch_td,
+    sbatch_s2s,
+    sbatch_s2f,
+    symlink_start_target
+
+
+rule all:
+    input:
+        PRE_FUNCTIONAL
+
+
+rule sbatch:
+    input:
+        TOUCHES_DIR + "/run.sbatch",
+        NRN_FUNCTIONAL_DIR + "/run.sbatch",
+        NRN_STRUCTURAL_DIR + "/run.sbatch",
+
+
+rule functional:
+    input:
+        PRE_FUNCTIONAL,
+        NRN_FUNCTIONAL_DATA,
+
+
+rule functional_all:
+    input:
+        rules.functional.output,
+        NRN_FUNCTIONAL_INDEX,
+        SEGMENT_INDEX,
+
+
+rule structural:
+    input:
+        'CircuitConfig_struct',
+        'circuit.mvd3',
+        NRN_STRUCTURAL_DIR + '/start.target',
+        NRN_STRUCTURAL_DATA,
+
+
+def build_circuit_config(nrn_path):
+    return bbp_env(
+        ['nix/py27/jinja2'],
+        ["jinja2 --strict",
+            "-D CIRCUIT_PATH=%s" % os.path.abspath(CIRCUIT_DIR),
+            "-D NRN_PATH=%s" % os.path.abspath(nrn_path),
+            "-D MORPH_PATH={MORPH_RELEASE}",
+            "-D ME_TYPE_PATH=%s" % os.path.join(EMODEL_RELEASE, "hoc"),
+            "-D ME_COMBO_INFO_PATH=%s" % os.path.join(EMODEL_RELEASE, "mecombo_emodel.tsv"),
+            "-D BIONAME={BIONAME}",
+            "-D ATLAS={ATLAS}",
+            template_path('CircuitConfig'),
+            "> {output}",
+        ]
+    )
+
+rule circuitconfig:
+    message:
+        "Generate CircuitConfig"
+
+    output:
+        'CircuitConfig'
+
+    shell:
+        build_circuit_config(nrn_path=NRN_FUNCTIONAL_DIR)
+
+
+rule circuitconfig_struct:
+    message:
+        "Generate CircuitConfig_struct"
+
+    output:
+        'CircuitConfig_struct'
+
+    shell:
+        build_circuit_config(nrn_path=NRN_STRUCTURAL_DIR)
+
+
+rule place_cells:
+    message:
+        "Generate cell positions; assign me-types"
+
+    output:
+        'circuit.mvd3.metypes'
+
+    log:
+        log_path('place_cells')
+
+    shell:
+        bbp_env(
+            ['nix/nse/brainbuilder'],
+            ["brainbuilder cells create",
+                "--composition",
+                    bioname_path("cell_composition.yaml"),
+                "--mtype-taxonomy",
+                    bioname_path("mtype_taxonomy.tsv"),
+                "--atlas",
+                    ATLAS,
+                "--atlas-cache",
+                    ATLAS_CACHE_DIR,
+                ("--region-ids " + ",".join(map(str, config['common']['region_ids']))
+                    if 'region_ids' in config['common'] else ""),
+                "--soma-placement",
+                    config['place_cells']['soma_placement'],
+                "--density-factor",
+                    config['place_cells'].get('density_factor', 1.0),
+                ("--assign-layer"
+                    if config['place_cells'].get('assign_layer', False) else ""),
+                ("--assign-column"
+                    if config['place_cells'].get('assign_column', False) else ""),
+                "--seed",
+                    config['place_cells']['seed'],
+                "--output",
+                    "{output}",
+                " 2>&1 | tee {log}"
+            ]
+        )
+
+
+rule assign_morphologies:
+    message:
+        "Assign morphologies using 'placement hints' approach"
+
+    input:
+        'circuit.mvd3.metypes'
+
+    output:
+        'circuit.mvd3.morphologies'
+
+    log:
+        log_path('assign_morphologies')
+
+    shell:
+        bbp_env(
+            ['spark', 'nix/nse/placement-algorithm'],
+            ["assign-morphologies",
+                "--mvd3 {input}",
+                "--atlas {ATLAS}",
+                "--atlas-cache {ATLAS_CACHE_DIR}",
+                "--resolution {config[assign_morphologies][resolution]}",
+                "--morphdb {MORPHDB}",
+                "--annotations",
+                    os.path.join(MORPH_RELEASE, "annotations"),
+                "--rules",
+                    bioname_path("placement_rules.xml"),
+                "--layers",
+                    ",".join(map(str, config['assign_morphologies']['layers'])),
+                "--layer-ratio",
+                    ",".join(map(str, config['assign_morphologies']['layer_ratio'])),
+                "--alpha {config[assign_morphologies][alpha]}",
+                "--seed {config[assign_morphologies][seed]}",
+                "--ntasks {config[assign_morphologies][ntasks]}",
+                "--output {output}",
+                "2>&1 | tee {log}",
+            ]
+        )
+
+
+rule assign_emodels:
+    message:
+        "Assign electrical models"
+
+    input:
+        'circuit.mvd3.morphologies'
+
+    output:
+        'circuit.mvd3.emodels'
+
+    shell:
+        bbp_env(
+            ['nix/nse/brainbuilder'],
+            ["brainbuilder cells assign_emodels",
+                "--morphdb {MORPHDB}",
+                "--output {output}",
+                "{input}"
+            ]
+        )
+
+
+rule set_circuit_seeds:
+    message:
+        "Set MVD3 /circuit/seeds"
+
+    input:
+        'circuit.mvd3.emodels'
+
+    output:
+        'circuit.mvd3'
+
+    shell:
+        bbp_env(
+            ['nix/nse/brainbuilder'],
+            ["brainbuilder mvd3 set_seeds",
+                "--seeds",
+                    ",".join(map(str, config['s2f']['seeds'])),
+                "--output {output}",
+                "{input}"
+            ]
+        )
+
+
+rule mvd3_reorder_mtypes:
+    message:
+        "Re-order /library/mtypes to be aligned with builder recipe"
+
+    input:
+        'circuit.mvd3'
+
+    output:
+        'circuit.mvd3.reordered'
+
+    shell:
+        bbp_env(
+            ['nix/nse/brainbuilder'],
+            ["brainbuilder mvd3 reorder_mtypes",
+                "--recipe {BUILDER_RECIPE}",
+                "--output {output}",
+                "{input}"
+            ]
+        )
+
+
+rule sbatch_td:
+    message:
+        "Generate sbatch script for running TouchDetector on BG"
+
+    input:
+        mvd3 = 'circuit.mvd3.reordered',
+
+    output:
+        TOUCHES_DIR + '/run.sbatch'
+
+    shell:
+        bbp_env(
+            ['nix/py27/jinja2'],
+            ["jinja2 --strict",
+                "-D SBATCH_ACCOUNT={config[touchdetector][account]}",
+                "-D SBATCH_PARTITION={config[touchdetector][partition]}",
+                "-D SBATCH_NNODES={config[touchdetector][nodes]}",
+                "-D SBATCH_NTASKS={config[touchdetector][ntasks]}",
+                "-D SBATCH_TIMELIMIT={config[touchdetector][time]}",
+                "-D SW_RELEASE={config[common][sw_release_BG]}",
+                "-D WORKING_DIR=%s" % os.path.abspath(TOUCHES_DIR),
+                "-D MVD3_PATH=%s" % os.path.abspath("{input[mvd3]}"),
+                "-D MORPH_PATH={MORPH_RELEASE}/v1",
+                "-D RECIPE_PATH={BUILDER_RECIPE}",
+                template_path('touchdetector.sbatch'),
+                "> {output}"
+            ]
+        )
+
+
+def build_functionalizer_sbatch(nrn_path, enable_pruning, sbatch_params):
+    return bbp_env(
+        ['nix/py27/jinja2'],
+        ["jinja2 --strict",
+            "-D SBATCH_ACCOUNT=%s" % sbatch_params['account'],
+            "-D SBATCH_PARTITION=%s" % sbatch_params['partition'],
+            "-D SBATCH_NNODES=%s" % sbatch_params['nodes'],
+            "-D SBATCH_NTASKS=%s" % sbatch_params['ntasks'],
+            "-D SBATCH_TIMELIMIT=%s" % sbatch_params['time'],
+            "-D SW_RELEASE={config[common][sw_release_BG]}",
+            "-D WORKING_DIR=%s" % os.path.abspath(nrn_path),
+            "-D MVD3_PATH=%s" % os.path.abspath("{input[mvd3]}"),
+            "-D TOUCHES_PATH=%s" % os.path.abspath(TOUCHES_DIR + "/touches"),
+            "-D MORPH_PATH={MORPH_RELEASE}/v1",
+            "-D MORPH_DAT={MORPHDB}",
+            "-D RECIPE_PATH={BUILDER_RECIPE}",
+            "-D PRUNING_TYPE=%d" % (1 if enable_pruning else 0),
+            template_path('functionalizer.sbatch'),
+            "> {output}"
+        ]
+    )
+
+rule sbatch_s2f:
+    message:
+        "Generate sbatch script for running S2F on BG"
+
+    input:
+        mvd3 = 'circuit.mvd3'
+
+    output:
+        NRN_FUNCTIONAL_DIR + '/run.sbatch'
+
+    shell:
+        build_functionalizer_sbatch(
+            nrn_path=NRN_FUNCTIONAL_DIR,
+            enable_pruning=True,
+            sbatch_params=config['s2f']
+        )
+
+
+rule sbatch_s2s:
+    message:
+        "Generate sbatch script for running S2S on BG"
+
+    input:
+        mvd3 = 'circuit.mvd3'
+
+    output:
+        NRN_STRUCTURAL_DIR + '/run.sbatch'
+
+    shell:
+        build_functionalizer_sbatch(
+            nrn_path=NRN_STRUCTURAL_DIR,
+            enable_pruning=False,
+            sbatch_params=config['s2s'],
+        )
+
+
+rule nrn_merge:
+    output:
+        '{nrn_dir}/{filename}'
+
+    wildcard_constraints:
+        filename = ".*\.h5$"
+
+    log:
+        log_path('nrn_merge_{nrn_dir}_{filename}')
+
+    shell:
+        bbp_env(
+            ['nix/hpc/functionalizer'],
+            ["cd {wildcards.nrn_dir} && nrn-merge .",
+                "--only {wildcards.filename}",
+                "2>&1 | tee {log}"
+            ]
+        )
+
+
+rule targetgen_mvd3:
+    message:
+        "Generate start.target file"
+
+    input:
+        'circuit.mvd3'
+
+    output:
+        'start.target'
+
+    shell:
+        bbp_env(
+            ['nix/nse/brainbuilder'],
+            ["brainbuilder targets from_mvd3",
+                "--output {output}",
+                "{input}"
+            ]
+        )
+
+
+rule symlink_start_target:
+    message:
+        "Symlink start.target file from {wildcards.nrn_dir}"
+
+    input:
+        'start.target'
+
+    output:
+        '{nrn_dir}/start.target',
+
+    shell:
+        'cd {wildcards.nrn_dir} && ln -s ../../{input}'
+
+
+rule mvd3to2:
+    message:
+        "MVD3 -> MVD2 (if applicable; for backwards compatibility)"
+
+    input:
+        'circuit.mvd3'
+
+    output:
+        'circuit.mvd2'
+
+    shell:
+        bbp_env(
+            ['nix/nse/brainbuilder'],
+            ["brainbuilder mvd3 to_mvd2",
+                "--morph-dir {MORPH_RELEASE}",
+                "--output {output}"
+            ]
+        )
+
+
+rule spatial_index_segment:
+    message:
+        "Generate segment spatial index"
+
+    input:
+        PRE_FUNCTIONAL
+
+    output:
+        SEGMENT_INDEX
+
+    log:
+        log_path('spatial_index_segment')
+
+    shell:
+        bbp_env(
+            ['nix/hpc/flatindexer'],
+            ["SDKGenerator CircuitConfig segment All SEGMENT",
+                "2>&1 | tee {log}"
+            ]
+        )
+
+
+rule spatial_index_synapse:
+    message:
+        "Generate synapse spatial index"
+
+    input:
+        rules.functional.output,
+
+    output:
+        NRN_FUNCTIONAL_INDEX
+
+    log:
+        log_path('spatial_index_synapse')
+
+    shell:
+        bbp_env(
+            ['nix/hpc/flatindexer'],
+            ["SDKGenerator CircuitConfig synapse All {NRN_FUNCTIONAL_DIR}/SYNAPSE",
+                "2>&1 | tee {log}"
+            ]
+        )

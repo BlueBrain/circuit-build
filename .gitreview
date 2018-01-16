@@ -1,0 +1,6 @@
+[gerrit]
+host=bbpcode.epfl.ch
+port=22
+project=common/circuit-build
+defaultbranch=master
+defaultremote=origin

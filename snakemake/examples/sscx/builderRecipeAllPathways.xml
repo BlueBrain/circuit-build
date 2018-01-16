@@ -1,0 +1,855 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE blueColumn [
+  <!ELEMENT blueColumn (column,NeuronTypes,Seeds?,SynapsesProperties,SynapsesClassification,DendriticMorphologyProbabilities,TouchRules,InterBoutonInterval?)>
+  <!ELEMENT column (layer*)>
+  <!ATTLIST column id CDATA #REQUIRED x CDATA #REQUIRED z CDATA #REQUIRED>
+  <!ELEMENT layer (#PCDATA)>
+  <!ATTLIST layer	id CDATA #REQUIRED height CDATA #REQUIRED>
+  <!ELEMENT NeuronTypes (Layer*)>
+  <!ATTLIST NeuronTypes totalNeurons CDATA #REQUIRED miniColumns CDATA #REQUIRED IntExtendedMinicolumnRadious CDATA #REQUIRED>
+  <!ELEMENT Layer (StructuralType*)>
+  <!ATTLIST Layer id CDATA #REQUIRED percentage CDATA #REQUIRED>
+  <!ELEMENT StructuralType (ElectroType*)>
+  <!ATTLIST StructuralType id CDATA #REQUIRED percentage CDATA #REQUIRED sigma CDATA #REQUIRED exclusionRadius CDATA #REQUIRED mClass CDATA #REQUIRED sClass CDATA #REQUIRED spineLength CDATA #REQUIRED>
+  <!ELEMENT ElectroType (#PCDATA)>
+  <!ATTLIST ElectroType id CDATA #REQUIRED percentage CDATA #REQUIRED>
+  <!ELEMENT Seeds (#PCDATA)>
+  <!ATTLIST Seeds recipeSeed CDATA #IMPLIED columnSeed CDATA #IMPLIED synapseSeed CDATA #IMPLIED>
+  <!ELEMENT InterBoutonInterval (#PCDATA)>
+  <!ATTLIST InterBoutonInterval minDistance CDATA #IMPLIED maxDistance CDATA #IMPLIED regionGap CDATA #IMPLIED>
+  <!ELEMENT SynapsesProperties (synapse*)>
+  <!ELEMENT synapse (#PCDATA)>
+  <!ATTLIST synapse id1 CDATA #REQUIRED id2 CDATA #REQUIRED id3 CDATA #REQUIRED id4 CDATA #REQUIRED GAB1 CDATA #REQUIRED GAB2 CDATA #REQUIRED>
+  <!ELEMENT SynapsesClassification (class*)>
+  <!ELEMENT class (#PCDATA)>
+  <!ATTLIST class id CDATA #REQUIRED gsyn CDATA #REQUIRED gsynVar CDATA #REQUIRED nsyn CDATA #REQUIRED nsynVar CDATA #REQUIRED dtc CDATA #REQUIRED dtcVar CDATA #REQUIRED u CDATA #REQUIRED uVar CDATA #REQUIRED d CDATA #REQUIRED dVar CDATA #REQUIRED f CDATA #REQUIRED fVar CDATA #REQUIRED ase CDATA #REQUIRED>
+  <!ELEMENT ConnectionRules (class*)>  
+  <!ELEMENT TouchRules (class*)>
+  <!ENTITY connectivityRecipe SYSTEM "builderConnectivityRecipeAllPathways.xml">
+]>
+
+
+<!-- @version: -->
+
+<blueColumn>
+<!-- use following line to modify inter-bouton interval algorithm paramters; defaults are min=3, max=7, gap=5
+        <InterBoutonInterval minDistance="5.0" maxDistance="9.0" regionGap="5.0"/> 
+-->
+    <InterBoutonInterval minDistance="5.0" maxDistance="7.0" regionGap="5.0"/> 
+    <!-- BrunoMagalhaes, BLBLD-42: Inh and Excitatory filtering distances. defaultSynapsesDistances
+         are applied when fromSclass/toSclass/fromMtype rules are not provided
+         (if InitialBoutonDistance XML tree not provided, inhibitorySynapsesDistance = 5.0 and excitatorySynapsesDistance = 25.0
+         will be used (hard-coded on Functionalizer)-->
+    <InitialBoutonDistance defaultInhSynapsesDistance="5.0" defaultExcSynapsesDistance="25.0" />
+
+	<column id="hexagon">
+	        <latticeVector id="a1" x="230.92" z="0.0" />
+                <latticeVector id="a2" x="-115.46" z="199.98" />
+		<layer id="1" thickness="164.94915873" />
+		<layer id="2" thickness="148.87602025" />
+		<layer id="3" thickness="352.92508322" />
+		<layer id="4" thickness="189.57183895" />
+		<layer id="5" thickness="525.05585701" />
+		<layer id="6" thickness="700.37845971" />
+	</column>
+
+	<NeuronTypes totalNeurons="31346" miniColumns="310" IntExtendedMinicolumnRadious="23">
+		<Layer id="1" percentage="1.037315">
+
+		  <StructuralType id="L1_DAC" percentage="16.9811320755" sigma="25" exclusionRadius="6.0" mClass="INT" sClass="INH" spineLength="2.5" maxHeightRestriction="-35">
+		    <ElectroType id="bNAC" percentage="33.33"/>
+		    <ElectroType id="cNAC" percentage="66.67"/>
+		  </StructuralType>
+		  <StructuralType id="L1_NGC-DA" percentage="20.7547169811" sigma="25" exclusionRadius="6.0" mClass="INT" sClass="INH" spineLength="2.5" maxHeightRestriction="-15">
+		    <ElectroType id="bNAC" percentage="10.00"/>
+		    <ElectroType id="cNAC" percentage="70.00"/>
+		    <ElectroType id="cSTUT" percentage="10.00"/>
+		    <ElectroType id="cACint" percentage="10.00"/>
+		  </StructuralType>
+		  <StructuralType id="L1_NGC-SA" percentage="16.3522012579" sigma="25" exclusionRadius="6.0" mClass="INT" sClass="INH" spineLength="2.5">
+		    <ElectroType id="cNAC" percentage="100.00"/>
+		  </StructuralType>
+		  <StructuralType id="L1_HAC" percentage="25.786163522" sigma="25" exclusionRadius="6.0" mClass="INT" sClass="INH" spineLength="2.5" maxHeightRestriction="-26">
+		    <ElectroType id="bNAC" percentage="20.00"/>
+		    <ElectroType id="cIR" percentage="10.00"/>
+		    <ElectroType id="cNAC" percentage="70.00"/>
+		  </StructuralType>
+		  <StructuralType id="L1_LAC" percentage="8.17610062893" sigma="25" exclusionRadius="6.0" mClass="INT" sClass="INH" spineLength="2.5" maxHeightRestriction="-46">
+		    <ElectroType id="cNAC" percentage="100.00"/>
+		  </StructuralType>
+		  <StructuralType id="L1_SAC" percentage="11.9496855346" sigma="25" exclusionRadius="6.0" mClass="INT" sClass="INH" spineLength="2.5" maxHeightRestriction="-27">
+		    <ElectroType id="bNAC" percentage="33.33"/>
+		    <ElectroType id="cNAC" percentage="50.00"/>
+		    <ElectroType id="cACint" percentage="16.67"/>
+		  </StructuralType>
+
+<!-- We are leaving CRC cells (1/94) out of the recipe for now as we have no usable reconstructions in MorphologyTracker.  The other cell percentages were recalculated based on 93 total cells.
+
+So, for the recipe, after I exclude the 1 CRC cell, the 2 excitatory cells, and the 16 unclassified cells, I end up with a total of 93 cells and the following percentages:
+
+17/93 = 18.3% NGFC1
+16/93 = 17.2% NGFC2
+14/93 = 15.1% sLAC
+11/93 = 11.8% dLAC
+16/93 = 17.2% LSC_DAC
+19/93 = 20.4% LSC
+
+			<StructuralType id="CRC" percentage="1.21" sigma="25" exclusionRadius="6.0" mClass="INT" sClass="INH" spineLength="2.5">
+				<ElectroType id="cACint" percentage="50" />
+				<ElectroType id="cNAC" percentage="50" />
+			</StructuralType>
+-->
+		</Layer>
+		<Layer id="2" percentage="10.832282">
+			<StructuralType id="L2_TPC:A" percentage="8.97435897436" sigma="20" exclusionRadius="6.0" mClass="PYR" sClass="EXC" spineLength="2.5">
+				<ElectroType id="cADpyr" percentage="100"/>
+			</StructuralType>
+
+			<StructuralType id="L2_TPC:B" percentage="56.8376068376" sigma="20" exclusionRadius="6.0" mClass="PYR" sClass="EXC" spineLength="2.5">
+				<ElectroType id="cADpyr" percentage="100"/>
+			</StructuralType>
+
+			<StructuralType id="L2_IPC" percentage="5.98290598291" sigma="20" exclusionRadius="6.0" mClass="PYR" sClass="EXC" spineLength="2.5">
+				<ElectroType id="cADpyr" percentage="100"/>
+			</StructuralType>
+
+
+
+			<StructuralType id="L23_MC" percentage="4.0293040293" sigma="25" exclusionRadius="6.0" mClass="INT" sClass="INH" spineLength="2.5" maxHeightRestriction="-120">
+			  <ElectroType id="bAC" percentage="2.44"/>
+			  <ElectroType id="bNAC" percentage="2.44"/>
+			  <ElectroType id="cACint" percentage="82.92"/>
+			  <ElectroType id="cNAC" percentage="9.76"/>
+			  <ElectroType id="dNAC" percentage="2.44"/>
+			</StructuralType>
+			<StructuralType id="L23_BTC" percentage="0.895400895399" sigma="25" exclusionRadius="6.0" mClass="INT" sClass="INH" spineLength="2.5" maxHeightRestriction="-15">
+			  <ElectroType id="bAC" percentage="13.89"/>
+			  <ElectroType id="bIR" percentage="5.56"/>
+			  <ElectroType id="bNAC" percentage="22.22"/>
+			  <ElectroType id="cACint" percentage="41.67"/>
+			  <ElectroType id="cNAC" percentage="16.67"/>
+			</StructuralType>
+			<StructuralType id="L23_DBC" percentage="1.7908017908" sigma="25" exclusionRadius="6.0" mClass="INT" sClass="INH" spineLength="0.5">
+			  <ElectroType id="bAC" percentage="5.88"/>
+			  <ElectroType id="bIR" percentage="17.65"/>
+			  <ElectroType id="bNAC" percentage="41.18"/>
+			  <ElectroType id="cACint" percentage="35.29"/>
+			</StructuralType>
+			<StructuralType id="L23_BP" percentage="0.4477004477" sigma="25" exclusionRadius="6.0" mClass="INT" sClass="INH" spineLength="0.5">
+			  <ElectroType id="bAC" percentage="7.14"/>
+			  <ElectroType id="bIR" percentage="14.29"/>
+			  <ElectroType id="bNAC" percentage="28.57"/>
+			  <ElectroType id="cACint" percentage="28.57"/>
+			  <ElectroType id="cNAC" percentage="14.29"/>
+			  <ElectroType id="dSTUT" percentage="7.14"/>
+			</StructuralType>
+			<StructuralType id="L23_NGC" percentage="2.2385022385" sigma="25" exclusionRadius="6.0" mClass="INT" sClass="INH" spineLength="0.5">
+			  <ElectroType id="bNAC" percentage="7.14"/>
+			  <ElectroType id="cNAC" percentage="78.58"/>
+			  <ElectroType id="cSTUT" percentage="7.14"/>
+			  <ElectroType id="cACint" percentage="7.14"/>
+			</StructuralType>
+			<StructuralType id="L23_LBC" percentage="6.2678062678" sigma="25" exclusionRadius="6.0" mClass="INT" sClass="INH" spineLength="2.5">
+			  <ElectroType id="bAC" percentage="7.46"/>
+			  <ElectroType id="bNAC" percentage="5.97"/>
+			  <ElectroType id="cACint" percentage="23.88"/>
+			  <ElectroType id="cNAC" percentage="16.42"/>
+			  <ElectroType id="cSTUT" percentage="4.48"/>
+			  <ElectroType id="dNAC" percentage="41.79"/>
+			</StructuralType>
+			<StructuralType id="L23_NBC" percentage="3.5816035816" sigma="25" exclusionRadius="6.0" mClass="INT" sClass="INH" spineLength="2.5">
+			  <ElectroType id="bAC" percentage="4.62"/>
+			  <ElectroType id="bNAC" percentage="1.54"/>
+			  <ElectroType id="cACint" percentage="24.62"/>
+			  <ElectroType id="cIR" percentage="1.54"/>
+			  <ElectroType id="cNAC" percentage="30.77"/>
+			  <ElectroType id="dNAC" percentage="36.92"/>
+			</StructuralType>
+			<StructuralType id="L23_SBC" percentage="2.2385022385" sigma="25" exclusionRadius="6.0" mClass="INT" sClass="INH" spineLength="2.5">
+			  <ElectroType id="bNAC" percentage="35.71"/>
+			  <ElectroType id="cACint" percentage="35.71"/>
+			  <ElectroType id="dNAC" percentage="28.57"/>
+			</StructuralType>
+			<StructuralType id="L23_CHC" percentage="6.7155067155" sigma="25" exclusionRadius="6.0" mClass="INT" sClass="INH" spineLength="2.5" maxHeightRestriction="-15">
+			  <ElectroType id="cACint" percentage="37.50"/>
+			  <ElectroType id="cNAC" percentage="37.50"/>
+			  <ElectroType id="dNAC" percentage="25.00"/>
+			</StructuralType>
+
+
+		</Layer>
+		<Layer id="3" percentage="13.075331">
+			<StructuralType id="L3_TPC:A" percentage="66.049382716" sigma="20" exclusionRadius="6.0" mClass="PYR" sClass="EXC" spineLength="2.5">
+				<ElectroType id="cADpyr" percentage="100"/>
+			</StructuralType>
+
+			<StructuralType id="L3_TPC:B" percentage="18.8712522046" sigma="20" exclusionRadius="6.0" mClass="PYR" sClass="EXC" spineLength="2.5">
+				<ElectroType id="cADpyr" percentage="100"/>
+			</StructuralType>
+
+			<StructuralType id="L23_MC" percentage="6.0824329732" sigma="25" exclusionRadius="6.0" mClass="INT" sClass="INH" spineLength="2.5">
+			  <ElectroType id="bAC" percentage="2.44"/>
+			  <ElectroType id="bNAC" percentage="2.44"/>
+			  <ElectroType id="cACint" percentage="82.92"/>
+			  <ElectroType id="cNAC" percentage="9.76"/>
+			  <ElectroType id="dNAC" percentage="2.44"/>
+			</StructuralType>
+			<StructuralType id="L23_BTC" percentage="0.126717353608" sigma="25" exclusionRadius="6.0" mClass="INT" sClass="INH" spineLength="2.5">
+			  <ElectroType id="bAC" percentage="13.89"/>
+			  <ElectroType id="bIR" percentage="5.56"/>
+			  <ElectroType id="bNAC" percentage="22.22"/>
+			  <ElectroType id="cACint" percentage="41.67"/>
+			  <ElectroType id="cNAC" percentage="16.67"/>
+			</StructuralType>
+			<StructuralType id="L23_DBC" percentage="1.5206082433" sigma="25" exclusionRadius="6.0" mClass="INT" sClass="INH" spineLength="0.5">
+			  <ElectroType id="bAC" percentage="5.88"/>
+			  <ElectroType id="bIR" percentage="17.65"/>
+			  <ElectroType id="bNAC" percentage="41.18"/>
+			  <ElectroType id="cACint" percentage="35.29"/>
+			</StructuralType>
+			<StructuralType id="L23_BP" percentage="0.126717353608" sigma="25" exclusionRadius="6.0" mClass="INT" sClass="INH" spineLength="0.5">
+			  <ElectroType id="bAC" percentage="7.14"/>
+			  <ElectroType id="bIR" percentage="14.29"/>
+			  <ElectroType id="bNAC" percentage="28.57"/>
+			  <ElectroType id="cACint" percentage="28.57"/>
+			  <ElectroType id="cNAC" percentage="14.29"/>
+			  <ElectroType id="dSTUT" percentage="7.14"/>
+			</StructuralType>
+			<StructuralType id="L23_NGC" percentage="0.253434707217" sigma="25" exclusionRadius="6.0" mClass="INT" sClass="INH" spineLength="0.5">
+			  <ElectroType id="bNAC" percentage="7.14"/>
+			  <ElectroType id="cNAC" percentage="78.58"/>
+			  <ElectroType id="cSTUT" percentage="7.14"/>
+			  <ElectroType id="cACint" percentage="7.14"/>
+			</StructuralType>
+			<StructuralType id="L23_LBC" percentage="3.67480325464" sigma="25" exclusionRadius="6.0" mClass="INT" sClass="INH" spineLength="2.5">
+			  <ElectroType id="bAC" percentage="7.46"/>
+			  <ElectroType id="bNAC" percentage="5.97"/>
+			  <ElectroType id="cACint" percentage="23.88"/>
+			  <ElectroType id="cNAC" percentage="16.42"/>
+			  <ElectroType id="cSTUT" percentage="4.48"/>
+			  <ElectroType id="dNAC" percentage="41.79"/>
+			</StructuralType>
+			<StructuralType id="L23_NBC" percentage="2.66106442578" sigma="25" exclusionRadius="6.0" mClass="INT" sClass="INH" spineLength="2.5">
+			  <ElectroType id="bAC" percentage="4.62"/>
+			  <ElectroType id="bNAC" percentage="1.54"/>
+			  <ElectroType id="cACint" percentage="24.62"/>
+			  <ElectroType id="cIR" percentage="1.54"/>
+			  <ElectroType id="cNAC" percentage="30.77"/>
+			  <ElectroType id="dNAC" percentage="36.92"/>
+			</StructuralType>
+			<StructuralType id="L23_SBC" percentage="0.380152060825" sigma="25" exclusionRadius="6.0" mClass="INT" sClass="INH" spineLength="2.5">
+			  <ElectroType id="bNAC" percentage="35.71"/>
+			  <ElectroType id="cACint" percentage="35.71"/>
+			  <ElectroType id="dNAC" percentage="28.57"/>
+			</StructuralType>
+			<StructuralType id="L23_CHC" percentage="0.253434707217" sigma="25" exclusionRadius="6.0" mClass="INT" sClass="INH" spineLength="2.5">
+			  <ElectroType id="cACint" percentage="37.50"/>
+			  <ElectroType id="cNAC" percentage="37.50"/>
+			  <ElectroType id="dNAC" percentage="25.00"/>
+			</StructuralType>
+		</Layer>
+		<Layer id="4" percentage="14.857382">
+			<StructuralType id="L4_TPC" percentage="58.1188065489" sigma="20" exclusionRadius="6.0" mClass="PYR" sClass="EXC" spineLength="2.5">
+				<ElectroType id="cADpyr" percentage="100"/>
+			</StructuralType>
+			<StructuralType id="L4_UPC" percentage="24.1733089186" sigma="20" exclusionRadius="6.0" mClass="PYR" sClass="EXC" spineLength="2.5">
+				<ElectroType id="cADpyr" percentage="100"/>
+			</StructuralType>
+			<StructuralType id="L4_SSC" percentage="8.22921154675" sigma="20" exclusionRadius="6.0" mClass="INT" sClass="EXC" spineLength="2.5">
+				<ElectroType id="cADpyr" percentage="100"/>
+			</StructuralType>
+
+			<StructuralType id="L4_MC" percentage="2.33082122601" sigma="25" exclusionRadius="6.0" mClass="INT" sClass="INH" spineLength="2.5">
+			  <ElectroType id="bAC" percentage="8.82"/>
+			  <ElectroType id="bNAC" percentage="2.94"/>
+			  <ElectroType id="cACint" percentage="70.59"/>
+			  <ElectroType id="cNAC" percentage="14.71"/>
+			  <ElectroType id="dNAC" percentage="2.94"/>
+			</StructuralType>
+			<StructuralType id="L4_BTC" percentage="0.466164245202" sigma="25" exclusionRadius="6.0" mClass="INT" sClass="INH" spineLength="2.5">
+			  <ElectroType id="bAC" percentage="7.69"/>
+			  <ElectroType id="bIR" percentage="7.69"/>
+			  <ElectroType id="bSTUT" percentage="7.69"/>
+			  <ElectroType id="cACint" percentage="53.86"/>
+			  <ElectroType id="cNAC" percentage="15.38"/>
+			  <ElectroType id="dNAC" percentage="7.69"/>
+			</StructuralType>
+			<StructuralType id="L4_DBC" percentage="0.725144381425" sigma="25" exclusionRadius="6.0" mClass="INT" sClass="INH" spineLength="0.5">
+			  <ElectroType id="bAC" percentage="9.09"/>
+			  <ElectroType id="bIR" percentage="36.36"/>
+			  <ElectroType id="bNAC" percentage="9.09"/>
+			  <ElectroType id="bSTUT" percentage="9.09"/>
+			  <ElectroType id="cACint" percentage="9.09"/>
+			  <ElectroType id="cIR" percentage="18.18"/>
+			  <ElectroType id="cNAC" percentage="9.09"/>
+			</StructuralType>
+			<StructuralType id="L4_BP" percentage="0.103592054489" sigma="25" exclusionRadius="6.0" mClass="INT" sClass="INH" spineLength="0.5">
+			  <ElectroType id="bAC" percentage="7.14"/>
+			  <ElectroType id="bIR" percentage="14.29"/>
+			  <ElectroType id="bNAC" percentage="28.57"/>
+			  <ElectroType id="cACint" percentage="28.57"/>
+			  <ElectroType id="cNAC" percentage="14.29"/>
+			  <ElectroType id="dSTUT" percentage="7.14"/>
+			</StructuralType>
+			<StructuralType id="L4_NGC" percentage="0.0517960272447" sigma="25" exclusionRadius="6.0" mClass="INT" sClass="INH" spineLength="0.5">
+			  <ElectroType id="bNAC" percentage="7.14"/>
+			  <ElectroType id="cNAC" percentage="78.58"/>
+			  <ElectroType id="cSTUT" percentage="7.14"/>
+			  <ElectroType id="cACint" percentage="7.14"/>
+			</StructuralType>
+			<StructuralType id="L4_LBC" percentage="2.4344132805" sigma="25" exclusionRadius="6.0" mClass="INT" sClass="INH" spineLength="2.5">
+			  <ElectroType id="cACint" percentage="17.86"/>
+			  <ElectroType id="cNAC" percentage="10.71"/>
+			  <ElectroType id="cSTUT" percentage="25.00"/>
+			  <ElectroType id="dNAC" percentage="39.29"/>
+			  <ElectroType id="dSTUT" percentage="7.14"/>
+			</StructuralType>
+			<StructuralType id="L4_NBC" percentage="2.07184108979" sigma="25" exclusionRadius="6.0" mClass="INT" sClass="INH" spineLength="2.5">
+			  <ElectroType id="cACint" percentage="9.52"/>
+			  <ElectroType id="cIR" percentage="4.76"/>
+			  <ElectroType id="cNAC" percentage="47.62"/>
+			  <ElectroType id="dNAC" percentage="38.10"/>
+			</StructuralType>
+			<StructuralType id="L4_SBC" percentage="1.19130862663" sigma="25" exclusionRadius="6.0" mClass="INT" sClass="INH" spineLength="2.5">
+			  <ElectroType id="bNAC" percentage="35.71"/>
+			  <ElectroType id="cACint" percentage="35.71"/>
+			  <ElectroType id="dNAC" percentage="28.57"/>
+			</StructuralType>
+			<StructuralType id="L4_CHC" percentage="0.103592054489" sigma="25" exclusionRadius="6.0" mClass="INT" sClass="INH" spineLength="2.5">
+			  <ElectroType id="cACint" percentage="37.50"/>
+			  <ElectroType id="cNAC" percentage="37.50"/>
+			  <ElectroType id="dNAC" percentage="25.00"/>
+			</StructuralType>
+
+		</Layer>
+		<Layer id="5" percentage="19.485231">
+			<StructuralType id="L5_TPC:A" percentage="39.6061105299" sigma="20" exclusionRadius="6.0" mClass="PYR" sClass="EXC" spineLength="2.5">
+				<ElectroType id="cADpyr" percentage="100"/>
+			</StructuralType>
+
+			<StructuralType id="L5_TPC:B" percentage="32.3044253484" sigma="20" exclusionRadius="6.0" mClass="PYR" sClass="EXC" spineLength="2.5">
+				<ElectroType id="cADpyr" percentage="100"/>
+			</StructuralType>
+
+			<StructuralType id="L5_TPC:C" percentage="5.53157968294" sigma="20" exclusionRadius="6.0" mClass="PYR" sClass="EXC" spineLength="2.5">
+				<ElectroType id="cADpyr" percentage="100"/>
+			</StructuralType>
+
+			<StructuralType id="L5_UPC" percentage="5.70395185437" sigma="20" exclusionRadius="6.0" mClass="PYR" sClass="EXC" spineLength="2.5">
+				<ElectroType id="cADpyr" percentage="100"/>
+			</StructuralType>
+
+
+			<StructuralType id="L5_MC" percentage="6.01926163724" sigma="25" exclusionRadius="6.0" mClass="INT" sClass="INH" spineLength="2.5">
+			  <ElectroType id="bAC" percentage="37.04"/>
+			  <ElectroType id="bIR" percentage="11.11"/>
+			  <ElectroType id="bSTUT" percentage="3.70"/>
+			  <ElectroType id="cACint" percentage="37.04"/>
+			  <ElectroType id="cNAC" percentage="3.70"/>
+			  <ElectroType id="cSTUT" percentage="3.70"/>
+			  <ElectroType id="dNAC" percentage="3.70"/>
+			</StructuralType>
+			<StructuralType id="L5_BTC" percentage="1.28984177941" sigma="25" exclusionRadius="6.0" mClass="INT" sClass="INH" spineLength="2.5">
+			  <ElectroType id="bAC" percentage="16.67"/>
+			  <ElectroType id="cACint" percentage="66.66"/>
+			  <ElectroType id="cNAC" percentage="16.67"/>
+			</StructuralType>
+			<StructuralType id="L5_DBC" percentage="1.37583123137" sigma="25" exclusionRadius="6.0" mClass="INT" sClass="INH" spineLength="0.5">
+			  <ElectroType id="bAC" percentage="9.09"/>
+			  <ElectroType id="bIR" percentage="36.36"/>
+			  <ElectroType id="bNAC" percentage="9.09"/>
+			  <ElectroType id="bSTUT" percentage="9.09"/>
+			  <ElectroType id="cACint" percentage="9.09"/>
+			  <ElectroType id="cIR" percentage="18.18"/>
+			  <ElectroType id="cNAC" percentage="9.09"/>
+			</StructuralType>
+			<StructuralType id="L5_BP" percentage="0.601926163724" sigma="25" exclusionRadius="6.0" mClass="INT" sClass="INH" spineLength="0.5">
+			  <ElectroType id="bAC" percentage="7.14"/>
+			  <ElectroType id="bIR" percentage="14.29"/>
+			  <ElectroType id="bNAC" percentage="28.57"/>
+			  <ElectroType id="cACint" percentage="28.57"/>
+			  <ElectroType id="cNAC" percentage="14.29"/>
+			  <ElectroType id="dSTUT" percentage="7.14"/>
+			</StructuralType>
+			<StructuralType id="L5_NGC" percentage="0.171978903921" sigma="25" exclusionRadius="6.0" mClass="INT" sClass="INH" spineLength="0.5">
+			  <ElectroType id="bNAC" percentage="7.14"/>
+			  <ElectroType id="cNAC" percentage="78.58"/>
+			  <ElectroType id="cSTUT" percentage="7.14"/>
+			  <ElectroType id="cACint" percentage="7.14"/>
+			</StructuralType>
+			<StructuralType id="L5_LBC" percentage="3.35358862646" sigma="25" exclusionRadius="6.0" mClass="INT" sClass="INH" spineLength="2.5">
+			  <ElectroType id="bAC" percentage="5.88"/>
+			  <ElectroType id="cACint" percentage="11.76"/>
+			  <ElectroType id="cIR" percentage="5.88"/>
+			  <ElectroType id="cNAC" percentage="17.65"/>
+			  <ElectroType id="cSTUT" percentage="17.65"/>
+			  <ElectroType id="dNAC" percentage="17.65"/>
+			  <ElectroType id="dSTUT" percentage="23.53"/>
+			</StructuralType>
+			<StructuralType id="L5_NBC" percentage="3.2675991745" sigma="25" exclusionRadius="6.0" mClass="INT" sClass="INH" spineLength="2.5">
+			  <ElectroType id="bAC" percentage="6.67"/>
+			  <ElectroType id="bIR" percentage="6.67"/>
+			  <ElectroType id="bSTUT" percentage="13.33"/>
+			  <ElectroType id="cACint" percentage="20.00"/>
+			  <ElectroType id="cIR" percentage="6.67"/>
+			  <ElectroType id="cNAC" percentage="20.00"/>
+			  <ElectroType id="cSTUT" percentage="20.00"/>
+			  <ElectroType id="dSTUT" percentage="6.67"/>
+			</StructuralType>
+			<StructuralType id="L5_SBC" percentage="0.515936711764" sigma="25" exclusionRadius="6.0" mClass="INT" sClass="INH" spineLength="2.5">
+			  <ElectroType id="bNAC" percentage="35.71"/>
+			  <ElectroType id="cACint" percentage="35.71"/>
+			  <ElectroType id="dNAC" percentage="28.57"/>
+			</StructuralType>
+			<StructuralType id="L5_CHC" percentage="0.257968355882" sigma="25" exclusionRadius="6.0" mClass="INT" sClass="INH" spineLength="2.5">
+			  <ElectroType id="cACint" percentage="37.50"/>
+			  <ElectroType id="cNAC" percentage="37.50"/>
+			  <ElectroType id="dNAC" percentage="25.00"/>
+			</StructuralType>
+
+		</Layer>
+		<Layer id="6" percentage="40.712459">
+<!--			<StructuralType id="L6_HPC" percentage="0.0" sigma="20" exclusionRadius="6.0" mClass="PYR" sClass="EXC" spineLength="2.5">
+				<ElectroType id="cADpyr" percentage="100" />
+			</StructuralType>
+-->
+			<StructuralType id="L6_TPC:A" percentage="17.6264746519" sigma="20" exclusionRadius="6.0" mClass="PYR" sClass="EXC" spineLength="2.5">
+				<ElectroType id="cADpyr" percentage="100"/>
+			</StructuralType>
+
+			<StructuralType id="L6_TPC:C" percentage="11.7509831013" sigma="20" exclusionRadius="6.0" mClass="PYR" sClass="EXC" spineLength="2.5">
+				<ElectroType id="cADpyr" percentage="100"/>
+			</StructuralType>
+
+			<StructuralType id="L6_UPC" percentage="9.32617706452" sigma="20" exclusionRadius="6.0" mClass="PYR" sClass="EXC" spineLength="2.5">
+				<ElectroType id="cADpyr" percentage="100"/>
+			</StructuralType>
+			<StructuralType id="L6_IPC" percentage="20.5175895419" sigma="20" exclusionRadius="6.0" mClass="PYR" sClass="EXC" spineLength="2.5">
+				<ElectroType id="cADpyr" percentage="100"/>
+			</StructuralType>
+			<StructuralType id="L6_BPC" percentage="16.3208098629" sigma="20" exclusionRadius="6.0" mClass="PYR" sClass="EXC" spineLength="2.5">
+				<ElectroType id="cADpyr" percentage="100"/> <!-- currently L6FFPC is used -->
+			</StructuralType>
+
+			<StructuralType id="L6_HPC" percentage="14.9218833032" sigma="20" exclusionRadius="6.0" mClass="PYR" sClass="EXC" spineLength="2.5">
+				<ElectroType id="cADpyr" percentage="100"/> 
+			</StructuralType>
+
+
+			<StructuralType id="L6_MC" percentage="2.36364437395" sigma="25" exclusionRadius="6.0" mClass="INT" sClass="INH" spineLength="2.5">
+			  <ElectroType id="bAC" percentage="12.00"/>
+			  <ElectroType id="bIR" percentage="44.00"/>
+			  <ElectroType id="bNAC" percentage="4.0"/>
+			  <ElectroType id="bSTUT" percentage="4.0"/>
+			  <ElectroType id="cACint" percentage="28.00"/>
+			  <ElectroType id="cIR" percentage="4.00"/>
+			  <ElectroType id="cNAC" percentage="4.00"/>
+			</StructuralType>
+			<StructuralType id="L6_BTC" percentage="0.407524892061" sigma="25" exclusionRadius="6.0" mClass="INT" sClass="INH" spineLength="2.5">
+			  <ElectroType id="bAC" percentage="16.67"/>
+			  <ElectroType id="cACint" percentage="66.66"/>
+			  <ElectroType id="cNAC" percentage="16.67"/>
+			</StructuralType>
+			<StructuralType id="L6_DBC" percentage="0.163009956824" sigma="25" exclusionRadius="6.0" mClass="INT" sClass="INH" spineLength="0.5">
+			  <ElectroType id="bAC" percentage="9.09"/>
+			  <ElectroType id="bIR" percentage="36.36"/>
+			  <ElectroType id="bNAC" percentage="9.09"/>
+			  <ElectroType id="bSTUT" percentage="9.09"/>
+			  <ElectroType id="cACint" percentage="9.09"/>
+			  <ElectroType id="cIR" percentage="18.18"/>
+			  <ElectroType id="cNAC" percentage="9.09"/>
+			</StructuralType>
+			<StructuralType id="L6_BP" percentage="0.407524892061" sigma="25" exclusionRadius="6.0" mClass="INT" sClass="INH" spineLength="0.5">
+			  <ElectroType id="bAC" percentage="7.14"/>
+			  <ElectroType id="bIR" percentage="14.29"/>
+			  <ElectroType id="bNAC" percentage="28.57"/>
+			  <ElectroType id="cACint" percentage="28.57"/>
+			  <ElectroType id="cNAC" percentage="14.29"/>
+			  <ElectroType id="dSTUT" percentage="7.14"/>
+			</StructuralType>
+			<StructuralType id="L6_NGC" percentage="0.0815049784122" sigma="25" exclusionRadius="6.0" mClass="INT" sClass="INH" spineLength="0.5">
+			  <ElectroType id="bNAC" percentage="7.14"/>
+			  <ElectroType id="cNAC" percentage="78.58"/>
+			  <ElectroType id="cSTUT" percentage="7.14"/>
+			  <ElectroType id="cACint" percentage="7.14"/>
+			</StructuralType>
+			<StructuralType id="L6_LBC" percentage="4.23825887743" sigma="25" exclusionRadius="6.0" mClass="INT" sClass="INH" spineLength="2.5">
+			  <ElectroType id="bAC" percentage="18.18"/>
+			  <ElectroType id="bIR" percentage="27.27"/>
+			  <ElectroType id="bNAC" percentage="9.09"/>
+			  <ElectroType id="bSTUT" percentage="27.27"/>
+			  <ElectroType id="cNAC" percentage="9.09"/>
+			  <ElectroType id="cSTUT" percentage="9.09"/>
+			</StructuralType>
+			<StructuralType id="L6_NBC" percentage="1.38558463301" sigma="25" exclusionRadius="6.0" mClass="INT" sClass="INH" spineLength="2.5">
+			  <ElectroType id="bAC" percentage="6.67"/>
+			  <ElectroType id="bIR" percentage="6.67"/>
+			  <ElectroType id="bSTUT" percentage="13.33"/>
+			  <ElectroType id="cACint" percentage="20.00"/>
+			  <ElectroType id="cIR" percentage="6.67"/>
+			  <ElectroType id="cNAC" percentage="20.00"/>
+			  <ElectroType id="cSTUT" percentage="20.00"/>
+			  <ElectroType id="dSTUT" percentage="6.67"/>
+			</StructuralType>
+			<StructuralType id="L6_SBC" percentage="0.407524892061" sigma="25" exclusionRadius="6.0" mClass="INT" sClass="INH" spineLength="2.5">
+			  <ElectroType id="bNAC" percentage="35.71"/>
+			  <ElectroType id="cACint" percentage="35.71"/>
+			  <ElectroType id="dNAC" percentage="28.57"/>
+			</StructuralType>
+			<StructuralType id="L6_CHC" percentage="0.0815049784122" sigma="25" exclusionRadius="6.0" mClass="INT" sClass="INH" spineLength="2.5">
+			  <ElectroType id="cACint" percentage="37.50"/>
+			  <ElectroType id="cNAC" percentage="37.50"/>
+			  <ElectroType id="dNAC" percentage="25.00"/>
+			</StructuralType>
+		</Layer>
+	</NeuronTypes>
+	
+<!--	<Seeds recipeSeed="837632" columnSeed="2906729" synapseSeed="4236279"/>
+-->
+
+	<SynapsesProperties neuralTransmitterReleaseDelay="0.1" axonalConductionVelocity="300.0">
+		<synapse fromSClass="EXC" toSClass="EXC" type="E2" />
+		<synapse fromSClass="INH" toSClass="INH" type="I2" />
+
+		<synapse fromSClass="EXC" toSClass="INH" type="E2_INH" />
+		<synapse fromSClass="INH" toSClass="EXC" type="I2" />
+
+	
+<!-- new synapse rules to assign specific USE value for select pyr-pyr pathways from literature. SR -->
+                <synapse fromMType="L3_TPC:*" toMType="L3_TPC:*" type="E2_L3PC" />
+                <synapse fromMType="L2_TPC:*" toMType="L3_TPC:*" type="E2_L3PC" />
+                <synapse fromMType="L2_IPC" toMType="L3_TPC:*" type="E2_L3PC" />
+                <synapse fromMType="L2_TPC:*" toMType="L2_TPC:*" type="E2_L3PC" />
+                <synapse fromMType="L2_TPC:*" toMType="L2_IPC" type="E2_L3PC" />
+                <synapse fromMType="L2_IPC" toMType="L2_TPC:*" type="E2_L3PC" />
+                <synapse fromMType="L2_IPC" toMType="L2_IPC" type="E2_L3PC" />
+                <synapse fromMType="L3_TPC:*" toMType="L2_TPC:*" type="E2_L3PC" />
+                <synapse fromMType="L3_TPC:*" toMType="L2_IPC" type="E2_L3PC" />
+
+                <synapse fromMType="L4_*PC" toMType="L4_*PC" type="E2_L4PC" />
+                <synapse fromMType="L4_*PC" toMType="L4_SSC" type="E2_L4PC" />
+                <synapse fromMType="L4_SSC" toMType="L4_*PC" type="E2_L4PC" />
+                <synapse fromMType="L4_SSC" toMType="L4_SSC" type="E2_L4PC" />
+
+                <synapse fromMType="L4_SSC" toMType="L2_*PC" type="E2_L4SS" />
+                <synapse fromMType="L4_SSC" toMType="L3_TPC:*" type="E2_L4SS" />
+
+                <synapse fromMType="L5_TPC:C" toMType="L5_TPC:*" type="E2_L5STPC" />
+		<synapse fromMType="L5_UPC" toMType="L5_TPC:*" type="E2_L5STPC" />
+                <synapse fromMType="L5_TPC:A" toMType="L5_TPC:*" type="E2_L5TTPC" />
+                <synapse fromMType="L5_TPC:B" toMType="L5_TPC:*" type="E2_L5TTPC" />
+                        
+<!-- new synapse rules to assign specific USE value for select e->i, i->e pathways from literature. SR -->            
+
+
+		<synapse fromMType="L*_MC" toSClass="EXC" type="I4" /> <!-- new synapse class from *MC->*PC. SR -->
+		<synapse fromSClass="EXC" toMType="L*_MC" type="E4" />
+
+		<synapse fromMType="L*_NGC" toSClass="EXC" type="I6" /> <!-- new synapse class from *NGC->*PC. SR -->
+		<synapse fromSClass="EXC" toMType="L*_NGC" type="E2_INH" />
+		
+		<!-- _DT = Distal/Dendrite targeting (BP, DBC, BTC, MC) -->
+
+		<synapse fromMType="L*_BP" toSClass="EXC" type="I2_DT" />
+		<synapse fromSClass="EXC" toMType="L*_BP" type="E2_INH" />
+		<synapse fromSClass="EXC" toMType="L*_BP" toEType="cACint" type="E1_INH" />
+		
+		<synapse fromMType="L*_BTC" toSClass="EXC" type="I2_DT" />
+		<synapse fromSClass="EXC" toMType="L*_BTC" type="E2_INH" />
+		<synapse fromSClass="EXC" toMType="L*_BTC" toEType="cACint" type="E1_INH" />
+
+		<synapse fromMType="L*_DBC" toSClass="EXC" type="I2_DT" />
+		<synapse fromSClass="EXC" toMType="L*_DBC" type="E2_INH" />
+		<synapse fromSClass="EXC" toMType="L*_DBC" toEType="cACint" type="E1_INH" />
+
+		<!-- _PT = Proximal targeting (*BC, CHC) -->
+
+		<synapse fromMType="L*_LBC" toSClass="EXC" type="I5_PT" /> 
+		<synapse fromMType="L*_LBC" fromEType="cNAC" toSClass="EXC" type="I3_PT" />
+		<synapse fromMType="L*_LBC" fromEType="dSTUT" toSClass="EXC" type="I3_PT" /> 
+		<synapse fromMType="L*_LBC" fromEType="cSTUT" toSClass="EXC" type="I3_PT" /> <!-- new synapse class from *LBC->*PC/*EXC. SR -->
+		<synapse fromMType="L*_LBC" fromEType="bSTUT" toSClass="EXC" type="I3_PT" />
+
+		<synapse fromSClass="EXC" toMType="L*_LBC" type="E5_PT" />
+		<synapse fromSClass="EXC" toMType="L*_LBC" toEType="cACint" type="E1_PT" />
+		<synapse fromSClass="EXC" toMType="L*_LBC" toEType="cIR" type="E1_PT" />
+		<synapse fromSClass="EXC" toMType="L*_LBC" toEType="bAC" type="E1_PT" />
+		<synapse fromSClass="EXC" toMType="L*_LBC" toEType="bIR" type="E1_PT" />
+		<synapse fromSClass="EXC" toMType="L*_LBC" toEType="cNAC" type="E1_PT" />
+		
+		<synapse fromMType="L*_NBC" toSClass="EXC" type="I5_PT" /> <!-- new synapse class from *LBC->*PC/*EXC. SR -->
+		<synapse fromMType="L*_NBC" fromEType="cNAC" toSClass="EXC" type="I3_PT" />
+		<synapse fromMType="L*_NBC" fromEType="dSTUT" toSClass="EXC" type="I3_PT" /> 
+		<synapse fromMType="L*_NBC" fromEType="cSTUT" toSClass="EXC" type="I3_PT" /> <!-- new synapse class from *LBC->*PC/*EXC. SR -->
+		<synapse fromMType="L*_NBC" fromEType="bSTUT" toSClass="EXC" type="I3_PT" />
+
+		<synapse fromSClass="EXC" toMType="L*_NBC" type="E5_PT" />
+		<synapse fromSClass="EXC" toMType="L*_NBC" toEType="cACint" type="E1_PT" />
+		<synapse fromSClass="EXC" toMType="L*_NBC" toEType="cIR" type="E1_PT" />
+		<synapse fromSClass="EXC" toMType="L*_NBC" toEType="bAC" type="E1_PT" />
+		<synapse fromSClass="EXC" toMType="L*_NBC" toEType="bIR" type="E1_PT" />
+		<synapse fromSClass="EXC" toMType="L*_NBC" toEType="cNAC" type="E1_PT" />
+
+		<synapse fromMType="L*_SBC" toSClass="EXC" type="I3_PT" />
+		<synapse fromMType="L*_SBC" fromEType="cACint" toSClass="EXC" type="I1_PT" />
+		<synapse fromMType="L*_SBC" fromEType="dNAC" toSClass="EXC" type="I2_PT" />
+
+		<synapse fromSClass="EXC" toMType="L*_SBC" type="E2_PT" />
+				
+		<synapse fromMType="L*_CHC" toSClass="EXC" type="I7" /> <!-- new synapse class for CHC -> Excitatory SR -->
+		<synapse fromSClass="EXC" toMType="L*_CHC" type="E2_PT" />
+
+        <!-- From TKB's thesis, L6_*BC -> L6_*BC connections are strongly facilitating with I1 dynamics. This is an exception to the general *INH -* INH rule, which prescribes I2 dynamics SR -->
+        <synapse fromMType="L6_*BC" toMType="L6_*BC" toEType="*" type="I1" /> 
+
+        <!-- See L6 MS excel sheet, Jira: SSCX-101 -->
+
+        <synapse fromMType="L6_*BC" toMType="L6_TPC:*" type="I2_L6" />
+	<synapse fromMType="L6_*BC" toMType="L6_*PC" type="I2_L6" />
+
+	<!-- fromMType="L6_MC" toMType="EXC" -> I4 TKB data N=1 -->
+	<synapse fromMType="L6_MC" toMType="L6_IPC" toEType="*" type="I1_L6_MC-L6_IPC" />
+
+        <synapse fromMType="L6_TPC:A" toMType="L6_*BC" type="E2_L6_TPC-BC" />
+        <synapse fromMType="L6_IPC" toMType="L6_*BC" type="E2_L6_IPC-BC" />
+	<synapse fromMType="L6_TPC:C" toMType="L6_*BC" type="E2_L6_NPC-BC" />
+	<synapse fromSClass="L6_UPC" toMType="L6_*BC" type="E2_L6_EXC-BC" />
+	<synapse fromSClass="L6_HPC" toMType="L6_*BC" type="E2_L6_EXC-BC" />
+	<synapse fromSClass="L6_BPC" toMType="L6_*BC" type="E2_L6_EXC-BC" />
+
+	<synapse fromMType="L6_*PC" toSClass="L6_TPC:*" type="E2_L6_EXC-L6_EXC" />
+	<synapse fromMType="L6_*PC" toSClass="L6_*PC" type="E2_L6_EXC-L6_EXC" />
+	<synapse fromMType="L6_TPC:*" toMType="L6_TPC:*" type="E2_L6_EXC-L6_EXC" />
+	<synapse fromMType="L6_TPC:*" toMType="L6_*PC" type="E2_L6_EXC-L6_EXC" />
+
+	<synapse fromMType="L6_TPC:A" toMType="L6_TPC:A" type="E2_L6_TPCA-L6_TPCA" />
+
+
+	</SynapsesProperties>
+	
+	<SynapsesClassification>
+	  <!-- Important!!! : gsynVar is interpreted by functionalizer as a standard deviation, not a variance - SR-->
+	  <!-- Important!!! : gsynVar was renamed gsynSD (and also *Var->*SD) as of 2017.10
+	       to reflect the fact it is interpreted by functionalizer as a standard deviation, not a variance - EM-->
+
+		<class id="I1"  gsyn="1.36" gsynSD="0.73" nrrp="1.0"  dtc="10.4" dtcSD="6.2" u="0.16" uSD="0.10" d="45" dSD="21" f="376" fSD="253" />
+		<class id="I2"  gsyn="1.36" gsynSD="0.73" nrrp="1.0"  dtc="8.30" dtcSD="2.2" u="0.25" uSD="0.13" d="706" dSD="405" f="021" fSD="9"  />
+		<class id="I3"  gsyn="1.36" gsynSD="0.73" nrrp="1.0"  dtc="6.40" dtcSD="1.7" u="0.32" uSD="0.14" d="144" dSD="80" f="062" fSD="31"  />
+
+		<class id="I1_PT"  gsyn="1.22" gsynSD="0.82" nrrp="1.0"  dtc="10.4" dtcSD="6.2" u="0.16" uSD="0.10" d="45" dSD="21" f="376" fSD="253"  />
+		<class id="I2_PT"  gsyn="1.22" gsynSD="0.82" nrrp="1.0"  dtc="8.30" dtcSD="2.2" u="0.25" uSD="0.13" d="706" dSD="405" f="021" fSD="9"  />
+		<class id="I3_PT"  gsyn="1.22" gsynSD="0.82" nrrp="1.0"  dtc="6.40" dtcSD="1.7" u="0.32" uSD="0.14" d="144" dSD="80" f="062" fSD="31"  />
+
+		<class id="I1_DT"  gsyn="1.49" gsynSD="0.63" nrrp="1.0"  dtc="10.4" dtcSD="6.2" u="0.16" uSD="0.10" d="45" dSD="21" f="376" fSD="253"  />
+		<class id="I3_DT"  gsyn="1.49" gsynSD="0.63" nrrp="1.0"  dtc="6.40" dtcSD="1.7" u="0.32" uSD="0.14" d="144" dSD="80" f="062" fSD="31"  />
+		<class id="I2_DT"  gsyn="1.49" gsynSD="0.63" nrrp="1.0"  dtc="8.30" dtcSD="2.2" u="0.25" uSD="0.13" d="706" dSD="405" f="021" fSD="9"  />
+
+<!-- I2-like *MC->*PC specific pathway parameters from Silberberg & Markram, 2007 SR -->
+        <class id="I4"  gsyn="1.49" gsynSD="0.63" nrrp="1.0"  dtc="8.3" dtcSD="2.2" u="0.3" uSD="0.08" d="1250" dSD="520" f="2" fSD="4"  />
+
+<!-- I2-like *NBC/*LBC->*PC specific pathway parameters from Yun et al. 2002.
+      Since *SBC->*PC innervation is largely proximal, we will continue to use the 
+      lumped values for I2 dynamics from Gupta et al. 2000 for these pathways SR  -->
+        <class id="I5_PT"  gsyn="1.22" gsynSD="0.82" nrrp="1.0"  dtc="8.3" dtcSD="2.7" u="0.14" uSD="0.05" d="875" dSD="285" f="22" fSD="5"  />
+
+<!-- I2-like *NGC->L23_PC specific pathway parameters from Szabadics et al 2007. Only IPSC rise and decay time constants are mentioned. All the other parameters for I2 dynamics will continue to be used from Gupta et al. 2000. SR  -->
+		<class id="I6"  gsyn="1.36" gsynSD="0.73" nrrp="1.0"  dtc="36.5" dtcSD="1.3" u="0.25" uSD="0.13" d="706" dSD="405" f="21" fSD="9"  />
+
+<!-- *CHC->*Excitatory pathway specific parameters were derived under the standard propagation of relative errors for a mean of 3 +/- 1 synaptic contacts/connection from Markram et al. 2004. A "super synapse" will be placed for CHC -> Excitatory instead of 3 different synapses on the AIS. The gsyn is drawn from the standard propagation of relative errors from I2 synapse dynamics. The U,D,F and other parameters will be the same as I2 synapse dynamics  SR -->
+		<class id="I7"  gsyn="3.67" gsynSD="2.42" nrrp="1.0"  dtc="8.3" dtcSD="2.2" u="0.25" uSD="0.13" d="706" dSD="405" f="21" fSD="9"  />
+
+<!-- exceptional synaptic dynamics for L6_MC-L6_IPC pathways from TKB -->
+                <class id="I1_L6_MC-L6_IPC"  gsyn="1.49" gsynSD="0.63" nrrp="1.0"  dtc="10.4" dtcSD="6.2" u="0.41" uSD="0.4" d="160" dSD="130" f="690" fSD="10"  />
+
+		<!-- exceptional synaptic dynamics for L6_BC-L6_*PC pathways from TKB -->
+                <class id="I2_L6"  gsyn="1.22" gsynSD="0.82" nrrp="1.0"  dtc="10.4" dtcSD="6.2" u="0.43" uSD="0.25" d="225" dSD="255" f="198" fSD="327"  />
+
+<!--  Excitatory pathways  -->
+<!-- Important!!! : gsynVar is interpreted by functionalizer as a standard deviation, not a variance - SR-->
+<!-- Important!!! : gsynVar was renamed gsynSD (and also *Var->*SD) as of 2017.10
+     to reflect the fact it is interpreted by functionalizer as a standard deviation, not a variance - EM-->
+
+		<class id="E1_INH"  gsyn="0.47" gsynSD="0.31" nrrp="2.8"  dtc="1.74" dtcSD="0.18" u="0.02" uSD="0.001" d="194" dSD="18" f="507" fSD="37"  />
+		<class id="E1_PT"  gsyn="0.769" gsynSD="0.51" nrrp="2.8"  dtc="1.74" dtcSD="0.18" u="0.02" uSD="0.001" d="194" dSD="18" f="507" fSD="37"  />
+
+		<class id="E2"  gsyn="0.77" gsynSD="0.55" nrrp="2.8"  dtc="1.74" dtcSD="0.18" u="0.50" uSD="0.02" d="671" dSD="17" f="017" fSD="5"  />
+		<class id="E2_INH"  gsyn="0.47" gsynSD="0.31" nrrp="2.8"  dtc="1.74" dtcSD="0.18" u="0.50" uSD="0.02" d="671" dSD="17" f="017" fSD="5"  />
+		<class id="E2_PT"  gsyn="0.769" gsynSD="0.51" nrrp="2.8"  dtc="1.74" dtcSD="0.18" u="0.50" uSD="0.02" d="671" dSD="17" f="017" fSD="5"  />
+
+		<class id="E2_L3PC"  gsyn="0.65" gsynSD="0.44" nrrp="2.8"  dtc="1.74" dtcSD="0.18" u="0.46" uSD="0.26" d="671" dSD="17" f="17" fSD="5"  /> 
+                <class id="E2_L4PC"  gsyn="0.66" gsynSD="0.44" nrrp="2.8"  dtc="1.74" dtcSD="0.18" u="0.86" uSD="0.09" d="671" dSD="17" f="17" fSD="5"  />
+                <class id="E2_L4SS"  gsyn="0.21" gsynSD="0.14" nrrp="2.8"  dtc="1.74" dtcSD="0.18" u="0.79" uSD="0.04" d="671" dSD="17" f="17" fSD="5"  />
+                <class id="E2_L5STPC"  gsyn="0.69" gsynSD="0.46" nrrp="2.8"  dtc="1.74" dtcSD="0.18" u="0.39" uSD="0.03" d="671" dSD="17" f="17" fSD="5"  />
+		<class id="E2_L5TTPC"  gsyn="1.62" gsynSD="1.27" nrrp="2.8"  dtc="1.74" dtcSD="0.18" u="0.448" uSD="0.106" d="446" dSD="109" f="40.6" fSD="46"  />
+
+		<!-- synaptic dynamics for E-E intra-laminar L6 pathways from TKB. See SSCX-101 -->
+		<class id="E2_L6_TPCA-L6_TPCA"  gsyn="1.4" gsynSD="1.0" nrrp="2.8"  dtc="1.74" dtcSD="0.18" u="0.37" uSD="0.11" d="280" dSD="90" f="90" fSD="80"  />
+                <class id="E2_L6_EXC-L6_EXC"  gsyn="0.77" gsynSD="0.55" nrrp="2.8"  dtc="1.74" dtcSD="0.18" u="0.25" uSD="0.14" d="520" dSD="320" f="300" fSD="340"  />
+		
+		<!-- Synaptic dynamics for L6_EXC-BC intra-laminar L6 pathways from TKB. See SSCX-101 -->
+                <class id="E2_L6_NPC-BC"  gsyn="0.54" gsynSD="0.36" nrrp="2.8"  dtc="1.74" dtcSD="0.18" u="0.36" uSD="0.21" d="380" dSD="310" f="280" fSD="340"  />
+                <class id="E2_L6_TPC-BC"  gsyn="0.54" gsynSD="0.36" nrrp="2.8"  dtc="1.74" dtcSD="0.18" u="0.58" uSD="0.13" d="240" dSD="80" f="70" fSD="90"  />
+		<class id="E2_L6_IPC-BC"  gsyn="0.54" gsynSD="0.36" nrrp="2.8"  dtc="1.74" dtcSD="0.18" u="0.51" uSD="0.20" d="440" dSD="300" f="100" fSD="50"  />
+		<class id="E2_L6_EXC-BC"  gsyn="0.54" gsynSD="0.36" nrrp="2.8"  dtc="1.74" dtcSD="0.18" u="0.47" uSD="0.21" d="364" dSD="274" f="158" fSD="245"  />
+	
+<!-- E1-like *PC->*MC specific pathway parameters from Silberberg & Markram, 2007 -->
+		<class id="E4"  gsyn="0.16" gsynSD="0.11" nrrp="2.8"  dtc="1.74" dtcSD="0.18" u="0.09" uSD="0.12" d="138" dSD="211" f="670" fSD="830"  />
+
+<!-- E2-like *PC->*NBC/*LBC specific pathway parameters from Yun et al, 2002 -->
+		<class id="E5_PT"  gsyn="0.769" gsynSD="0.51" nrrp="2.8"  dtc="1.74" dtcSD="0.18" u="0.72" uSD="0.12" d="227" dSD="70" f="13" fSD="24"  />
+
+	</SynapsesClassification>
+    
+	&connectivityRecipe;
+
+	<TouchRules>
+<!-- *\CHC -> * on the dendrites -->        
+        <touchRule fromLayer="*" fromMType="L2_*PC" toLayer="*" toMType="*" type="dendrite" />
+        <touchRule fromLayer="*" fromMType="L4_*PC" toLayer="*" toMType="*" type="dendrite" />
+        <touchRule fromLayer="*" fromMType="L5_*PC" toLayer="*" toMType="*" type="dendrite" />
+        <touchRule fromLayer="*" fromMType="L6_*PC" toLayer="*" toMType="*" type="dendrite" />
+        <touchRule fromLayer="*" fromMType="L*_TPC:A" toLayer="*" toMType="*" type="dendrite" />
+        <touchRule fromLayer="*" fromMType="L*_TPC:B" toLayer="*" toMType="*" type="dendrite" />
+        <touchRule fromLayer="*" fromMType="L*_TPC:C" toLayer="*" toMType="*" type="dendrite" />
+        <touchRule fromLayer="*" fromMType="L4_SSC" toLayer="*" toMType="*" type="dendrite" />
+	<touchRule fromLayer="*" fromMType="PROJ_*" toLayer="*" toMType="*" type="dendrite" />
+        
+        <touchRule fromLayer="*" fromMType="L1*" toLayer="*" toMType="*" type="dendrite" />
+        <touchRule fromLayer="*" fromMType="L*_MC" toLayer="*" toMType="*" type="dendrite" />
+        <touchRule fromLayer="*" fromMType="L*_BTC" toLayer="*" toMType="*" type="dendrite" />
+        <touchRule fromLayer="*" fromMType="L*_DBC" toLayer="*" toMType="*" type="dendrite" />
+        <touchRule fromLayer="*" fromMType="L*_BP" toLayer="*" toMType="*" type="dendrite" />
+        <touchRule fromLayer="*" fromMType="L*_NGC" toLayer="*" toMType="*" type="dendrite" />
+        <touchRule fromLayer="*" fromMType="L*_LBC" toLayer="*" toMType="*" type="dendrite" />
+        <touchRule fromLayer="*" fromMType="L*_NBC" toLayer="*" toMType="*" type="dendrite" />
+        <touchRule fromLayer="*" fromMType="L*_SBC" toLayer="*" toMType="*" type="dendrite" />       
+<!-- e -> i also on the soma -->
+        <touchRule fromLayer="*" fromMType="L2_*PC" toLayer="*" toMType="L1*" type="soma" />
+        <touchRule fromLayer="*" fromMType="L4_*PC" toLayer="*" toMType="L1*" type="soma" />
+        <touchRule fromLayer="*" fromMType="L5_*PC" toLayer="*" toMType="L1*" type="soma" />
+        <touchRule fromLayer="*" fromMType="L6_*PC" toLayer="*" toMType="L1*" type="soma" />
+        <touchRule fromLayer="*" fromMType="L*_TPC:A" toLayer="*" toMType="L1*" type="soma" />
+        <touchRule fromLayer="*" fromMType="L*_TPC:B" toLayer="*" toMType="L1*" type="soma" />
+        <touchRule fromLayer="*" fromMType="L*_TPC:C" toLayer="*" toMType="L1*" type="soma" />
+        <touchRule fromLayer="*" fromMType="L4_SSC" toLayer="*" toMType="L1*" type="soma" />
+        <touchRule fromLayer="*" fromMType="PROJ_*" toLayer="*" toMType="L1*" type="soma" />
+        
+        <touchRule fromLayer="*" fromMType="L2_*PC" toLayer="*" toMType="L*_MC" type="soma" />
+        <touchRule fromLayer="*" fromMType="L4_*PC" toLayer="*" toMType="L*_MC" type="soma" />
+        <touchRule fromLayer="*" fromMType="L5_*PC" toLayer="*" toMType="L*_MC" type="soma" />
+        <touchRule fromLayer="*" fromMType="L6_*PC" toLayer="*" toMType="L*_MC" type="soma" />
+        <touchRule fromLayer="*" fromMType="L*_TPC:A" toLayer="*" toMType="L*_MC" type="soma" />
+        <touchRule fromLayer="*" fromMType="L*_TPC:B" toLayer="*" toMType="L*_MC" type="soma" />
+        <touchRule fromLayer="*" fromMType="L*_TPC:C" toLayer="*" toMType="L*_MC" type="soma" />
+        <touchRule fromLayer="*" fromMType="L4_SSC" toLayer="*" toMType="L*_MC" type="soma" />
+        <touchRule fromLayer="*" fromMType="PROJ_*" toLayer="*" toMType="L*_MC" type="soma" />
+
+        <touchRule fromLayer="*" fromMType="L2_*PC" toLayer="*" toMType="L*_BTC" type="soma" />
+        <touchRule fromLayer="*" fromMType="L4_*PC" toLayer="*" toMType="L*_BTC" type="soma" />
+        <touchRule fromLayer="*" fromMType="L5_*PC" toLayer="*" toMType="L*_BTC" type="soma" />
+        <touchRule fromLayer="*" fromMType="L6_*PC" toLayer="*" toMType="L*_BTC" type="soma" />
+        <touchRule fromLayer="*" fromMType="L*_TPC:A" toLayer="*" toMType="L*_BTC" type="soma" />
+        <touchRule fromLayer="*" fromMType="L*_TPC:B" toLayer="*" toMType="L*_BTC" type="soma" />
+        <touchRule fromLayer="*" fromMType="L*_TPC:C" toLayer="*" toMType="L*_BTC" type="soma" />
+        <touchRule fromLayer="*" fromMType="L4_SSC" toLayer="*" toMType="L*_BTC" type="soma" />
+        <touchRule fromLayer="*" fromMType="PROJ_*" toLayer="*" toMType="L*_BTC" type="soma" />
+
+        <touchRule fromLayer="*" fromMType="L2_*PC" toLayer="*" toMType="L*_DBC" type="soma" />
+        <touchRule fromLayer="*" fromMType="L4_*PC" toLayer="*" toMType="L*_DBC" type="soma" />
+        <touchRule fromLayer="*" fromMType="L5_*PC" toLayer="*" toMType="L*_DBC" type="soma" />
+        <touchRule fromLayer="*" fromMType="L6_*PC" toLayer="*" toMType="L*_DBC" type="soma" />
+        <touchRule fromLayer="*" fromMType="L*_TPC:A" toLayer="*" toMType="L*_DBC" type="soma" />
+        <touchRule fromLayer="*" fromMType="L*_TPC:B" toLayer="*" toMType="L*_DBC" type="soma" />
+        <touchRule fromLayer="*" fromMType="L*_TPC:C" toLayer="*" toMType="L*_DBC" type="soma" />
+        <touchRule fromLayer="*" fromMType="L4_SSC" toLayer="*" toMType="L*_DBC" type="soma" />
+        <touchRule fromLayer="*" fromMType="PROJ_*" toLayer="*" toMType="L*_DBC" type="soma" />
+        
+        <touchRule fromLayer="*" fromMType="L2_*PC" toLayer="*" toMType="L*_BP" type="soma" />
+        <touchRule fromLayer="*" fromMType="L4_*PC" toLayer="*" toMType="L*_BP" type="soma" />
+        <touchRule fromLayer="*" fromMType="L5_*PC" toLayer="*" toMType="L*_BP" type="soma" />
+        <touchRule fromLayer="*" fromMType="L6_*PC" toLayer="*" toMType="L*_BP" type="soma" />
+        <touchRule fromLayer="*" fromMType="L*_TPC:A" toLayer="*" toMType="L*_BP" type="soma" />
+        <touchRule fromLayer="*" fromMType="L*_TPC:B" toLayer="*" toMType="L*_BP" type="soma" />
+        <touchRule fromLayer="*" fromMType="L*_TPC:C" toLayer="*" toMType="L*_BP" type="soma" />
+        <touchRule fromLayer="*" fromMType="L4_SSC" toLayer="*" toMType="L*_BP" type="soma" />
+        <touchRule fromLayer="*" fromMType="PROJ_*" toLayer="*" toMType="L*_BP" type="soma" />
+        
+        <touchRule fromLayer="*" fromMType="L2_*PC" toLayer="*" toMType="L*_NGC" type="soma" />
+        <touchRule fromLayer="*" fromMType="L4_*PC" toLayer="*" toMType="L*_NGC" type="soma" />
+        <touchRule fromLayer="*" fromMType="L5_*PC" toLayer="*" toMType="L*_NGC" type="soma" />
+        <touchRule fromLayer="*" fromMType="L6_*PC" toLayer="*" toMType="L*_NGC" type="soma" />
+        <touchRule fromLayer="*" fromMType="L*_TPC:A" toLayer="*" toMType="L*_NGC" type="soma" />
+        <touchRule fromLayer="*" fromMType="L*_TPC:B" toLayer="*" toMType="L*_NGC" type="soma" />
+        <touchRule fromLayer="*" fromMType="L*_TPC:C" toLayer="*" toMType="L*_NGC" type="soma" />
+        <touchRule fromLayer="*" fromMType="L4_SSC" toLayer="*" toMType="L*_NGC" type="soma" />
+        <touchRule fromLayer="*" fromMType="PROJ_*" toLayer="*" toMType="L*_NGC" type="soma" />
+
+        <touchRule fromLayer="*" fromMType="L2_*PC" toLayer="*" toMType="L*_LBC" type="soma" />
+        <touchRule fromLayer="*" fromMType="L4_*PC" toLayer="*" toMType="L*_LBC" type="soma" />
+        <touchRule fromLayer="*" fromMType="L5_*PC" toLayer="*" toMType="L*_LBC" type="soma" />
+        <touchRule fromLayer="*" fromMType="L6_*PC" toLayer="*" toMType="L*_LBC" type="soma" />
+        <touchRule fromLayer="*" fromMType="L*_TPC:A" toLayer="*" toMType="L*_LBC" type="soma" />
+        <touchRule fromLayer="*" fromMType="L*_TPC:B" toLayer="*" toMType="L*_LBC" type="soma" />
+        <touchRule fromLayer="*" fromMType="L*_TPC:C" toLayer="*" toMType="L*_LBC" type="soma" />
+        <touchRule fromLayer="*" fromMType="L4_SSC" toLayer="*" toMType="L*_LBC" type="soma" />
+        <touchRule fromLayer="*" fromMType="PROJ_*" toLayer="*" toMType="L*_LBC" type="soma" />
+
+        <touchRule fromLayer="*" fromMType="L2_*PC" toLayer="*" toMType="L*_NBC" type="soma" />
+        <touchRule fromLayer="*" fromMType="L4_*PC" toLayer="*" toMType="L*_NBC" type="soma" />
+        <touchRule fromLayer="*" fromMType="L5_*PC" toLayer="*" toMType="L*_NBC" type="soma" />
+        <touchRule fromLayer="*" fromMType="L6_*PC" toLayer="*" toMType="L*_NBC" type="soma" />
+        <touchRule fromLayer="*" fromMType="L*_TPC:A" toLayer="*" toMType="L*_NBC" type="soma" />
+        <touchRule fromLayer="*" fromMType="L*_TPC:B" toLayer="*" toMType="L*_NBC" type="soma" />
+        <touchRule fromLayer="*" fromMType="L*_TPC:C" toLayer="*" toMType="L*_NBC" type="soma" />
+        <touchRule fromLayer="*" fromMType="L4_SSC" toLayer="*" toMType="L*_NBC" type="soma" />        
+        <touchRule fromLayer="*" fromMType="PROJ_*" toLayer="*" toMType="L*_NBC" type="soma" />
+
+        <touchRule fromLayer="*" fromMType="L2_*PC" toLayer="*" toMType="L*_SBC" type="soma" />
+        <touchRule fromLayer="*" fromMType="L4_*PC" toLayer="*" toMType="L*_SBC" type="soma" />
+        <touchRule fromLayer="*" fromMType="L5_*PC" toLayer="*" toMType="L*_SBC" type="soma" />
+        <touchRule fromLayer="*" fromMType="L6_*PC" toLayer="*" toMType="L*_SBC" type="soma" />
+        <touchRule fromLayer="*" fromMType="L*_TPC:A" toLayer="*" toMType="L*_SBC" type="soma" />
+        <touchRule fromLayer="*" fromMType="L*_TPC:B" toLayer="*" toMType="L*_SBC" type="soma" />
+        <touchRule fromLayer="*" fromMType="L*_TPC:C" toLayer="*" toMType="L*_SBC" type="soma" />
+        <touchRule fromLayer="*" fromMType="L4_SSC" toLayer="*" toMType="L*_SBC" type="soma" />
+        <touchRule fromLayer="*" fromMType="PROJ_*" toLayer="*" toMType="L*_SBC" type="soma" />
+
+        <touchRule fromLayer="*" fromMType="L2_*PC" toLayer="*" toMType="L*_CHC" type="soma" />
+        <touchRule fromLayer="*" fromMType="L4_*PC" toLayer="*" toMType="L*_CHC" type="soma" />
+        <touchRule fromLayer="*" fromMType="L5_*PC" toLayer="*" toMType="L*_CHC" type="soma" />
+        <touchRule fromLayer="*" fromMType="L6_*PC" toLayer="*" toMType="L*_CHC" type="soma" />
+        <touchRule fromLayer="*" fromMType="L*_TPC:A" toLayer="*" toMType="L*_CHC" type="soma" />
+        <touchRule fromLayer="*" fromMType="L*_TPC:B" toLayer="*" toMType="L*_CHC" type="soma" />
+        <touchRule fromLayer="*" fromMType="L*_TPC:C" toLayer="*" toMType="L*_CHC" type="soma" />
+        <touchRule fromLayer="*" fromMType="L4_SSC" toLayer="*" toMType="L*_CHC" type="soma" />
+        <touchRule fromLayer="*" fromMType="PROJ_*" toLayer="*" toMType="L*_CHC" type="soma" />
+
+
+<!-- i\CHC -> * also on the soma -->
+        <touchRule fromLayer="*" fromMType="L1*" toLayer="*" toMType="*" type="soma" />
+        <touchRule fromLayer="*" fromMType="L*_MC" toLayer="*" toMType="*" type="soma" />
+        <touchRule fromLayer="*" fromMType="L*_BTC" toLayer="*" toMType="*" type="soma" />
+        <touchRule fromLayer="*" fromMType="L*_DBC" toLayer="*" toMType="*" type="soma" />
+        <touchRule fromLayer="*" fromMType="L*_BP" toLayer="*" toMType="*" type="soma" />
+        <touchRule fromLayer="*" fromMType="L*_NGC" toLayer="*" toMType="*" type="soma" />
+        <touchRule fromLayer="*" fromMType="L*_LBC" toLayer="*" toMType="*" type="soma" />
+        <touchRule fromLayer="*" fromMType="L*_NBC" toLayer="*" toMType="*" type="soma" />
+        <touchRule fromLayer="*" fromMType="L*_SBC" toLayer="*" toMType="*" type="soma" />
+
+        
+<!-- CHC are in a special class: they target excitatory cell soma only -->
+
+        <touchRule fromLayer="*" fromMType="L*_CHC" toLayer="*" toMType="L2_*PC" type="soma" />
+        <touchRule fromLayer="*" fromMType="L*_CHC" toLayer="*" toMType="L4_*PC" type="soma" />
+        <touchRule fromLayer="*" fromMType="L*_CHC" toLayer="*" toMType="L5_*PC" type="soma" />
+        <touchRule fromLayer="*" fromMType="L*_CHC" toLayer="*" toMType="L6_*PC" type="soma" />
+        <touchRule fromLayer="*" fromMType="L*_CHC" toLayer="*" toMType="L*_TPC:A" type="soma" />
+        <touchRule fromLayer="*" fromMType="L*_CHC" toLayer="*" toMType="L*_TPC:B" type="soma" />
+        <touchRule fromLayer="*" fromMType="L*_CHC" toLayer="*" toMType="L*_TPC:C" type="soma" />
+        <touchRule fromLayer="*" fromMType="L*_CHC" toLayer="*" toMType="L4_SSC" type="soma" />
+
+	</TouchRules>
+
+	
+</blueColumn>
+

@@ -1,0 +1,30 @@
+#!/bin/sh
+
+#SBATCH --job-name="touchdetector"
+#SBATCH --account={{ SBATCH_ACCOUNT }}
+#SBATCH --partition={{ SBATCH_PARTITION }}
+#SBATCH --nodes={{ SBATCH_NNODES }}
+#SBATCH --ntasks={{ SBATCH_NTASKS }}
+#SBATCH --time={{ SBATCH_TIMELIMIT }}
+#SBATCH --output=stdout.log
+#SBATCH --error=stderr.err
+
+module purge
+
+export MODULEPATH="/gpfs/bbp.cscs.ch/apps/bgq/nix/nix-root/var/nix/profiles/per-user/modules/bgq-lugano/archive-modules/{{ SW_RELEASE }}/release/share/modulefiles/"
+module load nix/hpc/touchdetector
+
+## magic GPFS env var to avoid lock problem
+export BGLOCKLESSMPIO_F_TYPE=0x47504653
+
+export TOUCH_DETECTOR_BIN=`which touchdetector`
+echo "Using touchdetector binary:" "$TOUCH_DETECTOR_BIN"
+
+cd "{{ WORKING_DIR }}"
+srun "$TOUCH_DETECTOR_BIN" \
+    --outputFolder="{{ WORKING_DIR }}" \
+    --mvdFilePath="{{ MVD3_PATH }}" \
+    --morphologyPath="{{ MORPH_PATH }}" \
+    --recipePath="{{ RECIPE_PATH }}" \
+    --enableSaveState \
+    2>&1 | tee output.txt

@@ -1,0 +1,13 @@
+Run Default
+{
+    CircuitPath {{ CIRCUIT_PATH }}
+    nrnPath {{ NRN_PATH }}
+    MorphologyPath {{ MORPH_PATH }}
+    METypePath {{ ME_TYPE_PATH }}
+{%- if ME_COMBO_INFO_PATH %}
+    MEComboInfoFile {{ ME_COMBO_INFO_PATH }}
+    CellLibraryFile circuit.mvd3
+{% endif %}
+    BioName {{ BIONAME }}
+    Atlas {{ ATLAS }}
+}

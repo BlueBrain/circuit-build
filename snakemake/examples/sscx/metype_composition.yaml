@@ -1,0 +1,469 @@
+version: v1.0
+composition:
+  L1:
+    L1_DAC:
+      density: 8000
+      etypes:
+        bNAC: 0.5
+        cNAC: 0.5
+    L1_HAC:
+      density: 12000
+      etypes:
+        bNAC: 0.33
+        cIR: 0.33
+        cNAC: 0.33
+    L1_LAC:
+      density: 4000
+      etypes:
+        cNAC: 1.0
+    L1_NGC-DA:
+      density: 16000
+      etypes:
+        bNAC: 0.25
+        cACint: 0.25
+        cNAC: 0.25
+        cSTUT: 0.25
+    L1_NGC-SA:
+      density: 4000
+      etypes:
+        cNAC: 1.0
+    L1_SAC:
+      density: 12000
+      etypes:
+        bNAC: 0.3333
+        cACint: 0.3333
+        cNAC: 0.3333
+  L2:
+    L23_BP:
+      density: 24000
+      etypes:
+        bAC: 0.1666
+        bIR: 0.1666
+        bNAC: 0.1666
+        cACint: 0.1666
+        cNAC: 0.1666
+        dSTUT: 0.1666
+    L23_BTC:
+      density: 20000
+      etypes:
+        bAC: 0.2
+        bIR: 0.2
+        bNAC: 0.2
+        cACint: 0.2
+        cNAC: 0.2
+    L23_CHC:
+      density: 12000
+      etypes:
+        cACint: 0.33
+        cNAC: 0.33
+        dNAC: 0.33
+    L23_DBC:
+      density: 16000
+      etypes:
+        bAC: 0.25
+        bIR: 0.25
+        bNAC: 0.25
+        cACint: 0.25
+    L23_LBC:
+      density: 24000
+      etypes:
+        bAC: 0.1666
+        bNAC: 0.1666
+        cACint: 0.1666
+        cNAC: 0.1666
+        cSTUT: 0.1666
+        dNAC: 0.1666
+    L23_MC:
+      density: 20000
+      etypes:
+        bAC: 0.2
+        bNAC: 0.2
+        cACint: 0.2
+        cNAC: 0.2
+        dNAC: 0.2
+    L23_NBC:
+      density: 24000
+      etypes:
+        bAC: 0.1666
+        bNAC: 0.1666
+        cACint: 0.1666
+        cIR: 0.1666
+        cNAC: 0.1666
+        dNAC: 0.1666
+    L23_NGC:
+      density: 16000
+      etypes:
+        bNAC: 0.25
+        cACint: 0.25
+        cNAC: 0.25
+        cSTUT: 0.25
+    L23_SBC:
+      density: 12000
+      etypes:
+        bNAC: 0.3333
+        cACint: 0.3333
+        dNAC: 0.3333
+    L2_IPC:
+      density: 4000
+      etypes:
+        cADpyr: 1.0
+    L2_TPC:A:
+      density: 4000
+      etypes:
+        cADpyr: 1.0
+    L2_TPC:B:
+      density: 4000
+      etypes:
+        cADpyr: 1.0
+  L3:
+    L23_BP:
+      density: 18000
+      etypes:
+        bAC: 0.1666
+        bIR: 0.1666
+        bNAC: 0.1666
+        cACint: 0.1666
+        cNAC: 0.1666
+        dSTUT: 0.1666
+    L23_BTC:
+      density: 15000
+      etypes:
+        bAC: 0.2
+        bIR: 0.2
+        bNAC: 0.2
+        cACint: 0.2
+        cNAC: 0.2
+    L23_CHC:
+      density: 9000
+      etypes:
+        cACint: 0.3333
+        cNAC: 0.3333
+        dNAC: 0.3333
+    L23_DBC:
+      density: 12000
+      etypes:
+        bAC: 0.25
+        bIR: 0.25
+        bNAC: 0.25
+        cACint: 0.25
+    L23_LBC:
+      density: 18000
+      etypes:
+        bAC: 0.1666
+        bNAC: 0.1666
+        cACint: 0.1666
+        cNAC: 0.1666
+        cSTUT: 0.1666
+        dNAC: 0.1666
+    L23_MC:
+      density: 15000
+      etypes:
+        bAC: 0.2
+        bNAC: 0.2
+        cACint: 0.2
+        cNAC: 0.2
+        dNAC: 0.2
+    L23_NBC:
+      density: 18000
+      etypes:
+        bAC: 0.1666
+        bNAC: 0.1666
+        cACint: 0.1666
+        cIR: 0.1666
+        cNAC: 0.1666
+        dNAC: 0.1666
+    L23_NGC:
+      density: 12000
+      etypes:
+        bNAC: 0.25
+        cACint: 0.25
+        cNAC: 0.25
+        cSTUT: 0.25
+    L23_SBC:
+      density: 9000
+      etypes:
+        bNAC: 0.3333
+        cACint: 0.3333
+        dNAC: 0.3333
+    L3_TPC:A:
+      density: 3000
+      etypes:
+        cADpyr: 1.0
+    L3_TPC:B:
+      density: 3000
+      etypes:
+        cADpyr: 1.0
+  L4:
+    L4_BP:
+      density: 12000
+      etypes:
+        bAC: 0.1666
+        bIR: 0.1666
+        bNAC: 0.1666
+        cACint: 0.1666
+        cNAC: 0.1666
+        dSTUT: 0.1666
+    L4_BTC:
+      density: 12000
+      etypes:
+        bAC: 0.1666
+        bIR: 0.1666
+        bSTUT: 0.1666
+        cACint: 0.1666
+        cNAC: 0.1666
+        dNAC: 0.1666
+    L4_CHC:
+      density: 6000
+      etypes:
+        cACint: 0.3333
+        cNAC: 0.3333
+        dNAC: 0.3333
+    L4_DBC:
+      density: 14000
+      etypes:
+        bAC: 0.142
+        bIR: 0.142
+        bNAC: 0.142
+        bSTUT: 0.142
+        cACint: 0.142
+        cIR: 0.142
+        cNAC: 0.142
+    L4_LBC:
+      density: 10000
+      etypes:
+        cACint: 0.2
+        cNAC: 0.2
+        cSTUT: 0.2
+        dNAC: 0.2
+        dSTUT: 0.2
+    L4_MC:
+      density: 10000
+      etypes:
+        bAC: 0.2
+        bNAC: 0.2
+        cACint: 0.2
+        cNAC: 0.2
+        dNAC: 0.2
+    L4_NBC:
+      density: 8000
+      etypes:
+        cACint: 0.25
+        cIR: 0.25
+        cNAC: 0.25
+        dNAC: 0.25
+    L4_NGC:
+      density: 8000
+      etypes:
+        bNAC: 0.25
+        cACint: 0.25
+        cNAC: 0.25
+        cSTUT: 0.25
+    L4_SBC:
+      density: 6000
+      etypes:
+        bNAC: 0.3333
+        cACint: 0.3333
+        dNAC: 0.3333
+    L4_SSC:
+      density: 2000
+      etypes:
+        cADpyr: 1.0
+    L4_TPC:
+      density: 2000
+      etypes:
+        cADpyr: 1.0
+    L4_UPC:
+      density: 2000
+      etypes:
+        cADpyr: 1.0
+  L5:
+    L5_BP:
+      density: 6000
+      etypes:
+        bAC: 0.1666
+        bIR: 0.1666
+        bNAC: 0.1666
+        cACint: 0.1666
+        cNAC: 0.1666
+        dSTUT: 0.1666
+    L5_BTC:
+      density: 3000
+      etypes:
+        bAC: 0.3333
+        cACint: 0.3333
+        cNAC: 0.3333
+    L5_CHC:
+      density: 3000
+      etypes:
+        cACint: 0.3333
+        cNAC: 0.3333
+        dNAC: 0.3333
+    L5_DBC:
+      density: 7000
+      etypes:
+        bAC: 0.142
+        bIR: 0.142
+        bNAC: 0.142
+        bSTUT: 0.142
+        cACint: 0.142
+        cIR: 0.142
+        cNAC: 0.142
+    L5_LBC:
+      density: 7000
+      etypes:
+        bAC: 0.142
+        cACint: 0.142
+        cIR: 0.142
+        cNAC: 0.142
+        cSTUT: 0.142
+        dNAC: 0.142
+        dSTUT: 0.142
+    L5_MC:
+      density: 7000
+      etypes:
+        bAC: 0.142
+        bIR: 0.142
+        bSTUT: 0.142
+        cACint: 0.142
+        cNAC: 0.142
+        cSTUT: 0.142
+        dNAC: 0.142
+    L5_NBC:
+      density: 8000
+      etypes:
+        bAC: 0.125
+        bIR: 0.125
+        bSTUT: 0.125
+        cACint: 0.125
+        cIR: 0.125
+        cNAC: 0.125
+        cSTUT: 0.125
+        dSTUT: 0.125
+    L5_NGC:
+      density: 4000
+      etypes:
+        bNAC: 0.25
+        cACint: 0.25
+        cNAC: 0.25
+        cSTUT: 0.25
+    L5_SBC:
+      density: 3000
+      etypes:
+        bNAC: 0.3333
+        cACint: 0.3333
+        dNAC: 0.3333
+    L5_TPC:A:
+      density: 1000
+      etypes:
+        cADpyr: 1.0
+    L5_TPC:B:
+      density: 1000
+      etypes:
+        cADpyr: 1.0
+    L5_TPC:C:
+      density: 1000
+      etypes:
+        cADpyr: 1.0
+    L5_UPC:
+      density: 1000
+      etypes:
+        cADpyr: 1.0
+  L6:
+    L6_BP:
+      density: 6000
+      etypes:
+        bAC: 0.1666
+        bIR: 0.1666
+        bNAC: 0.1666
+        cACint: 0.1666
+        cNAC: 0.1666
+        dSTUT: 0.1666
+    L6_BPC:
+      density: 1000
+      etypes:
+        cADpyr: 1.0
+    L6_BTC:
+      density: 3000
+      etypes:
+        bAC: 0.3333
+        cACint: 0.3333
+        cNAC: 0.3333
+    L6_CHC:
+      density: 3000
+      etypes:
+        cACint: 0.3333
+        cNAC: 0.3333
+        dNAC: 0.3333
+    L6_DBC:
+      density: 7000
+      etypes:
+        bAC: 0.142
+        bIR: 0.142
+        bNAC: 0.142
+        bSTUT: 0.142
+        cACint: 0.142
+        cIR: 0.142
+        cNAC: 0.142
+    L6_HPC:
+      density: 1000
+      etypes:
+        cADpyr: 1.0
+    L6_IPC:
+      density: 1000
+      etypes:
+        cADpyr: 1.0
+    L6_LBC:
+      density: 6000
+      etypes:
+        bAC: 0.1666
+        bIR: 0.1666
+        bNAC: 0.1666
+        bSTUT: 0.1666
+        cNAC: 0.1666
+        cSTUT: 0.1666
+    L6_MC:
+      density: 7000
+      etypes:
+        bAC: 0.142
+        bIR: 0.142
+        bNAC: 0.142
+        bSTUT: 0.142
+        cACint: 0.142
+        cIR: 0.142
+        cNAC: 0.142
+    L6_NBC:
+      density: 8000
+      etypes:
+        bAC: 0.125
+        bIR: 0.125
+        bSTUT: 0.125
+        cACint: 0.125
+        cIR: 0.125
+        cNAC: 0.125
+        cSTUT: 0.125
+        dSTUT: 0.125
+    L6_NGC:
+      density: 4000
+      etypes:
+        bNAC: 0.25
+        cACint: 0.25
+        cNAC: 0.25
+        cSTUT: 0.25
+    L6_SBC:
+      density: 3000
+      etypes:
+        bNAC: 0.3333
+        cACint: 0.3333
+        dNAC: 0.3333
+    L6_TPC:A:
+      density: 1000
+      etypes:
+        cADpyr: 1.0
+    L6_TPC:C:
+      density: 1000
+      etypes:
+        cADpyr: 1.0
+    L6_UPC:
+      density: 1000
+      etypes:
+        cADpyr: 1.0

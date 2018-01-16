@@ -1,0 +1,33 @@
+#!/bin/sh
+
+#SBATCH --job-name="functionalizer"
+#SBATCH --account={{ SBATCH_ACCOUNT }}
+#SBATCH --partition={{ SBATCH_PARTITION }}
+#SBATCH --nodes={{ SBATCH_NNODES }}
+#SBATCH --ntasks={{ SBATCH_NTASKS }}
+#SBATCH --time={{ SBATCH_TIMELIMIT }}
+#SBATCH --output=stdout.log
+#SBATCH --error=stderr.err
+
+module purge
+
+export MODULEPATH="/gpfs/bbp.cscs.ch/apps/bgq/nix/nix-root/var/nix/profiles/per-user/modules/bgq-lugano/archive-modules/{{ SW_RELEASE }}/release/share/modulefiles/"
+module load nix/hpc/functionalizer
+
+## magic GPFS env var to avoid lock problem
+export BGLOCKLESSMPIO_F_TYPE=0x47504653
+
+export FUNCTIONALIZER_BIN=`which functionalizer`
+echo "Using functionalizer binary:" "$FUNCTIONALIZER_BIN"
+
+cd "{{ WORKING_DIR }}"
+srun "$FUNCTIONALIZER_BIN" \
+    --outNCS-file="{{ WORKING_DIR }}/a.ncs" \
+    --inMVD-file="{{ MVD3_PATH }}" \
+    --inDetector-file="{{ TOUCHES_PATH }}" \
+    --recipe-file="{{ RECIPE_PATH }}" \
+    --database="{{ MORPH_PATH }}" \
+    --database-file="{{ MORPH_DAT }}" \
+    --pruningType={{ PRUNING_TYPE }} \
+    --disableDeltaOutput \
+    2>&1 | tee output.txt
