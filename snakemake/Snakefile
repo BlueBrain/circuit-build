@@ -409,9 +409,10 @@ rule nrn_merge:
 
     shell:
         bbp_env(
-            ['nix/hpc/functionalizer'],
-            ["cd {wildcards.nrn_dir} && nrn-merge .",
+            ['nix/nse/brainbuilder'],
+            ["brainbuilder nrn merge {wildcards.nrn_dir}",
                 "--only {wildcards.filename}",
+                "--link" if config.get('nrn_merge', "copy") == "link" else "",
                 "2>&1 | tee {log}"
             ]
         )
