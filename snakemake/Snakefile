@@ -1,9 +1,12 @@
 CIRCUIT_DIR = '.'
 
-BIONAME = os.path.abspath(os.path.dirname(workflow.overwrite_configfile))
+BIONAME = os.path.abspath(config.get('bioname', 'bioname'))
 
 def bioname_path(filename):
     return os.path.join(BIONAME, filename)
+
+# Load MANIFEST.yaml into workflow config
+workflow.configfile(bioname_path('MANIFEST.yaml'))
 
 BUILDER_RECIPE = bioname_path("builderRecipeAllPathways.xml")
 MORPHDB = bioname_path("extNeuronDB.dat")
