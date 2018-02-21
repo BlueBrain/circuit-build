@@ -1,6 +1,6 @@
 CIRCUIT_DIR = '.'
 
-BIONAME = os.path.abspath(config.get('bioname', 'bioname'))
+BIONAME = os.path.realpath(config.get('bioname', 'bioname'))
 
 def bioname_path(filename):
     return os.path.join(BIONAME, filename)
