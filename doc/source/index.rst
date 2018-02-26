@@ -6,6 +6,7 @@ Introduction
 
    circuit_files
    bioname
+   atlas
    tutorial
    phases
    faq
