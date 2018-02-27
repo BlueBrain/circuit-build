@@ -106,6 +106,7 @@ Now we can prepare sbatch scripts for building the connectome:
 This would create three sbatch scripts to be executed on BlueGene (see the next section):
 
 ::
+
     connectome/touches/run.sbatch
     connectome/structural/run.sbatch
     connectome/functional/run.sbatch
@@ -239,7 +240,7 @@ Instead one can produce a merged file using HDF5 *external links*. This could be
 
 .. code-block:: bash
 
-    $ sm -j8 --config nrn_merge=link structural
+    $ sm -j8 structural --config nrn_merge=link
 
 instead of:
 
