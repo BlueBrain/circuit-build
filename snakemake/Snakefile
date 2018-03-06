@@ -221,8 +221,9 @@ rule assign_morphologies:
 
     shell:
         bbp_env(
-            ['spark', 'nix/nse/placement-algorithm'],
-            ["assign-morphologies",
+            ['nix/nse/placement-algorithm'],
+            ["env PATH=$PATH:/nfs4/bbp.epfl.ch/sw/tools/spark/2.2.0/bin JAVA_HOME=/nfs4/bbp.epfl.ch/sw/tools/java/1.8u51",
+             "assign-morphologies",
                 "--mvd3 {input}",
                 "--atlas {ATLAS}",
                 "--atlas-cache {ATLAS_CACHE_DIR}",
