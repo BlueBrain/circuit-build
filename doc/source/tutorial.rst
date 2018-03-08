@@ -4,7 +4,7 @@ How to create a new circuit build
 Preparation
 -----------
 
-1. Create circuit build folder
+1. Create circuit release folder
 
 .. code-block:: bash
 
@@ -56,9 +56,9 @@ For all the commands below we assume that a following alias is defined:
 
 .. code-block:: bash
 
-    $ alias sm='snakemake --snakefile <circuit-build>/snakemake/Snakefile --config bioname=<path-to-bioname>'
+    $ alias sm='snakemake --config bioname=<path-to-bioname> --snakefile <circuit-build>/snakemake/Snakefile'
 
-We also assume that all ``sm`` commands are executed from circuit build folder root.
+We also assume that all ``sm`` commands are executed from circuit release folder root.
 
 
 Cell collection
