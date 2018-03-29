@@ -42,6 +42,7 @@ Main config defining:
 
 Example:
 ::
+
     common:
         atlas: http://voxels.nexus.apps.bbp.epfl.ch/api/analytics/atlas/releases/77831ACA-6198-4AA0-82EF-D0475A4E0647
         region_ids: [120]
@@ -94,6 +95,7 @@ Defines which mtypes are used, their density and associated etypes.
 
 Example:
 ::
+
     version: v1.0
     composition:
       <region>:
@@ -114,11 +116,44 @@ where
 `density` could be:
 
  * a number (cell count per mm^3)
- * 3D-profile (path to NRRD file with volumetric data aligned with brain region atlas)
+ * atlas-defined 3D profile (VoxelBrain atlas layer name in curly braces)
+ * locally-defined 3D-profile (path to NRRD file with volumetric data)
 
 .. tip::
-    We are going to add support for referencing VoxelBrain-stored 3D density profiles in the recipe.
-    We'd recommend to use local file paths with 3D density profiles for development purpose only; and to use exclusively constants and atlas-stored profiles for "public" circuits.
+    We'd recommend to use local file paths with 3D density profiles for development purpose only; and to use exclusively constants and atlas-defined profiles for "public" circuits.
+
+To specify morphology rotation angles individually per each mtype, please add `rotation` section to YAML root.
+
+For instance,
+
+::
+
+  version: 1.2
+  composition:
+    ...
+  rotation:
+    L2:
+      L23_MC:
+        - ['y', 'uniform', {'low': -3.1416, 'high': 3.1416}]
+        - ['x', 'uniform', {'low': -0.7853, 'high': 0.7853}]
+
+would rotate each `(L2, L23_MC)` cell:
+
+  - first by a random uniform angle from :math:`-\pi` to :math:`\pi` around Y-axis
+  - then by random uniform angle from :math:`-\pi/4` to :math:`\pi/4` around X-axis
+
+.. note::
+
+  The axis in question here, are _morphology_ axes, not global coordinate system axes.
+
+At the moment two random distributions are supported:
+
+  - `uniform(low, high)`
+  - `normal(loc, scale)`
+
+.. note::
+
+  The names for distributions and their parameters are chosen according to `NumPy <https://docs.scipy.org/doc/numpy/reference/routines.random.html>`_ naming style.
 
 Used in :ref:`ref-phase-place-cells` phase.
 
@@ -130,6 +165,7 @@ A tab-separated file mapping mtypes to their morph class (Interneuron / Pyramida
 
 Example:
 ::
+
     mtype       mClass  sClass
     L23_NGC     INT     INH
     L23_SBC     INT     INH
@@ -147,6 +183,7 @@ Should be compatible with morphology and emodel releases used; most often is a s
 
 Example:
 ::
+
   C230998A-I3           2 L23_BP bAC bAC_L23BTC_L23_BP_2_C230998A-I3
   C230998A-I3_-_Clone_0 2 L23_BP bAC bAC_L23BTC_L23_BP_2_C230998A-I3_-_Clone_0
 
