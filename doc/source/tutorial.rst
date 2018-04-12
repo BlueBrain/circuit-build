@@ -28,7 +28,7 @@ Please refer to :ref:`ref-bioname` section for the list of the files that consti
 
 4. Make `snakemake` command available.
 
-On vizcluster `snakemake` is available as a module:
+On BB5 cluster `snakemake` is available as a module:
 
 .. code-block:: bash
 
@@ -40,7 +40,7 @@ Alternatively, it can be pip-installed in any Python 3.5+ virtual environment:
 
 `snakemake` could run the tasks locally or automatically allocate SLURM partition for each task based on the provided `cluster config <http://snakemake.readthedocs.io/en/latest/snakefiles/configuration.html#cluster-configuration>`_.
 
-For simplicity we will use local operational mode throughout the tutorial. We will also assume that all the commands below are executed on a vizcluster allocation similar to:
+For simplicity we will use local operational mode throughout the tutorial. We will also assume that all the commands below are executed on a Slurm allocation similar to:
 
 .. code-block:: bash
 
@@ -103,7 +103,7 @@ Now we can prepare sbatch scripts for building the connectome:
 
     sm sbatch
 
-This would create three sbatch scripts to be executed on BlueGene (see the next section):
+This would create three sbatch scripts to be executed in batch mode (see the next section):
 
 ::
 
@@ -111,34 +111,28 @@ This would create three sbatch scripts to be executed on BlueGene (see the next 
     connectome/structural/run.sbatch
     connectome/functional/run.sbatch
 
-In parallel with launching these scripts, we can start segment spatial index build (on vizcluster):
+In parallel with launching these scripts, we can start segment spatial index build:
 
 .. code-block:: bash
 
     sm spatial_index_segment
 
 .. note::
-    Spatial index is more demanding to computing resources than all the other steps run at vizcluster.
+    Spatial index is more demanding to computing resources than all the other steps run in local mode.
     Please either launch `Snakemake` in `cluster mode <http://snakemake.readthedocs.io/en/stable/snakefiles/configuration.html#cluster-configuration>`_ or get a larger SLURM allocation by hand:
 
     .. code-block:: bash
 
-        $ ssh bbpviz2.cscs.ch
+        $ ssh bbpv2.epfl.ch
         $ cd <circuit-dir>
-        $ salloc -A <proj> -p prod --mem 120G --time 3-00:00:00 --cpus-per-task 16 --exclusive
+        $ salloc -A <proj> -p prod --constraint='nvme|cpu' -N1 --mem 0 --time 3-00:00:00 --exclusive
         $ sm spatial_index_segment
 
 
-Connectome - BlueGene
----------------------
+Connectome - sbatch
+-------------------
 
-The next two phases are executed on BlueGene.
-
-.. code-block:: bash
-
-    $ ssh bbpbg1.cscs.csh
-
-For these phases no `snakemake` environment is needed, it is enough to `sbatch` the scripts prepared at previous step.
+The next two phases are submitted manually using the scripts prepared at previous step.
 
 First `touchdetector`:
 
@@ -159,10 +153,10 @@ To avoid waiting for `touchdetector`, one can queue `functionalizer` right away:
    $ sbatch -d afterok:<touchdetector Slurm job ID> <circuit-dir>/connectome/functional/run.sbatch
 
 
-Connectome - vizcluster
+Connectome - local mode
 -----------------------
 
-Once `functionalizer` run on BlueGene has successfully finished, we can go back to executing `Snakemake` on vizcluster:
+Once `functionalizer` sbatch run has successfully finished, we can go back to executing `Snakemake` in local mode:
 
 .. code-block:: bash
 
@@ -198,7 +192,7 @@ which should give you a complete functionalized circuit with all the files descr
 Structural circuit
 ------------------
 
-If you'd like to build a structural circuit instead of functional one (i.e., avoid pruning synapses when executing `functionalizer`), on BlueGene execute:
+If you'd like to build a structural circuit instead of functional one (i.e., avoid pruning synapses when executing `functionalizer`) submit the corresponding sbatch:
 
 .. code-block:: bash
 
@@ -221,8 +215,6 @@ instead of:
 .. code-block:: bash
 
     $ sm -j8 functional
-
-on vizcluster.
 
 .. note::
     You can also build structural circuit *in addition* to the functional one. They do not conflict with each other, but share the common files (``circuit.mvd3``, ``start.target`` etc). Structural circuit would be available via ``CircuitConfig_struct`` file.

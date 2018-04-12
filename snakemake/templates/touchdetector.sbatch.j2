@@ -11,17 +11,23 @@
 
 module purge
 
-export MODULEPATH="/gpfs/bbp.cscs.ch/apps/bgq/nix/nix-root/var/nix/profiles/per-user/modules/bgq-lugano/archive-modules/{{ SW_RELEASE }}/release/share/modulefiles/"
+{%- if SW_RELEASE %}
+export MODULEPATH="/nix/var/nix/profiles/per-user/modules/bbpv-x86_64/archive-modules/{{ SW_RELEASE }}/release/share/modulefiles/"
+{% endif %}
+
 module load nix/hpc/touchdetector
 
 ## magic GPFS env var to avoid lock problem
 export BGLOCKLESSMPIO_F_TYPE=0x47504653
 
+export OMP_NUM_THREADS=1
+export MV2_ENABLE_AFFINITY=0
+
 export TOUCH_DETECTOR_BIN=`which touchdetector`
 echo "Using touchdetector binary:" "$TOUCH_DETECTOR_BIN"
 
 cd "{{ WORKING_DIR }}"
-srun "$TOUCH_DETECTOR_BIN" \
+srun --mpi=pmi2 "$TOUCH_DETECTOR_BIN" \
     --outputFolder="{{ WORKING_DIR }}" \
     --mvdFilePath="{{ MVD3_PATH }}" \
     --morphologyPath="{{ MORPH_PATH }}" \

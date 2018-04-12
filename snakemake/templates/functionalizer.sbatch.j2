@@ -11,7 +11,10 @@
 
 module purge
 
-export MODULEPATH="/gpfs/bbp.cscs.ch/apps/bgq/nix/nix-root/var/nix/profiles/per-user/modules/bgq-lugano/archive-modules/{{ SW_RELEASE }}/release/share/modulefiles/"
+{%- if SW_RELEASE %}
+export MODULEPATH="/nix/var/nix/profiles/per-user/modules/bbpv-x86_64/archive-modules/{{ SW_RELEASE }}/release/share/modulefiles/"
+{% endif %}
+
 module load nix/hpc/functionalizer
 
 ## magic GPFS env var to avoid lock problem
@@ -21,7 +24,7 @@ export FUNCTIONALIZER_BIN=`which functionalizer`
 echo "Using functionalizer binary:" "$FUNCTIONALIZER_BIN"
 
 cd "{{ WORKING_DIR }}"
-srun "$FUNCTIONALIZER_BIN" \
+srun --mpi=pmi2 "$FUNCTIONALIZER_BIN" \
     --outNCS-file="{{ WORKING_DIR }}/a.ncs" \
     --inMVD-file="{{ MVD3_PATH }}" \
     --inDetector-file="{{ TOUCHES_PATH }}" \
