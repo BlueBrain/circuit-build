@@ -64,8 +64,17 @@ def bbp_env(modules, command):
 
     sw_release = config['common']['sw_release']
     if sw_release is not None:
+        import socket
+        hostname = socket.getfqdn()
+        if hostname.startswith("bbpviz") or hostname.startswith("bbpcj"):
+            system = "lugano-viz-x86_64"
+        else:
+            system = "bbpv-x86_64"
         full_cmd.append(
-            "export MODULEPATH=/nix/var/nix/profiles/per-user/modules/lugano-viz-x86_64/archive-modules/%s/release/share/modulefiles/" % sw_release
+            "export MODULEPATH=/nix/var/nix/profiles/per-user/modules/{system}/archive-modules/{sw_release}/release/share/modulefiles/".format(
+                system=system,
+                sw_release=sw_release
+            )
         )
 
     if modules:
