@@ -44,9 +44,12 @@ For simplicity we will use local operational mode throughout the tutorial. We wi
 
 .. code-block:: bash
 
-    $ salloc -A proj64 -p prod --mem 32G --time 8:00:00 --cpus-per-task 8
+    $ salloc -A proj64 -p prod --mem 64G --time 8:00:00 --cpus-per-task 8
 
 Specifying ``--cpus-per-task`` would allow to run circuit building phases in parallel where possible.
+
+.. note::
+    Depending on the size of the circuit, more memory or time may be needed: increase the parameters accordingly.
 
 .. note::
     Please note that a the moment "supercomputer" phases (`touchdetector`, `functionalizer`) are launched manually.
