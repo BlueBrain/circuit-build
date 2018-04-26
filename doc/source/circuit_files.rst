@@ -72,3 +72,31 @@ A typical circuit release folder would look like:
 
 **[SEGMENT|SYNAPSE]_[index|payload]**
   Segment / synapse `spatial index <https://bbpteam.epfl.ch/project/spaces/display/BBPDIAS/BBP-DIAS+Spatial+Indexing+of+Microcircuits>`_
+
+
+Experimental
+------------
+
+**transcriptome.h5**
+
+HDF5 defining *gene expression* for each cell.
+
+The file layout is:
+
+::
+
+  \cells
+  -- expressions [N x 1, int32]
+  \library
+  -- genes [M x 1, string]
+  -- expressions [K x M, float32]
+
+where
+
+  * ``N`` is the number of cells in the circuit (GIDs are assumed to be numbers from ``1`` to ``N``)
+  * ``M`` is the number of genes in each gene expression
+  * ``K`` is the number of available gene expression vectors (multiple cells are sharing same gene expression vector at the moment)
+
+``/library/expressions`` is the matrix of all unique gene expressions; and ``library/genes`` are gene names corresponding to ``/library/expressions`` columns.
+
+``/cells/expressions`` contains row indices ``/library/expressions`` corresponding to each GID (``\cells/expressions[0]`` corresponds to GID=1, ``\cells/expressions[1]`` to GID=2, etc.)

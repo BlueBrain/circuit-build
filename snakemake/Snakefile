@@ -524,3 +524,25 @@ rule spatial_index_synapse:
                 "2>&1 | tee {log}"
             ]
         )
+
+
+rule transcriptome:
+    message:
+        "Assign gene expressions to cells"
+
+    input:
+        'circuit.mvd3'
+
+    output:
+        'transcriptome.h5'
+
+    shell:
+        bbp_env(
+            ['nix/nse/brainbuilder'],
+            [" brainbuilder cells assign_transcriptome",
+                "--db {config[transcriptome][db]}",
+                "--seed {config[transcriptome][seed]}",
+                "--output {output}",
+                "{input}"
+            ]
+        )

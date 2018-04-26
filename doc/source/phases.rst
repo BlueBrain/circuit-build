@@ -178,3 +178,39 @@ Parameters
 
 **time**
     SBATCH_TIMELIMIT
+
+
+transcriptome
+-------------
+
+Assign gene expressions to cells.
+
+Parameters
+~~~~~~~~~~
+
+**db**
+    HDF5 file with gene expressions database.
+
+**seed**
+    Pseudo-random generator seed.
+
+Gene expressions database HDF5 file has the following layout:
+
+::
+
+    \library
+        -- expressions [N x M, float32]
+        -- genes [M x 1, string]
+    \mapping
+        -- by_mtype
+        ---- <mtype1> [K(<mtype1>), int32]
+        ---- <mtype2> [K(<mtype2>), int32]
+        ...
+
+where:
+
+  * ``N`` is the total number of gene expression vectors
+  * ``M`` is the length of each expression vector (number of genes)
+  * ``K(mtype)`` is the number of expressions corresponding to a given *mtype*.
+
+Each ``/mapping/by_mtype/<mtype>`` dataset contains row indices in ``/library/expressions`` corresponding to a given mtype.
