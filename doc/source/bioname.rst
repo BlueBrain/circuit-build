@@ -8,7 +8,7 @@ The following parts should define a *reproducible* circuit release:
  * external `entities`, like morphology release or electrical model release
  * workflow definition, at the moment based on `Snakemake <http://snakemake.readthedocs.io/en/stable/index.html>`_
 
-Eventually `bioname` and `entities` would become `Nexus`-stored entities in a strict sense (i.e. validated against some schema, immutable, accessible by URL). At the moment though these are files stored at specified paths at GPFS.
+Eventually `bioname` and `entities` would become `Nexus`-stored entities in a strict sense (i.e. validated against some schema, immutable, accessible by URL). At the moment though these are files stored at specified paths on GPFS.
 
 Let us describe the contents of `bioname` in more detail now.
 
@@ -16,7 +16,7 @@ Let us describe the contents of `bioname` in more detail now.
 Bioname
 -------
 
-We address a folder for storing circuit build recipes as circuit `bioname`.
+We address the folder for storing circuit build recipes as circuit `bioname`.
 
 Absolute path to this folder is put to CircuitConfig *BioName* attribute.
 
@@ -40,7 +40,8 @@ Main config defining:
  * S/W modules version
  * individual task parameters
 
-Example:
+It starts with `common` section:
+
 ::
 
     common:
@@ -48,17 +49,11 @@ Example:
         region_ids: [120]
         morph_release: /gpfs/bbp.cscs.ch/project/proj59/entities/morphologies/2017.10.31
         emodel_release: /gpfs/bbp.cscs.ch/project/proj64/entities/emodels/2017.11.03
-        sw_release: 2017-11-pre-upgrade
+        sw_release: 2018-04-06
 
-    place_cells:
-        density_factor: 1.0
-        soma_placement: 'basic'
-        assign_column: true
-        assign_layer: true
-        seed: 0
-    ...
+and follows with a separate section for each phase.
 
-We'll provide a short description for each of the *common* values here.
+We'll provide a short description for each of the `common` values here.
 Please refer to :ref:`ref-phases` for each phase config description.
 
 **atlas**
@@ -72,13 +67,20 @@ Please refer to :ref:`ref-phases` for each phase config description.
 **morph_release**
     Path to morphology release folder.
     It should contain:
-      * ``v1`` folder with morphologies in H5v1 format
+
+      * ``h5v1`` folder with morphologies in H5v1 format
       * ``ascii`` folder with morphologies in ASC format
       * ``annotations`` folder with morphology annotations used for placement
 
+.. tip::
+
+  Since `morph_release` entity is not properly formalized yet, different tools might have different opinion how ``h5v1`` folder should be named. To be on a safe side, we recommend providing also ``h5`` and ``v1`` *aliases* in addition to ``h5v1``.
+
+
 **emodel_release**
     Path to emodel release folder.
-    It should contain as subfolders:
+    It should contain:
+
       * ``hoc`` folder with model HOC templates
       * ``mecombo_emodel.tsv`` file with *me_combo* parameters
 
@@ -88,6 +90,10 @@ Please refer to :ref:`ref-phases` for each phase config description.
 .. tip::
     If `sw_release` is set to `null`, modules available in the current environment would be used. This feature is meant for development purposes; we strongly recommend to use some specific release for the "public" circuits.
 
+An example of full ``MANIFEST.yaml``:
+
+.. literalinclude:: ../../snakemake/examples/sscx/MANIFEST.yaml
+   :language: yaml
 
 cell_composition.yaml
 ~~~~~~~~~~~~~~~~~~~~~
@@ -179,13 +185,22 @@ extNeuronDB.dat
 
 A tab-separated file storing a table with `morphology`, `region`, `mtype`, `etype`, `me-combo` combinations.
 
-Should be compatible with morphology and emodel releases used; most often is a subset of a similar file produced as a part of emodel release.
+Should be compatible with morphology and emodel releases used; most often is a subset of a similar file produced as a part of emodel release (i.e. the output of BluePyMM).
 
 Example:
 ::
 
   C230998A-I3           2 L23_BP bAC bAC_L23BTC_L23_BP_2_C230998A-I3
   C230998A-I3_-_Clone_0 2 L23_BP bAC bAC_L23BTC_L23_BP_2_C230998A-I3_-_Clone_0
+
+If emodel release is not yet available, one can obtain a stub version of `extNeuronDB.dat` from morphology release `neuronDB.dat` file and cell composition recipe:
+
+.. code-block:: bash
+
+  $ pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ nse-tools
+  $ stub-extneurondb -r <path recipe> <path neuronDB.dat> -o extNeuronDB.dat
+
+This will create `extNeuronDB.dat` in the current folder with all possible me-type combinations being assigned `N/A` me_combo.
 
 Used in :ref:`ref-phase-assign-morphologies`, :ref:`ref-phase-assign-emodels`, :ref:`ref-phase-s2f` and :ref:`ref-phase-s2s` phases.
 

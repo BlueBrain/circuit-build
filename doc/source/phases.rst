@@ -45,6 +45,12 @@ Parameters
 **seed**
     Pseudo-random generator seed.
 
+.. warning::
+
+    This phase consumes amount of memory proportional to atlas size times number of mtypes.
+
+    Please consider increasing your allocation memory limit if your are facing "out of memory" errors.
+
 .. _ref-phase-assign-morphologies:
 
 assign_morphologies

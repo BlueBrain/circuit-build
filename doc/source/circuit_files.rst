@@ -4,7 +4,9 @@ What constitues a circuit release?
 ==================================
 
 A typical circuit release folder would look like:
+
 ::
+
     CircuitConfig
     circuit.mvd3
     connectome/
@@ -23,7 +25,10 @@ A typical circuit release folder would look like:
     SEGMENT_index.idx
     SEGMENT_payload.dat
 
-where
+.. note::
+  All of these files are normally produced as a part of circuit build pipeline.
+
+  We'd recommend to avoid modifying them manually unless REALLY required.
 
 **CircuitConfig**
   `BlueConfig <https://bbpteam.epfl.ch/documentation/Circuit%20Documentation-0.0.1/blueconfig.html>`_ file defining "static" part of the circuit (path to cell / synapse collection, morphology release etc), e.g.:

@@ -93,3 +93,21 @@ Fix: Make sure your Kerberos token is not expired:
 .. code-block:: bash
 
     kinit
+
+Killed: Out of Memory
+~~~~~~~~~~~~~~~~~~~~~
+
+If you are seeing something like:
+
+.. code-block:: bash
+
+    Killed
+    srun: error: r1i7n0: task 0: Out Of Memory
+
+when running circuit build phases, please consider increasing memory limit for your Slurm allocation, for instance:
+
+.. code-block:: bash
+
+    salloc ... --mem 32G ...
+
+More information on configuring Slurm allocations could be found `here <https://slurm.schedmd.com/sbatch.html>`_.

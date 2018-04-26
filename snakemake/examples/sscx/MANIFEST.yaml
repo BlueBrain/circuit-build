@@ -3,8 +3,7 @@ common:
   region_ids: [120]
   morph_release: /gpfs/bbp.cscs.ch/project/proj59/entities/morphologies/2017.10.31
   emodel_release: /gpfs/bbp.cscs.ch/project/proj64/entities/emodels/2017.11.03
-  sw_release: null
-  sw_release_BG: 2017-11-pre-release
+  sw_release: 2018-04-06
 
 place_cells:
   density_factor: 0.1
