@@ -3,6 +3,7 @@
 #SBATCH --job-name="functionalizer"
 #SBATCH --account={{ SBATCH_ACCOUNT }}
 #SBATCH --partition={{ SBATCH_PARTITION }}
+#SBATCH --constraint=uc3
 #SBATCH --nodes={{ SBATCH_NNODES }}
 #SBATCH --ntasks={{ SBATCH_NTASKS }}
 #SBATCH --time={{ SBATCH_TIMELIMIT }}
@@ -15,6 +16,7 @@ module purge
 export MODULEPATH="/nix/var/nix/profiles/per-user/modules/bbpv-x86_64/archive-modules/{{ SW_RELEASE }}/release/share/modulefiles/"
 {% endif %}
 
+module load nix/mvapich2-rdma
 module load nix/hpc/functionalizer
 
 ## magic GPFS env var to avoid lock problem
