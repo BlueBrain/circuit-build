@@ -75,6 +75,42 @@ Please refer to `Snakemake <http://snakemake.readthedocs.io/en/stable/index.html
 Troubleshooting
 ---------------
 
+Unable to locate Nix module
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If some phase fails with a message like:
+
+.. code-block:: bash
+
+    ModuleCmd_Load.c(213):ERROR:105: Unable to locate a modulefile for 'nix/nse/brainbuilder'
+    /bin/bash: brainbuilder: command not found
+
+most likely it indicates that an older archive release is used where corresponding module is not available yet.
+
+Unfortunately, we do not have a proper mechanism to ensure module version requirements yet.
+
+Please check ``sw_release`` value in ``MANIFEST.yaml`` and try loading the module from the corresponding archive release manually to ensure its availability.
+
+
+[spark] Failed to create any local dir
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+`assign_morphologies` phase failing with a message like:
+
+.. code-block:: bash
+
+    ERROR DiskBlockManager: Failed to create any local dir
+
+OR
+
+.. code-block:: bash
+
+    IOError: [Errno 28] No space left on device
+
+Please make sure that ``TMPDIR`` environment variable in your allocation is set and points to a writable folder on local disk with enough free space.
+
+If the allocation is obtained with ``--constraint=uc4``, ``TMPDIR`` is set up automatically and should point to a ``/nvme`` subfolder (for the details please refer to: `File systems attached to BB5 <https://bbpteam.epfl.ch/project/spaces/display/INFRA/HPC+Service#HPCService-FilesystemsattachedtoBB5>`_).
+
 
 spark-submit command not found
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -93,6 +129,7 @@ Fix: Make sure your Kerberos token is not expired:
 .. code-block:: bash
 
     kinit
+
 
 Killed: Out of Memory
 ~~~~~~~~~~~~~~~~~~~~~
