@@ -51,6 +51,10 @@ PRE_FUNCTIONAL = [
 ]
 
 
+def enquote(value, quote="'"):
+    return quote + value + quote
+
+
 def log_path(name):
     return os.path.abspath(os.path.join(LOGS_DIR, name + ".log"))
 
@@ -100,7 +104,8 @@ localrules:
     sbatch_td,
     sbatch_s2s,
     sbatch_s2f,
-    symlink_start_target
+    symlink_start_target,
+    ngv
 
 
 rule all:
@@ -546,3 +551,122 @@ rule subcellular:
                 "{input}"
             ]
         )
+
+
+rule place_astrocytes:
+    message:
+        "Assign astrocyte soma positions & radii"
+
+    output:
+        'ngv/astrocytes.mvd3'
+
+    log:
+        log_path('place_astrocytes')
+
+    shell:
+        bbp_env(
+            ['nix/nse/brainbuilder'],
+            ["brainbuilder astrocytes place",
+                "--atlas",
+                    ATLAS,
+                "--atlas-cache",
+                    ATLAS_CACHE_DIR,
+                "--density",
+                    "{config[place_astrocytes][density]}",
+                "--soma-radii",
+                    enquote("{config[place_astrocytes][soma_radii]}"),
+                "--seed",
+                    "{config[place_astrocytes][seed]}",
+                "--output",
+                    "{output}",
+                " 2>&1 | tee {log}"
+            ]
+        )
+
+
+rule astrocyte_domains_tesselate:
+    message:
+        "Tesselate astrocyte domains"
+
+    input:
+        'ngv/astrocytes.mvd3'
+
+    output:
+        'ngv/astrocyte_domains.h5'
+
+    log:
+        log_path('astrocyte_domains_tesselate')
+
+    shell:
+        bbp_env(
+            ['nix/nse/brainbuilder'],
+            ["brainbuilder astrocytes domains tesselate",
+                "--atlas",
+                    ATLAS,
+                "--atlas-cache",
+                    ATLAS_CACHE_DIR,
+                "--output",
+                    "{output}",
+                "{input}",
+                " 2>&1 | tee {log}"
+            ]
+        )
+
+
+rule astrocyte_domains_overlap:
+    message:
+        "Overlap astrocyte domains"
+
+    input:
+        'ngv/astrocyte_domains.h5'
+
+    output:
+        'ngv/astrocyte_domains_overlap.h5'
+
+    log:
+        log_path('astrocyte_domains_overlap')
+
+    shell:
+        bbp_env(
+            ['nix/nse/brainbuilder'],
+            ["brainbuilder astrocytes domains overlap",
+                "--distr",
+                    enquote("{config[astrocyte_domains_overlap][overlap]}"),
+                "--seed",
+                    "{config[astrocyte_domains_overlap][seed]}",
+                "--output",
+                    "{output}",
+                "{input}",
+                " 2>&1 | tee {log}"
+            ]
+        )
+
+
+rule astrocyte_domains_mesh:
+    message:
+        "Mesh astrocyte domains"
+
+    input:
+        'ngv/{filename}.h5'
+
+    output:
+        'ngv/{filename}.stl'
+
+    shell:
+        bbp_env(
+            ['nix/nse/brainbuilder'],
+            ["brainbuilder astrocytes domains mesh",
+                "--output",
+                    "{output}",
+                "{input}",
+            ]
+        )
+
+
+rule ngv:
+    input:
+        'ngv/astrocytes.mvd3',
+        'ngv/astrocyte_domains.h5',
+        'ngv/astrocyte_domains.stl',
+        'ngv/astrocyte_domains_overlap.h5',
+        'ngv/astrocyte_domains_overlap.stl',
