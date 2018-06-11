@@ -180,37 +180,103 @@ Parameters
     SBATCH_TIMELIMIT
 
 
-transcriptome
--------------
+.. _ref-phase-subcellular:
 
-Assign gene expressions to cells.
+subcellular
+-----------
+
+Assign gene expressions / protein concentrations to cells.
 
 Parameters
 ~~~~~~~~~~
 
-**db**
-    HDF5 file with gene expressions database.
+**gene-mapping**
+    PyTables_ HDF5 file with single ``\gene_mapping`` table storing gene to protein correspondence.
+
+    It has four columns:
+
+      - ``gene`` with gene name
+      - ``lead_protein`` with the name of the main protein associated with the gene
+      - ``maj_protein`` with ';'-separated list of other proteins associated with the gene
+      - ``comment`` with free-form optional comment
+
+    For instance:
+
+    +---------------+--------------+----------------------+----------------------------------+
+    | gene          | lead_protein | maj_protein          | comment                          |
+    +===============+==============+======================+==================================+
+    | 0610011F06Rik | Q9DCS2       | Q9DCS2;E9Q7K5;G5E8X1 | UPF0585 protein C16orf13 homolog |
+    +---------------+--------------+----------------------+----------------------------------+
+
+**gene-expressions**
+    PyTables_ HDF5 file with a collection of tables corresponding to different gene expressions.
+
+    Tables are stored in the root ``\gene_expressions`` group; each of those has a unique identifier in this group.
+    It is envisioned that eventually each of those tables will be a separate *entity instance* in Nexus data storage platform, which we can reference by its UUID.
+
+    Each of those tables has two columns:
+      - ``gene`` with gene name
+      - ``expr`` with corresponding gene expression (floating point value)
+
+    For instance:
+
+    +--------+-----+
+    | gene   |expr |
+    +========+=====+
+    | Tshz1  | 1.0 |
+    +--------+-----+
+
+
+    In addition, each table has an attribute ``mtype``, which stores '|'-separated list of mtypes "compatible" with a given gene expression (for instance, ``L1_DAC|L1_HAC``).
+
+**cell-proteins**
+    PyTables_ HDF5 file with a collection of tables corresponding to different cell proteins concentration measurements.
+
+    Tables are stored in the root ``\cell_proteins`` group; similar to **gene-expressions** each of those tables is a "proto-entity".
+
+    Each of those tables has nine columns corresponding to protein concentraion in each of cell organelles; plus ``total`` with protein concentration across all the cell.
+    Concentrations are measured in nM (nanomoles / litre); missing values are encoded with ``NaN``.
+
+    For instance:
+
+    +---------------+--------+---------+---------+-----+----------+-------+----------+--------------+------------+----------+
+    | gene          | total  | cytosol | nucleus | ER  | endosome | golgi | lysosome | mitochodrion | peroxisome | membrane |
+    +===============+========+=========+=========+=====+==========+=======+==========+==============+============+==========+
+    | 0610009B22Rik | 37.076 | NaN     | 1.729   | NaN | NaN      | NaN   | NaN      | NaN          | NaN        | NaN      |
+    +---------------+--------+---------+---------+-----+----------+-------+----------+--------------+------------+----------+
+
+**synapse-proteins**
+    PyTables_ HDF5 file with a collection of tables corresponding to different synapse proteins concentration measurements.
+
+    Tables are stored in the root ``\synapse_proteins`` group; similar to **gene-expressions** each of those tables is a "proto-entity".
+
+    Each of those tables has three columns:
+
+      - ``post_exc`` with protein *density* in excitatory synapses on postsynaptic side [count / um^2]
+      - ``post_inh`` with protein *density* in inhibitory synapses on postsynaptic side [count / um^2]
+      - ``pre`` with protein *concentration* on presynaptic side (without distinguishing synapse type) [nM]
+
+    For instance:
+
+    +---------------+----------+----------+-------+
+    | gene          | post_exc | post_inh | pre   |
+    +===============+==========+==========+=======+
+    | 0610005C13Rik | 0.947    | 0.390    | 0.528 |
+    +---------------+----------+----------+-------+
 
 **seed**
     Pseudo-random generator seed.
 
-Gene expressions database HDF5 file has the following layout:
+.. warning::
 
-::
+    | It is assumed that gene namespace is same across all subcellular data sources;
+    | though cell or synapse protein concentrations tables don't necessarily have *all* the genes.
+    | It is up to data source provider to ensure that; ``circuit-build`` makes no extra effort to check that assumption.
 
-    \library
-        -- expressions [N x M, float32]
-        -- genes [M x 1, string]
-    \mapping
-        -- by_mtype
-        ---- <mtype1> [K(<mtype1>), int32]
-        ---- <mtype2> [K(<mtype2>), int32]
-        ...
+.. note::
 
-where:
+    | One can observe that source data layout is far from being optimal (for instance, "squashing" gene expressions collection into a single table could reduce the file size by ~20 times).
+    | The main intent here is to provide an (experimental) uniform approach for storing the source data for gene expressions and cell / synapse protein concentrations, which could be later extended to using Nexus entities.
 
-  * ``N`` is the total number of gene expression vectors
-  * ``M`` is the length of each expression vector (number of genes)
-  * ``K(mtype)`` is the number of expressions corresponding to a given *mtype*.
 
-Each ``/mapping/by_mtype/<mtype>`` dataset contains row indices in ``/library/expressions`` corresponding to a given mtype.
+.. _PyTables: <https://www.pytables.org/>

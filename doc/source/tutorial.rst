@@ -228,14 +228,14 @@ instead of:
     You can also build structural circuit *in addition* to the functional one. They do not conflict with each other, but share the common files (``circuit.mvd3``, ``start.target`` etc). Structural circuit would be available via ``CircuitConfig_struct`` file.
 
 
-Transcriptome
--------------
+Subcellular
+-----------
 
-To assign gene expressions to the cells based on their mtype:
+To assign gene expressions and protein concentrations to the cells:
 
 .. code-block:: bash
 
-    $ sm transcriptome
+    $ sm subcellular
 
 
 Tips & Tricks

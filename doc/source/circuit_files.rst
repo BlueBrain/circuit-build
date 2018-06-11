@@ -77,26 +77,26 @@ A typical circuit release folder would look like:
 Experimental
 ------------
 
-**transcriptome.h5**
+**subcellular.h5**
 
-HDF5 defining *gene expression* for each cell.
+`PyTables <https://www.pytables.org/>`_ HDF5 file storing gene expressions and protein concentrations associated with each cell.
+It has ``\library`` group with a collection of gene expressions / protein concentrations "types"; and ``\cells`` table assigning those to each cell GID.
 
-The file layout is:
+``cells`` library has four columns:
 
-::
+  - ``gid`` for cell GID
+  - ``gene_expressions`` with UUID of one of the tables from ``/library/gene_expressions``
+  - ``cell_proteins`` with UUID of one of the tables from ``/library/cell_proteins``
+  - ``synapse_proteins`` with UUID of one of the tables from ``/library/synapse_proteins``
 
-  \cells
-  -- expressions [N x 1, int32]
-  \library
-  -- genes [M x 1, string]
-  -- expressions [K x M, float32]
+Each row correspond to a different GID.
 
-where
+For instance, one row from ``/cells`` table can look like:
 
-  * ``N`` is the number of cells in the circuit (GIDs are assumed to be numbers from ``1`` to ``N``)
-  * ``M`` is the number of genes in each gene expression
-  * ``K`` is the number of available gene expression vectors (multiple cells are sharing same gene expression vector at the moment)
++-----+------------------+--------------------------------------+-------------------------------------+
+| gid | gene_expressions | cell_proteins                        | synapse_proteins                    |
++=====+==================+======================================+=====================================+
+| 1   | a00062           | 24329084-c0a5-4d7b-975d-0c621a46fa95 |f0199090-ff1f-4fd9-a084-db3c41f54b92 |
++-----+------------------+--------------------------------------+-------------------------------------+
 
-``/library/expressions`` is the matrix of all unique gene expressions; and ``library/genes`` are gene names corresponding to ``/library/expressions`` columns.
-
-``/cells/expressions`` contains row indices ``/library/expressions`` corresponding to each GID (``\cells/expressions[0]`` corresponds to GID=1, ``\cells/expressions[1]`` to GID=2, etc.)
+Please refer to :ref:`subcellular phase <ref-phase-subcellular>` for the description of ``/library`` content.

@@ -529,21 +529,24 @@ rule spatial_index_synapse:
         )
 
 
-rule transcriptome:
+rule subcellular:
     message:
-        "Assign gene expressions to cells"
+        "Assign gene expressions / protein concentrations to cells"
 
     input:
         'circuit.mvd3'
 
     output:
-        'transcriptome.h5'
+        'subcellular.h5'
 
     shell:
         bbp_env(
             ['nix/nse/brainbuilder'],
-            [" brainbuilder cells assign_transcriptome",
-                "--db {config[transcriptome][db]}",
+            ["brainbuilder subcellular assign",
+                "--gene-expressions {config[subcellular][gene_expressions]}",
+                "--gene-mapping {config[subcellular][gene_mapping]}",
+                "--cell-proteins {config[subcellular][cell_proteins]}",
+                "--synapse-proteins {config[subcellular][synapse_proteins]}",
                 "--seed {config[transcriptome][seed]}",
                 "--output {output}",
                 "{input}"
