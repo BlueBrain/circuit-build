@@ -56,7 +56,7 @@ Parameters
 assign_morphologies
 -------------------
 
-Assign morphologies to cell positions using `placement hints <https://bbpteam.epfl.ch/documentation/placement-algorithm-1.0/index.html>`_ approach.
+Assign morphologies to cell positions using `placement hints <https://bbpteam.epfl.ch/documentation/placement-algorithm-1.1/index.html>`_ approach.
 
 Parameters
 ~~~~~~~~~~
@@ -67,15 +67,6 @@ Parameters
     Use this value to speed up morphology scoring;
 
     *resolution=10* usually provides a good trade-off between execution speed and score precision.
-
-
-**layers**
-    List of layer names (from 'bottom' to 'top').
-
-    For instance, ['L6', 'L5', 'L4', 'L3', 'L2', 'L1']
-
-**layer_ratio**
-    List of relative layer thickness (in the order specified by **layers**).
 
 **alpha**
     Use `score ** alpha` as morphology choice probability.

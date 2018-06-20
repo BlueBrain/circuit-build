@@ -14,8 +14,6 @@ place_cells:
 
 assign_morphologies:
   resolution: 1
-  layers: ['6', '5', '4', '3', '2', '1']
-  layer_ratio: [700, 525, 190, 353, 149, 165]
   alpha: 3.0
   ntasks: 100
   seed: 0
