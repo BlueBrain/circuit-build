@@ -15,3 +15,9 @@ In particular, the following *data_types* are expected to be found in the atlas:
 - `distance`, `scalar field <https://bbpteam.epfl.ch/project/spaces/display/NRINF/Scalar+Value+Image>`_ defining distance from "bottom" along "main cell direction" axis
 
 The last two datasets are used by :ref:`ref-phase-assign-morphologies` phase.
+
+.. tip::
+
+    ``tools/check_atlas.py`` script in ``circuit-build`` repo provides an automated way to check if a given VoxelBrain atlas is compatible with circuit building pipeline.
+
+    Please note though, that it does not give 100% guarantee of atlas compatibility.
