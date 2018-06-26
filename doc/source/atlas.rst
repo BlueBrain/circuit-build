@@ -11,7 +11,7 @@ In particular, the following *data_types* are expected to be found in the atlas:
 
 - `brain_regions`, `scalar field <https://bbpteam.epfl.ch/project/spaces/display/NRINF/Scalar+Value+Image>`_ specifying region ID for each voxel
 - `orientation`, `orientation field <https://bbpteam.epfl.ch/project/spaces/display/NRINF/Orientation+Field>`_ defining cell orientation for each voxel in quaternion representation
-- `[PH]<X>`, `layer profiles <https://bbpteam.epfl.ch/documentation/placement-algorithm-1.1/index.html#ref-data-atlas>
+- `[PH]<X>`, `layer profiles <https://bbpteam.epfl.ch/documentation/placement-algorithm-1.1/index.html#ref-data-atlas>`_
 
 .. tip::
 
