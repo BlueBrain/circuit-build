@@ -111,9 +111,6 @@ Parameters
 **partition**
     SBATCH_PARTITION
 
-**nodes**
-    SBATCH_NNODES
-
 **ntasks**
     SBATCH_NTASKS
 
@@ -136,9 +133,6 @@ Parameters
 **partition**
     SBATCH_PARTITION
 
-**nodes**
-    SBATCH_NNODES
-
 **ntasks**
     SBATCH_NTASKS
 
@@ -160,9 +154,6 @@ Parameters
 
 **partition**
     SBATCH_PARTITION
-
-**nodes**
-    SBATCH_NNODES
 
 **ntasks**
     SBATCH_NTASKS
