@@ -226,7 +226,7 @@ rule place_cells:
     shell:
         bbp_env(
             ['nix/nse/brainbuilder'],
-            ["brainbuilder cells create",
+            ["brainbuilder cells create2",
                 "--composition",
                     bioname_path("cell_composition.yaml"),
                 "--mtype-taxonomy",
@@ -235,16 +235,12 @@ rule place_cells:
                     ATLAS,
                 "--atlas-cache",
                     ATLAS_CACHE_DIR,
-                ("--region-ids " + ",".join(map(str, config['common']['region_ids']))
-                    if 'region_ids' in config['common'] else ""),
+                ("--region " + config['common']['region']
+                    if 'region' in config['common'] else ""),
                 "--soma-placement",
                     config['place_cells']['soma_placement'],
                 "--density-factor",
                     config['place_cells'].get('density_factor', 1.0),
-                ("--assign-layer"
-                    if config['place_cells'].get('assign_layer', False) else ""),
-                ("--assign-column"
-                    if config['place_cells'].get('assign_column', False) else ""),
                 "--seed",
                     config['place_cells']['seed'],
                 "--output",
@@ -275,6 +271,7 @@ rule assign_morphologies:
                 "PATH=$PATH:/nfs4/bbp.epfl.ch/sw/tools/spark/2.2.0/bin",
                 "JAVA_HOME=/nfs4/bbp.epfl.ch/sw/tools/java/1.8u51",
                 "SPARK_LOCAL_DIRS=$TMPDIR",
+                "SPARK_CONF_DIR=" + bioname_path("spark/assign_morphologies"),
              "assign-morphologies",
                 "--mvd3 {input}",
                 "--atlas {ATLAS}",
