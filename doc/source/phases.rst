@@ -130,7 +130,7 @@ Detect touches between neurites using `TouchDetector <https://bbpteam.epfl.ch/do
 s2f
 ---
 
-Prune touches and convert them into synapses (S2F) using `Functionalizer <https://bbpteam.epfl.ch/documentation/#functionalizer>`_.
+Prune touches and convert them into synapses using `Functionalizer <https://bbpteam.epfl.ch/documentation/#functionalizer>`_.
 
 
 .. _ref-phase-s2s:
@@ -138,7 +138,63 @@ Prune touches and convert them into synapses (S2F) using `Functionalizer <https:
 s2s
 ---
 
-Convert touches into synapses (S2S) using `Functionalizer <https://bbpteam.epfl.ch/documentation/#functionalizer>`_.
+Analogous to ``s2f``, but does not prune touches.
+
+.. _ref-phase-touch2parquet:
+
+touch2parquet
+-------------
+
+Convert touches to Parquet format (to use as input for `Spark Functionalizer <https://bbpteam.epfl.ch/documentation/#spykfunc>`_).
+
+.. tip::
+
+    We use MPI-enabled version of the converter; thus it is beneficial to configure an allocation with multiple tasks.
+
+.. _ref-phase-spykfunc_s2f:
+
+spykfunc_s2f
+------------
+
+Prune touches and convert them into synapses (S2F) using `Spark Functionalizer <https://bbpteam.epfl.ch/documentation/#spykfunc>`_.
+
+.. tip::
+
+    Recommended SLURM allocation (time limit and number of nodes depend on circuit size):
+
+    ::
+
+        -A <proj> -p prod --constraint=nvme -N<nodes> --exclusive --mem 0 --time <time>
+
+To provide additional arguments to ``sm_run``, put those to the :ref:`cluster config <ref-cluster-config>`.
+For instance, to disable HDFS mode:
+
+::
+
+    spykfunc_s2f:
+        salloc: ...
+        sm_run: '-H'
+
+Please refer to `Spark Functionalizer <https://bbpteam.epfl.ch/documentation/#spykfunc>`_ documentation for the details.
+
+
+.. _ref-phase-spykfunc_s2s:
+
+spykfunc_s2s
+------------
+
+Analogous to ``spykfunc_s2f``, but does not prune touches.
+
+.. _ref-phase-parquet2syn2:
+
+parquet2syn2
+------------
+
+Convert `Spark Functionalizer <https://bbpteam.epfl.ch/documentation/#spykfunc>`_ output to SYN2 format.
+
+.. tip::
+
+    We use MPI-enabled version of the converter; thus it is beneficial to configure an allocation with multiple tasks.
 
 
 .. _ref-phase-subcellular:

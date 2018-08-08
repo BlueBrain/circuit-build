@@ -145,6 +145,12 @@ rule functional:
         NRN_FUNCTIONAL_DATA,
 
 
+rule functional_syn2:
+    input:
+        PRE_FUNCTIONAL,
+        NRN_FUNCTIONAL_DIR + '/default.syn2',
+
+
 rule functional_all:
     input:
         rules.functional.output,
@@ -158,6 +164,14 @@ rule structural:
         'circuit.mvd3',
         NRN_STRUCTURAL_DIR + '/start.target',
         NRN_STRUCTURAL_DATA,
+
+
+rule structural_syn2:
+    input:
+        'CircuitConfig_struct',
+        'circuit.mvd3',
+        NRN_STRUCTURAL_DIR + '/start.target',
+        NRN_STRUCTURAL_DIR + '/default.syn2',
 
 
 def build_circuit_config(nrn_path):
@@ -547,6 +561,115 @@ rule nrn_merge:
                 "2>&1 | tee {log}"
             ],
             slurm_env='nrn_merge'
+        )
+
+
+rule touch2parquet:
+    message:
+        "Convert touches to Parquet format"
+
+    output:
+        TOUCHES_DIR + '/parquet/touchesData.0.parquet'
+
+    shell:
+        bbp_env(
+            ['nix/hpc/spykfunc'],
+            ["cd %s" % os.path.join(TOUCHES_DIR, "parquet"),
+             "&&",
+             "touch2parquetp ../touchesData.*"
+            ],
+            slurm_env='touch2parquet'
+        )
+
+
+def run_spykfunc(rule, output_dir, enable_pruning):
+    return bbp_env(
+        ['nix/hpc/spykfunc'],
+        ["env",
+            "SPARK_USER=$(whoami)",
+         "sm_run",
+            cluster_config.get(rule, {}).get('sm_run', ""),
+            "-w %s" % os.path.join(output_dir, 'spykfunc', '.sm_run'),
+         "spykfunc",
+            "--s2f" if enable_pruning else "--s2s",
+            "--output-dir %s" % os.path.join(output_dir, 'spykfunc'),
+        ] + [
+            "--spark-property %s" % p
+                for p in config.get(rule, {}).get('spark_property', [])
+        ] + [
+            BUILDER_RECIPE,
+            "{input[mvd3]}",
+            MORPH_RELEASE + '/h5v1/',
+            TOUCHES_DIR + '/parquet/',
+            "2>&1 | tee {log}"
+        ],
+        slurm_env=rule,
+        skip_srun=True
+    )
+
+
+rule spykfunc_s2s:
+    message:
+        "Convert touches into synapses (S2S)"
+
+    input:
+        mvd3 = 'circuit.mvd3',
+        touches = TOUCHES_DIR + '/parquet/touchesData.0.parquet'
+
+    output:
+        NRN_STRUCTURAL_DIR + '/spykfunc/circuit.parquet/_SUCCESS'
+
+    log:
+        log_path('spykfunc_s2s')
+
+    shell:
+        run_spykfunc(
+            'spykfunc_s2s',
+            output_dir=NRN_STRUCTURAL_DIR,
+            enable_pruning=False,
+        )
+
+
+rule spykfunc_s2f:
+    message:
+        "Prune touches and convert them into synapses (S2F)"
+
+    input:
+        mvd3 = 'circuit.mvd3',
+        touches = TOUCHES_DIR + '/parquet/touchesData.0.parquet'
+
+    output:
+        NRN_FUNCTIONAL_DIR + '/spykfunc/circuit.parquet/_SUCCESS'
+
+    log:
+        log_path('spykfunc_s2f')
+
+    shell:
+        run_spykfunc(
+            'spykfunc_s2f',
+            output_dir=NRN_FUNCTIONAL_DIR,
+            enable_pruning=True
+        )
+
+
+rule parquet2syn2:
+    message:
+        "Convert synapses from Parquet to SYN2 format"
+
+    input:
+        '{nrn_dir}/spykfunc/circuit.parquet/_SUCCESS'
+
+    output:
+        '{nrn_dir}/default.syn2'
+
+    shell:
+        bbp_env(
+            ['nix/hpc/spykfunc'],
+            ["parquet2syn2p",
+                "-o {output}",
+                "{wildcards.nrn_dir}/spykfunc/circuit.parquet/*.parquet",
+            ],
+            slurm_env='parquet2syn2'
         )
 
 

@@ -112,6 +112,19 @@ Building connectome involves three phases: :ref:`ref-phase-touchdetector` follow
 After the command above has completed, any analysis not involving spatial indices should be possible.
 
 
+SYN2 connectome (experimental)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+We are planning to switch to `Spark Functionalizer <https://bbpteam.epfl.ch/documentation/#spykfunc>`_ for pruning touches and converting them into synapses. At the moment we support both "old" way of obtaining connectome in NRN format (described above), and the "new" one:
+
+.. code-block:: bash
+
+    $ sm -j8 functional_syn2
+
+This will produce ``default.syn2`` file in ``connectome/functional/`` subfolder.
+
+To make it visible to BluePy, please set environmental variable `BLUEPY_USE_SYN2 <https://bbpteam.epfl.ch/documentation/bluepy-0.12.5/settings.html#bluepy-use-syn2>`_ when running any BluePy-based script with the built circuit.
+
 Spatial indices
 ~~~~~~~~~~~~~~~
 
