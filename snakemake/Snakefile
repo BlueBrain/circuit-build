@@ -85,7 +85,6 @@ def bbp_env(modules, command):
         full_cmd.extend([
             "module purge",
             "module load " + " ".join(modules),
-            "export LD_LIBRARY_PATH="
         ])
 
     full_cmd.append(" ".join(map(str, command)))
