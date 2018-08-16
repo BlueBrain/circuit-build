@@ -45,11 +45,12 @@ Parameters
 **seed**
     Pseudo-random generator seed.
 
-.. warning::
+.. tip::
 
     This phase consumes amount of memory proportional to atlas size times number of mtypes.
 
-    Please consider increasing your allocation memory limit if your are facing "out of memory" errors.
+    Please consider increasing allocation memory limit if you are facing "out of memory" errors.
+
 
 .. _ref-phase-assign-morphologies:
 
@@ -57,6 +58,16 @@ assign_morphologies
 -------------------
 
 Assign morphologies to cell positions using `placement hints <https://bbpteam.epfl.ch/documentation/placement-algorithm-1.1/index.html>`_ approach.
+
+.. tip::
+
+    This task uses ``$TMPDIR`` environment variable to configure temporary folder for Spark.
+
+    Recommended SLURM allocation (time limit depends on circuit size, 2 hours should suffice for up to 10M cells):
+
+    ::
+
+        -A <proj> -p prod --constraint=nvme -N1 --exclusive --mem 0 --time <time>
 
 Parameters
 ~~~~~~~~~~
@@ -77,6 +88,7 @@ Parameters
 **seed**
     Pseudo-random generator seed.
 
+
 .. _ref-phase-assign-emodels:
 
 assign_emodels
@@ -90,76 +102,43 @@ Parameters
 **seed**
     Pseudo-random generator seed.
 
+
 targetgen_mvd3
 --------------
 
 Generate *start.target* file.
+
 
 .. _ref-phase-touchdetector:
 
 touchdetector
 -------------
 
-Write sbatch script for running `TouchDetector <https://bbpteam.epfl.ch/documentation/touchdetector-4.3.1-2017.10dev/index.html>`_ on BlueGene.
+Detect touches between neurites using `TouchDetector <https://bbpteam.epfl.ch/documentation/#touchdetector>`_.
 
-Parameters
-~~~~~~~~~~
+.. tip::
 
-**account**
-    SBATCH_ACCOUNT
+    Recommended SLURM allocation (time limit and number of tasks depends on circuit size):
 
-**partition**
-    SBATCH_PARTITION
+    ::
 
-**ntasks**
-    SBATCH_NTASKS
+        -A <proj> -p prod --constraint=cpu -n<tasks> --time <time>
 
-**time**
-    SBATCH_TIMELIMIT
 
 .. _ref-phase-s2f:
 
 s2f
 ---
 
-Write sbatch script for running `Functionalizer <https://bbpteam.epfl.ch/documentation/functionalizer-3.11.0/index.html>`_ on BlueGene (with synapse pruning **enabled**).
+Prune touches and convert them into synapses (S2F) using `Functionalizer <https://bbpteam.epfl.ch/documentation/#functionalizer>`_.
 
-Parameters
-~~~~~~~~~~
-
-**account**
-    SBATCH_ACCOUNT
-
-**partition**
-    SBATCH_PARTITION
-
-**ntasks**
-    SBATCH_NTASKS
-
-**time**
-    SBATCH_TIMELIMIT
 
 .. _ref-phase-s2s:
 
 s2s
 ---
 
-Write sbatch script for running `Functionalizer <https://bbpteam.epfl.ch/documentation/functionalizer-3.11.0/index.html>`_ on BlueGene (with synapse pruning **disabled**).
-
-Parameters
-~~~~~~~~~~
-
-**account**
-    SBATCH_ACCOUNT
-
-**partition**
-    SBATCH_PARTITION
-
-**ntasks**
-    SBATCH_NTASKS
-
-**time**
-    SBATCH_TIMELIMIT
+Convert touches into synapses (S2S) using `Functionalizer <https://bbpteam.epfl.ch/documentation/#functionalizer>`_.
 
 
 .. _ref-phase-subcellular:

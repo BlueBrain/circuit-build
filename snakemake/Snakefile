@@ -57,6 +57,10 @@ def enquote(value, quote="'"):
     return quote + value + quote
 
 
+def escape_single_quotes(value):
+    return value.replace("'", "'\\''")
+
+
 def log_path(name):
     timestamp = datetime.datetime.now().strftime("%Y%m%dT%H%M%S")
     return os.path.abspath(os.path.join(LOGS_DIR, "%s.%s.log" % (name, timestamp)))
@@ -66,7 +70,7 @@ def template_path(name):
     return os.path.join(workflow.basedir, 'templates', name + ".j2")
 
 
-def bbp_env(modules, command):
+def bbp_env(modules, command, slurm_env=None, skip_srun=False):
     full_cmd = []
 
     sw_release = config['common']['sw_release']
@@ -92,7 +96,20 @@ def bbp_env(modules, command):
 
     full_cmd.append(" ".join(map(str, command)))
 
-    return " && ".join(full_cmd)
+    result = " && ".join(full_cmd)
+
+    if (slurm_env is not None) and cluster_config:
+        if slurm_env not in cluster_config:
+            slurm_env = '__default__'
+        slurm_config = cluster_config[slurm_env]
+        result = "salloc -J {jobname} {alloc} {srun} sh -c '{cmd}'".format(
+            jobname=slurm_config.get('jobname', 'cbuild'),
+            alloc=slurm_config['salloc'],
+            srun=('' if skip_srun else 'srun'),
+            cmd=escape_single_quotes(result)
+        )
+
+    return result
 
 
 localrules:
@@ -218,7 +235,8 @@ rule place_cells:
                 "--output",
                     "{output}",
                 " 2>&1 | tee {log}"
-            ]
+            ],
+            slurm_env='place_cells'
         )
 
 
@@ -257,7 +275,8 @@ rule assign_morphologies:
                 "--ntasks {config[assign_morphologies][ntasks]}",
                 "--output {output}",
                 "2>&1 | tee {log}",
-            ]
+            ],
+            slurm_env='assign_morphologies'
         )
 
 
@@ -278,7 +297,8 @@ rule assign_emodels:
                 "--morphdb {MORPHDB}",
                 "--output {output}",
                 "{input}"
-            ]
+            ],
+            slurm_env='assign_emodels'
         )
 
 
@@ -300,7 +320,8 @@ rule set_circuit_seeds:
                     ",".join(map(str, config['s2f']['seeds'])),
                 "--output {output}",
                 "{input}"
-            ]
+            ],
+            slurm_env='set_circuit_seeds'
         )
 
 
@@ -321,9 +342,9 @@ rule mvd3_reorder_mtypes:
                 "--recipe {BUILDER_RECIPE}",
                 "--output {output}",
                 "{input}"
-            ]
+            ],
+            slurm_env='mvd3_reorder_mtypes'
         )
-
 
 rule sbatch_td:
     message:
@@ -410,8 +431,104 @@ rule sbatch_s2s:
             sbatch_params=config['s2s'],
         )
 
+rule touchdetector:
+    message:
+        "Detect touches between neurites"
+
+    input:
+        'circuit.mvd3.reordered',
+
+    output:
+        TOUCHES_DIR + '/touchesData.0'
+
+    log:
+        log_path('touchdetector')
+
+    shell:
+        bbp_env(
+            ['touchdetector'],
+            ["env",
+                "BGLOCKLESSMPIO_F_TYPE=0x47504653",
+             "touchdetector",
+                "--mvdFilePath={input}",
+                "--morphologyPath={MORPH_RELEASE}/h5v1",
+                "--recipePath={BUILDER_RECIPE}",
+                "--enableSaveState",
+                "--outputFolder={TOUCHES_DIR}",
+                "2>&1 | tee {log}",
+            ],
+            slurm_env='touchdetector'
+        )
+
+
+def run_functionalizer(rule, output_dir, enable_pruning):
+    return bbp_env(
+        ['nix/hpc/functionalizer'],
+        ["env",
+            "BGLOCKLESSMPIO_F_TYPE=0x47504653",
+         "functionalizer",
+            "--inMVD-file={input[mvd3]}",
+            "--inDetector-file={TOUCHES_DIR}/touches",
+            "--recipe-file={BUILDER_RECIPE}",
+            "--database={MORPH_RELEASE}/h5v1",
+            "--database-file={MORPHDB}",
+            "--pruningType=%d" % (1 if enable_pruning else 0),
+            "--disableDeltaOutput",
+            "--outNCS-file=%s" % os.path.join(output_dir, "a.ncs"),
+            "2>&1 | tee {log}",
+        ],
+        slurm_env=rule
+    )
+
+
+rule s2s:
+    message:
+        "Convert touches into synapses (S2S)"
+
+    input:
+        mvd3 = 'circuit.mvd3',
+        touches = TOUCHES_DIR + '/touchesData.0'
+
+    output:
+        expand(NRN_STRUCTURAL_DIR + '/{filename}.0', filename=NRN_FILES)
+
+    log:
+        log_path('s2s')
+
+    shell:
+        run_functionalizer(
+            's2s',
+            output_dir=NRN_STRUCTURAL_DIR,
+            enable_pruning=False,
+        )
+
+
+rule s2f:
+    message:
+        "Prune touches and convert them into synapses (S2F)"
+
+    input:
+        mvd3 = 'circuit.mvd3',
+        touches = TOUCHES_DIR + '/touchesData.0'
+
+    output:
+        expand(NRN_FUNCTIONAL_DIR + '/{filename}.0', filename=NRN_FILES)
+
+    log:
+        log_path('s2f')
+
+    shell:
+        run_functionalizer(
+            's2f',
+            output_dir=NRN_FUNCTIONAL_DIR,
+            enable_pruning=False,
+        )
+
 
 rule nrn_merge:
+    input:
+        '{nrn_dir}/{filename}.0'
+
     output:
         '{nrn_dir}/{filename}'
 
@@ -428,7 +545,8 @@ rule nrn_merge:
                 "--only {wildcards.filename}",
                 "--link" if config.get('nrn_merge', "copy") == "link" else "",
                 "2>&1 | tee {log}"
-            ]
+            ],
+            slurm_env='nrn_merge'
         )
 
 
@@ -448,7 +566,8 @@ rule targetgen_mvd3:
             ["brainbuilder targets from_mvd3",
                 "--output {output}",
                 "{input}"
-            ]
+            ],
+            slurm_env='targetgen_mvd3'
         )
 
 
@@ -482,7 +601,8 @@ rule mvd3to2:
             ["brainbuilder mvd3 to_mvd2",
                 "--morph-dir {MORPH_RELEASE}",
                 "--output {output}"
-            ]
+            ],
+            slurm_env='mvd3to2'
         )
 
 
@@ -504,7 +624,8 @@ rule spatial_index_segment:
             ['nix/hpc/flatindexer'],
             ["SDKGenerator CircuitConfig segment All SEGMENT",
                 "2>&1 | tee {log}"
-            ]
+            ],
+            slurm_env='spatial_index_segment'
         )
 
 
@@ -526,7 +647,8 @@ rule spatial_index_synapse:
             ['nix/hpc/flatindexer'],
             ["SDKGenerator CircuitConfig synapse All {NRN_FUNCTIONAL_DIR}/SYNAPSE",
                 "2>&1 | tee {log}"
-            ]
+            ],
+            slurm_env='spatial_index_synapse'
         )
 
 
@@ -551,7 +673,8 @@ rule subcellular:
                 "--seed {config[transcriptome][seed]}",
                 "--output {output}",
                 "{input}"
-            ]
+            ],
+            slurm_env='subcellular'
         )
 
 
@@ -582,7 +705,8 @@ rule place_astrocytes:
                 "--output",
                     "{output}",
                 " 2>&1 | tee {log}"
-            ]
+            ],
+            slurm_env='place_astrocytes'
         )
 
 
@@ -611,7 +735,8 @@ rule astrocyte_domains_tesselate:
                     "{output}",
                 "{input}",
                 " 2>&1 | tee {log}"
-            ]
+            ],
+            slurm_env='astrocyte_domains_tesselate'
         )
 
 
@@ -640,7 +765,8 @@ rule astrocyte_domains_overlap:
                     "{output}",
                 "{input}",
                 " 2>&1 | tee {log}"
-            ]
+            ],
+            slurm_env='astrocyte_domains_overlap'
         )
 
 
@@ -661,7 +787,8 @@ rule astrocyte_domains_mesh:
                 "--output",
                     "{output}",
                 "{input}",
-            ]
+            ],
+            slurm_env='astrocyte_domains_mesh'
         )
 
 
