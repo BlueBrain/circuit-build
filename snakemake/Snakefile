@@ -153,7 +153,8 @@ rule functional_syn2:
 
 rule functional_all:
     input:
-        rules.functional.output,
+        PRE_FUNCTIONAL,
+        NRN_FUNCTIONAL_DATA,
         NRN_FUNCTIONAL_INDEX,
         SEGMENT_INDEX,
 
@@ -568,6 +569,9 @@ rule touch2parquet:
     message:
         "Convert touches to Parquet format"
 
+    input:
+        TOUCHES_DIR + '/touchesData.0'
+
     output:
         TOUCHES_DIR + '/parquet/touchesData.0.parquet'
 
@@ -757,7 +761,8 @@ rule spatial_index_synapse:
         "Generate synapse spatial index"
 
     input:
-        rules.functional.output,
+        PRE_FUNCTIONAL,
+        NRN_FUNCTIONAL_DATA,
 
     output:
         NRN_FUNCTIONAL_INDEX
