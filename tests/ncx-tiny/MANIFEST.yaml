@@ -1,0 +1,39 @@
+common:
+  atlas: /gpfs/bbp.cscs.ch/project/proj66/entities/dev/atlas/O1-152
+  region: 'mc2_Column'
+  morph_release: /gpfs/bbp.cscs.ch/project/proj66/entities/morphologies/2018.02.16
+  emodel_release: /gpfs/bbp.cscs.ch/project/proj66/entities/emodels/2018.02.26.dev0
+  sw_release: null
+
+place_cells:
+  soma_placement: 'basic'
+  density_factor: 0.1
+  seed: 0
+
+assign_morphologies:
+  resolution: 5
+  alpha: 3.0
+  ntasks: 100
+  seed: 0
+
+assign_emodels:
+  seed: 0
+
+touchdetector:
+  account: proj68
+  partition: prod
+  ntasks: 32
+  time: '0:10:00'
+
+s2f:
+   account: proj68
+   partition: prod
+   ntasks: 4
+   time: '0:10:00'
+   seeds: [11, 12, 13, 14]
+
+s2s:
+   account: proj68
+   partition: prod
+   ntasks: 4
+   time: '0:10:00'

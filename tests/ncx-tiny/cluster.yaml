@@ -1,0 +1,53 @@
+__default__:
+  salloc: '-A proj68 -p prod_small --time 0:05:00'
+
+assign_morphologies:
+  salloc: >-
+    -A proj68
+    -p interactive
+    -C nvme
+    --time 0:10:00
+
+touchdetector:
+  jobname: td
+  salloc: >-
+    -A proj68
+    -p prod_small
+    -C cpu
+    -n2
+    --time 0:02:00
+
+s2f:
+  jobname: s2f
+  salloc: >-
+    -A proj68
+    -p prod_small
+    -C cpu
+    -n2
+    --time 0:02:00
+
+s2s:
+  jobname: s2s
+  salloc: >-
+    -A proj68
+    -p prod_small
+    -C cpu
+    -n2
+    --time 0:02:00
+
+spykfunc_s2f:
+  jobname: s2f_spark
+  salloc: '-A proj68 -p prod_small --time 0:15:00 -N2'
+  sm_run: '-H'
+
+spykfunc_s2s:
+  jobname: s2s_spark
+  salloc: '-A proj68 -p prod_small --time 0:15:00 -N2'
+
+spatial_index_segment:
+  jobname: segment_index
+  salloc: '-A proj68 -p prod_small --constraint=cpu --time 0:02:00'
+
+spatial_index_synapse:
+  jobname: synapse_index
+  salloc: '-A proj68 -p prod_small --constraint=cpu --time 0:02:00'
