@@ -19,6 +19,9 @@ assign_morphologies:
 assign_emodels:
   seed: 0
 
+targetgen_mvd3:
+  targets: 'targets.yaml'
+
 touchdetector:
   account: proj68
   partition: prod

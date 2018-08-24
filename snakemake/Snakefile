@@ -688,6 +688,8 @@ rule targetgen_mvd3:
         bbp_env(
             ['nix/nse/brainbuilder'],
             ["brainbuilder targets from_mvd3",
+                ("--targets %s" % bioname_path(config['targetgen_mvd3']['targets'])
+                    if 'targets' in config.get('targetgen_mvd3', {}) else ""),
                 "--output {output}",
                 "{input}"
             ],

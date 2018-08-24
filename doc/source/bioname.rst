@@ -29,6 +29,8 @@ In particular, the following files should be placed there:
  * ``placement_rules.xml``
  * ``builder[Connectivity]RecipeAllPathways.xml``
 
+Optionally, `bioname` can also contain YAML files with cell target definitions. If used, these should be referenced from :ref:`ref-phase-targetgen-mvd3` section in ``MANIFEST.yaml``.
+
 
 MANIFEST.yaml
 ~~~~~~~~~~~~~
@@ -92,7 +94,7 @@ Please refer to :ref:`ref-phases` for each phase config description.
 
 An example of full ``MANIFEST.yaml``:
 
-.. literalinclude:: ../../snakemake/examples/sscx/MANIFEST.yaml
+.. literalinclude:: ../../tests/ncx-tiny/MANIFEST.yaml
    :language: yaml
 
 cell_composition.yaml
@@ -224,3 +226,21 @@ This pair used to fully defined the circuit composition; now it is still relevan
     We apologize for this inconvenience that is due to ongoing transition from column-based circuit building to atlas-based one.
 
 Used in :ref:`ref-phase-touchdetector`, :ref:`ref-phase-s2f` and :ref:`ref-phase-s2s` phases.
+
+
+.. _ref-bioname-targets:
+
+Target definitions (YAML)
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Custom targets to be added to the circuit. During circuit build, they are resolved into named GID sets stored in ``start.target``.
+
+At the moment we support only query-based target definitions. These should be defined inside ``targets/query_based`` section as mappings with `BluePy-like <https://bbpteam.epfl.ch/documentation/bluepy-0.12.5/circuit.html#cells-get>`_ cell property filters.
+
+Example:
+
+.. literalinclude:: ../../tests/ncx-tiny/targets.yaml
+   :language: yaml
+
+.. note::
+  These query-based target definitions can be considered a stepping stone towards *node sets files* which would define cell subsets in the forthcoming `SONATA <https://github.com/AllenInstitute/sonata/blob/master/docs/SONATA_DEVELOPER_GUIDE.md>`_ circuit format.
