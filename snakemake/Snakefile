@@ -186,6 +186,8 @@ def build_circuit_config(nrn_path):
             "-D ME_COMBO_INFO_PATH=%s" % os.path.join(EMODEL_RELEASE, "mecombo_emodel.tsv"),
             "-D BIONAME={BIONAME}",
             "-D ATLAS={ATLAS}",
+            ("-D PROJECTIONS=%s" % ":".join(config['projectionizer'])
+                if 'projectionizer' in config else ""),
             template_path('CircuitConfig'),
             "> {output}",
         ]

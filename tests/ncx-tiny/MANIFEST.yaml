@@ -40,3 +40,7 @@ s2s:
    partition: prod
    ntasks: 4
    time: '0:10:00'
+
+projectionizer:
+  Thalamocortical_VPM_1: {}
+  Thalamocortical_VPM_2: {}
