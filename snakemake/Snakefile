@@ -114,15 +114,11 @@ def bbp_env(modules, command, slurm_env=None, skip_srun=False):
 
 localrules:
     all,
-    sbatch,
     functional,
     functional_all,
     structural,
     circuitconfig,
     circuitconfig_struct,
-    sbatch_td,
-    sbatch_s2s,
-    sbatch_s2f,
     symlink_start_target,
     ngv
 
@@ -130,13 +126,6 @@ localrules:
 rule all:
     input:
         PRE_FUNCTIONAL
-
-
-rule sbatch:
-    input:
-        TOUCHES_DIR + "/run.sbatch",
-        NRN_FUNCTIONAL_DIR + "/run.sbatch",
-        NRN_STRUCTURAL_DIR + "/run.sbatch",
 
 
 rule functional:
@@ -360,90 +349,6 @@ rule mvd3_reorder_mtypes:
             slurm_env='mvd3_reorder_mtypes'
         )
 
-rule sbatch_td:
-    message:
-        "Generate sbatch script for running TouchDetector on BG"
-
-    input:
-        mvd3 = 'circuit.mvd3.reordered',
-
-    output:
-        TOUCHES_DIR + '/run.sbatch'
-
-    shell:
-        bbp_env(
-            ['nix/py27/jinja2'],
-            ["jinja2 --strict",
-                "-D SBATCH_ACCOUNT={config[touchdetector][account]}",
-                "-D SBATCH_PARTITION={config[touchdetector][partition]}",
-                "-D SBATCH_NTASKS={config[touchdetector][ntasks]}",
-                "-D SBATCH_TIMELIMIT={config[touchdetector][time]}",
-                "-D SW_RELEASE=%s" % (config['common']['sw_release'] or ""),
-                "-D WORKING_DIR=%s" % os.path.abspath(TOUCHES_DIR),
-                "-D MVD3_PATH=%s" % os.path.abspath("{input[mvd3]}"),
-                "-D MORPH_PATH={MORPH_RELEASE}/v1",
-                "-D RECIPE_PATH={BUILDER_RECIPE}",
-                template_path('touchdetector.sbatch'),
-                "> {output}"
-            ]
-        )
-
-
-def build_functionalizer_sbatch(nrn_path, enable_pruning, sbatch_params):
-    return bbp_env(
-        ['nix/py27/jinja2'],
-        ["jinja2 --strict",
-            "-D SBATCH_ACCOUNT=%s" % sbatch_params['account'],
-            "-D SBATCH_PARTITION=%s" % sbatch_params['partition'],
-            "-D SBATCH_NTASKS=%s" % sbatch_params['ntasks'],
-            "-D SBATCH_TIMELIMIT=%s" % sbatch_params['time'],
-            "-D SW_RELEASE=%s" % (config['common']['sw_release'] or ""),
-            "-D WORKING_DIR=%s" % os.path.abspath(nrn_path),
-            "-D MVD3_PATH=%s" % os.path.abspath("{input[mvd3]}"),
-            "-D TOUCHES_PATH=%s" % os.path.abspath(TOUCHES_DIR + "/touches"),
-            "-D MORPH_PATH={MORPH_RELEASE}/v1",
-            "-D MORPH_DAT={MORPHDB}",
-            "-D RECIPE_PATH={BUILDER_RECIPE}",
-            "-D PRUNING_TYPE=%d" % (1 if enable_pruning else 0),
-            template_path('functionalizer.sbatch'),
-            "> {output}"
-        ]
-    )
-
-rule sbatch_s2f:
-    message:
-        "Generate sbatch script for running S2F on BG"
-
-    input:
-        mvd3 = 'circuit.mvd3'
-
-    output:
-        NRN_FUNCTIONAL_DIR + '/run.sbatch'
-
-    shell:
-        build_functionalizer_sbatch(
-            nrn_path=NRN_FUNCTIONAL_DIR,
-            enable_pruning=True,
-            sbatch_params=config['s2f']
-        )
-
-
-rule sbatch_s2s:
-    message:
-        "Generate sbatch script for running S2S on BG"
-
-    input:
-        mvd3 = 'circuit.mvd3'
-
-    output:
-        NRN_STRUCTURAL_DIR + '/run.sbatch'
-
-    shell:
-        build_functionalizer_sbatch(
-            nrn_path=NRN_STRUCTURAL_DIR,
-            enable_pruning=False,
-            sbatch_params=config['s2s'],
-        )
 
 rule touchdetector:
     message:
