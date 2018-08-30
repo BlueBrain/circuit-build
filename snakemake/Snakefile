@@ -535,7 +535,7 @@ rule s2f:
         run_functionalizer(
             's2f',
             output_dir=NRN_FUNCTIONAL_DIR,
-            enable_pruning=False,
+            enable_pruning=True,
         )
 
 
