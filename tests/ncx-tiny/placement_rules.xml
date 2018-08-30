@@ -104,5 +104,14 @@
 	<rule id="L6_UPC, dendrite, 0.8:Layer_5 - 0.5:Layer_3"  type="region_target" segment_type="dendrite" y_min_layer="5" y_min_fraction="0.80" y_max_layer="3" y_max_fraction="0.50" />
 </mtype_rule_set>
 
+  <global_rotation>
+    <!-- uniform random rotation around Y-axis -->
+    <rotation axis="y" distr='["uniform", {"a": -3.14159, "b": 3.14159}]' />
+  </global_rotation>
+
+  <mtype_rotation mtype="L23_MC">
+    <!-- suppress random rotation -->
+  </mtype_rotation>
+
 </placement_rules>
 

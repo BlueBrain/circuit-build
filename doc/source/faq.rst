@@ -22,10 +22,22 @@ Why making an intermediate step?
  * to improve circuit build reproducibility
  * to facilitate merging circuit building pipelines for different projects (SSCX, Hippocampus, Thalamus)
 
-Where can I find the logs?
---------------------------
+.. _ref-faq-bioname:
 
-Logs for most of the phases could be found in ``logs`` dir in circuit build folder.
+Where can I find a sample *bioname*?
+------------------------------------
+
+Some sample bioname(s) can be found in ``circuit-build`` `Git repo <https://bbpcode.epfl.ch/browse/code/common/circuit-build/tree/tests>`_.
+
+While not biologically realistic, these sample bionames serve as integration tests and are built on BB5 `daily <https://bbpcode.epfl.ch/ci/job/nse.circuit-build.tests/>`_; which gives certain guarantee that they are in sync with latest S/W deployed on BB5 cluster, as well as `circuit-build` script itself.
+
+
+Where can I find logs for a given circuit build?
+------------------------------------------------
+
+`Snakemake` execution logs (which rules we launched along with full launch commands) can be found in ``.snakemake/logs`` subfolder of each circuit build folder.
+
+Stdout / stderr output for most of the rules can be found in ``logs`` subfolder (NB: at the moment these logs fail to grab certain type of failures, like SLURM allocation running out of memory).
 
 
 How can I see the full list of the phases and their status?

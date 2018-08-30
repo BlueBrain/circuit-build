@@ -12,6 +12,8 @@ Eventually `bioname` and `entities` would become `Nexus`-stored entities in a st
 
 Let us describe the contents of `bioname` in more detail now.
 
+For a full example of `bioname` see also: :ref:`ref-faq-bioname`
+
 
 Bioname
 -------
@@ -99,69 +101,46 @@ An example of full ``MANIFEST.yaml``:
 
 cell_composition.yaml
 ~~~~~~~~~~~~~~~~~~~~~
-Defines which mtypes are used, their density and associated etypes.
+YAML file which defines which mtypes are used, their density and associated etypes.
+
+.. note::
+
+  We are versioning the YAML schema used, to provide minimal software / recipe compatibility check here. Once the recipe schema stabilizes and becomes an "entity", it would be checked more rigorously.
+
+  At the moment we are at version 2.0; please specify this on top of YAML file with ``version: 2.0`` element.
+
+How the recipe is organized:
+
+ * cell composition is represented as "flat" collection of cell groups within root ``neurons`` element
+ * each cell group should have ``mtype``, ``etype`` and ``layer`` traits, which should correspond to those used in the morphology release
+ * each of the "traits" can be either a single value or 'value -> probability' mapping (probabilities should sum up to 1.0)
+ * at the moment mappings are used mostly for defining etypes for each group
+ * location is prescribed with two required attributes: ``density`` and ``region``
+ * ``region`` is used for building region mask based on ``brain_regions`` atlas dataset + region hierarchy, by matching against region *acronym*. If ``region`` starts with '@' it is interpreted as regular expression (for instance, ``@1$`` stands for "acronym ends with '1'")
+ * ``density`` could be either a scalar value or a reference to atlas dataset encoded as ``{<dataset-name}``
+ * if ``density`` is a scalar value, region mask defines where to apply this constant density
+ * otherwise, if ``density`` is a volumetric dataset, it is checked against region mask; a warning is emitted if it prescribes non-zero density outside of region mask
+ * cell groups are built independent of each other (and thus are cumulative)
 
 Example:
 ::
 
-    version: v1.0
-    composition:
-      <region>:
-        <mtype>:
-          density: <number|3D-profile>
-          etypes:
-            <etype1>: e_1
-            <etype2>: e_2
+    version: v2.0
+    neurons:
 
-where
+      - density: '{L23_MC}'
+        region: '@3$'
+        traits:
+          layer: 3
+          mtype: L23_MC
+          etype:
+            bAC: 0.7
+            bNAC: 0.3
+          ...
 
- * `<region>` is region name ('L1', 'L2'..., 'L6' in case of SSCX);
- * `<mtype>` is mtype name (for example, 'L1_SLAC');
- * `<etype>` one of corresponding etypes (for example, 'bAC').
+      - density: 10000
+        ...
 
-`etype` proportions `e_k` corresponding to single `mtype` should sum to 1.0.
-
-`density` could be:
-
- * a number (cell count per mm^3)
- * atlas-defined 3D profile (VoxelBrain atlas layer name in curly braces)
- * locally-defined 3D-profile (path to NRRD file with volumetric data)
-
-.. tip::
-    We'd recommend to use local file paths with 3D density profiles for development purpose only; and to use exclusively constants and atlas-defined profiles for "public" circuits.
-
-To specify morphology rotation angles individually per each mtype, please add `rotation` section to YAML root.
-
-For instance,
-
-::
-
-  version: 1.2
-  composition:
-    ...
-  rotation:
-    L2:
-      L23_MC:
-        - ['y', 'uniform', {'low': -3.1416, 'high': 3.1416}]
-        - ['x', 'uniform', {'low': -0.7853, 'high': 0.7853}]
-
-would rotate each `(L2, L23_MC)` cell:
-
-  - first by a random uniform angle from :math:`-\pi` to :math:`\pi` around Y-axis
-  - then by random uniform angle from :math:`-\pi/4` to :math:`\pi/4` around X-axis
-
-.. note::
-
-  The axis in question here, are _morphology_ axes, not global coordinate system axes.
-
-At the moment two random distributions are supported:
-
-  - `uniform(low, high)`
-  - `normal(loc, scale)`
-
-.. note::
-
-  The names for distributions and their parameters are chosen according to `NumPy <https://docs.scipy.org/doc/numpy/reference/routines.random.html>`_ naming style.
 
 Used in :ref:`ref-phase-place-cells` phase.
 
