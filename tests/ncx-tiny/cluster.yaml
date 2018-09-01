@@ -4,7 +4,7 @@ __default__:
 assign_morphologies:
   salloc: >-
     -A proj44
-    -p interactive
+    -p prod
     -C nvme
     --time 0:10:00
 
