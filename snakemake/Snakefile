@@ -597,6 +597,8 @@ rule targetgen_mvd3:
             ["brainbuilder targets from_mvd3",
                 ("--targets %s" % bioname_path(config['targetgen_mvd3']['targets'])
                     if 'targets' in config.get('targetgen_mvd3', {}) else ""),
+                ("--allow-empty"
+                    if config.get('targetgen_mvd3', {}).get('allow_empty', False) else ""),
                 "--output {output}",
                 "{input}"
             ],

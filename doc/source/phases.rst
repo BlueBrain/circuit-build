@@ -130,6 +130,11 @@ Parameters
 
     Should be located in ``bioname`` folder.
 
+**allow_empty**
+    Allow query-based targets to resolve to empty GID set.
+
+    Optional; if omitted, defaults to *false*.
+
 
 .. _ref-phase-touchdetector:
 
