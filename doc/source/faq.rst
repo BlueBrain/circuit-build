@@ -37,7 +37,7 @@ Where can I find logs for a given circuit build?
 
 `Snakemake` execution logs (which rules we launched along with full launch commands) can be found in ``.snakemake/logs`` subfolder of each circuit build folder.
 
-Stdout / stderr output for most of the rules can be found in ``logs`` subfolder (NB: at the moment these logs fail to grab certain type of failures, like SLURM allocation running out of memory).
+Stdout / stderr output for most of the rules can be found in ``logs`` subfolder.
 
 
 How can I see the full list of the phases and their status?

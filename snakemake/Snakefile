@@ -70,7 +70,7 @@ def template_path(name):
     return os.path.join(workflow.basedir, 'templates', name + ".j2")
 
 
-def bbp_env(modules, command, slurm_env=None, skip_srun=False):
+def bbp_env(modules, command, dump_log=False, slurm_env=None, skip_srun=False):
     full_cmd = []
 
     sw_release = config['common']['sw_release']
@@ -108,6 +108,9 @@ def bbp_env(modules, command, slurm_env=None, skip_srun=False):
             srun=('' if skip_srun else 'srun'),
             cmd=escape_single_quotes(result)
         )
+
+    if dump_log:
+        result += " 2>&1 | tee {log}"
 
     return result
 
@@ -236,8 +239,8 @@ rule place_cells:
                     config['place_cells']['seed'],
                 "--output",
                     "{output}",
-                " 2>&1 | tee {log}"
             ],
+            dump_log=True,
             slurm_env='place_cells'
         )
 
@@ -277,8 +280,8 @@ rule assign_morphologies:
                 "--seed {config[assign_morphologies][seed]}",
                 "--ntasks {config[assign_morphologies][ntasks]}",
                 "--output {output}",
-                "2>&1 | tee {log}",
             ],
+            dump_log=True,
             slurm_env='assign_morphologies'
         )
 
@@ -374,8 +377,8 @@ rule touchdetector:
                 "--recipePath={BUILDER_RECIPE}",
                 "--enableSaveState",
                 "--outputFolder={TOUCHES_DIR}",
-                "2>&1 | tee {log}",
             ],
+            dump_log=True,
             slurm_env='touchdetector'
         )
 
@@ -394,8 +397,8 @@ def run_functionalizer(rule, output_dir, enable_pruning):
             "--pruningType=%d" % (1 if enable_pruning else 0),
             "--disableDeltaOutput",
             "--outNCS-file=%s" % os.path.join(output_dir, "a.ncs"),
-            "2>&1 | tee {log}",
         ],
+        dump_log=True,
         slurm_env=rule
     )
 
@@ -463,8 +466,8 @@ rule nrn_merge:
             ["brainbuilder nrn merge {wildcards.nrn_dir}",
                 "--only {wildcards.filename}",
                 "--link" if config.get('nrn_merge', "copy") == "link" else "",
-                "2>&1 | tee {log}"
             ],
+            dump_log=True,
             slurm_env='nrn_merge'
         )
 
@@ -509,8 +512,8 @@ def run_spykfunc(rule, output_dir, enable_pruning):
             "{input[mvd3]}",
             MORPH_RELEASE + '/h5v1/',
             TOUCHES_DIR + '/parquet/',
-            "2>&1 | tee {log}"
         ],
+        dump_log=True,
         slurm_env=rule,
         skip_srun=True
     )
@@ -659,8 +662,8 @@ rule spatial_index_segment:
             ['nix/hpc/flatindexer'],
             ["env FLATINDEXER_NB_THREADS=2",
              "SDKGenerator CircuitConfig segment All SEGMENT",
-                "2>&1 | tee {log}"
             ],
+            dump_log=True,
             slurm_env='spatial_index_segment'
         )
 
@@ -684,8 +687,8 @@ rule spatial_index_synapse:
             ['nix/hpc/flatindexer'],
             ["env FLATINDEXER_NB_THREADS=2",
              "SDKGenerator CircuitConfig synapse All {NRN_FUNCTIONAL_DIR}/SYNAPSE",
-                "2>&1 | tee {log}"
             ],
+            dump_log=True,
             slurm_env='spatial_index_synapse'
         )
 
@@ -742,8 +745,8 @@ rule place_astrocytes:
                     "{config[place_astrocytes][seed]}",
                 "--output",
                     "{output}",
-                " 2>&1 | tee {log}"
             ],
+            dump_log=True,
             slurm_env='place_astrocytes'
         )
 
@@ -772,8 +775,8 @@ rule astrocyte_domains_tesselate:
                 "--output",
                     "{output}",
                 "{input}",
-                " 2>&1 | tee {log}"
             ],
+            dump_log=True,
             slurm_env='astrocyte_domains_tesselate'
         )
 
@@ -802,8 +805,8 @@ rule astrocyte_domains_overlap:
                 "--output",
                     "{output}",
                 "{input}",
-                " 2>&1 | tee {log}"
             ],
+            dump_log=True,
             slurm_env='astrocyte_domains_overlap'
         )
 
