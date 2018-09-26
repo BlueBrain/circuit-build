@@ -504,14 +504,15 @@ def run_spykfunc(rule, output_dir, enable_pruning):
          "spykfunc",
             "--s2f" if enable_pruning else "--s2s",
             "--output-dir %s" % os.path.join(output_dir, 'spykfunc'),
+            "--spark-property spark.master=spark://$(scontrol show hostnames $SLURM_JOB_NODELIST | head -1):7077",
         ] + [
             "--spark-property %s" % p
                 for p in config.get(rule, {}).get('spark_property', [])
         ] + [
             BUILDER_RECIPE,
-            "{input[mvd3]}",
+            os.path.abspath("{input[mvd3]}"),
             MORPH_RELEASE + '/h5v1/',
-            TOUCHES_DIR + '/parquet/',
+            os.path.abspath(TOUCHES_DIR + '/parquet/'),
         ],
         dump_log=True,
         slurm_env=rule,
