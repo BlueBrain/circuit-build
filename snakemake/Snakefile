@@ -361,7 +361,7 @@ rule touchdetector:
         'circuit.mvd3.reordered',
 
     output:
-        touch(TOUCHES_DIR + '/.done')
+        touch(TOUCHES_DIR + '/_SUCCESS')
 
     log:
         log_path('touchdetector')
@@ -409,7 +409,7 @@ rule s2s:
 
     input:
         mvd3 = 'circuit.mvd3',
-        touches = TOUCHES_DIR + '/.done'
+        touches = TOUCHES_DIR + '/_SUCCESS'
 
     output:
         expand(NRN_STRUCTURAL_DIR + '/{filename}.0', filename=NRN_FILES)
@@ -431,7 +431,7 @@ rule s2f:
 
     input:
         mvd3 = 'circuit.mvd3',
-        touches = TOUCHES_DIR + '/.done'
+        touches = TOUCHES_DIR + '/_SUCCESS'
 
     output:
         expand(NRN_FUNCTIONAL_DIR + '/{filename}.0', filename=NRN_FILES)
@@ -477,7 +477,7 @@ rule touch2parquet:
         "Convert touches to Parquet format"
 
     input:
-        TOUCHES_DIR + '/.done'
+        TOUCHES_DIR + '/_SUCCESS'
 
     output:
         TOUCHES_DIR + '/parquet/touchesData.0.parquet'
