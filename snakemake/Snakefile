@@ -661,7 +661,7 @@ rule spatial_index_segment:
     shell:
         bbp_env(
             ['nix/hpc/flatindexer'],
-            ["env FLATINDEXER_NB_THREADS=2",
+            [
              "SDKGenerator CircuitConfig segment All SEGMENT",
             ],
             dump_log=True,
@@ -686,7 +686,7 @@ rule spatial_index_synapse:
     shell:
         bbp_env(
             ['nix/hpc/flatindexer'],
-            ["env FLATINDEXER_NB_THREADS=2",
+            [
              "SDKGenerator CircuitConfig synapse All {NRN_FUNCTIONAL_DIR}/SYNAPSE",
             ],
             dump_log=True,
