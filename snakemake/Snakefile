@@ -140,7 +140,14 @@ rule functional:
 rule functional_syn2:
     input:
         PRE_FUNCTIONAL,
-        NRN_FUNCTIONAL_DIR + '/default.syn2',
+        NRN_FUNCTIONAL_DIR + '/circuit.syn2',
+
+
+rule functional_sonata:
+    input:
+        PRE_FUNCTIONAL,
+        'nodes.sonata',
+        NRN_FUNCTIONAL_DIR + '/edges.sonata',
 
 
 rule functional_all:
@@ -164,7 +171,7 @@ rule structural_syn2:
         'CircuitConfig_struct',
         'circuit.mvd3',
         NRN_STRUCTURAL_DIR + '/start.target',
-        NRN_STRUCTURAL_DIR + '/default.syn2',
+        NRN_STRUCTURAL_DIR + '/circuit.syn2',
 
 
 def build_circuit_config(nrn_path):
@@ -572,7 +579,7 @@ rule parquet2syn2:
         '{nrn_dir}/spykfunc/circuit.parquet/_SUCCESS'
 
     output:
-        '{nrn_dir}/default.syn2'
+        '{nrn_dir}/circuit.syn2'
 
     shell:
         bbp_env(
@@ -691,6 +698,48 @@ rule spatial_index_synapse:
             ],
             dump_log=True,
             slurm_env='spatial_index_synapse'
+        )
+
+
+rule mvd3_to_sonata:
+    message:
+        "MVD3 -> SONATA Nodes"
+
+    input:
+        'circuit.mvd3'
+
+    output:
+        'nodes.sonata'
+
+    shell:
+        bbp_env(
+            ['nix/nse/brainbuilder'],
+            ["brainbuilder mvd3 to_sonata",
+                "--output {output}",
+                "{input}"
+            ],
+            slurm_env='mvd3_to_sonata'
+        )
+
+
+rule syn2_to_sonata:
+    message:
+        "SYN2 -> SONATA Edges"
+
+    input:
+        '{nrn_dir}/circuit.syn2'
+
+    output:
+        '{nrn_dir}/edges.sonata'
+
+    shell:
+        bbp_env(
+            ['nix/nse/brainbuilder'],
+            ["brainbuilder syn2 to_sonata",
+                "--output {output}",
+                "{input}"
+            ],
+            slurm_env='syn2_to_sonata'
         )
 
 
