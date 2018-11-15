@@ -511,7 +511,7 @@ def run_spykfunc(rule, output_dir, enable_pruning):
          "spykfunc",
             "--s2f" if enable_pruning else "--s2s",
             "--output-dir %s" % os.path.join(output_dir, 'spykfunc'),
-            "--spark-property spark.master=spark://$(scontrol show hostnames $SLURM_JOB_NODELIST | head -1):7077",
+            "--spark-property spark.master=spark://$(srun sh -c '[ $SLURM_PROCID -eq 0 ] && hostname || true' | tail -n 1):7077",
         ] + [
             "--spark-property %s" % p
                 for p in config.get(rule, {}).get('spark_property', [])
