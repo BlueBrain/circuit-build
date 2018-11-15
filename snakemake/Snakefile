@@ -375,7 +375,7 @@ rule touchdetector:
 
     shell:
         bbp_env(
-            ['touchdetector'],
+            ['touchdetector/4.3.3'],
             ["env",
                 "BGLOCKLESSMPIO_F_TYPE=0x47504653",
              "touchdetector",
@@ -392,7 +392,7 @@ rule touchdetector:
 
 def run_functionalizer(rule, output_dir, enable_pruning):
     return bbp_env(
-        ['nix/hpc/functionalizer'],
+        ['functionalizer/3.11.0'],
         ["env",
             "BGLOCKLESSMPIO_F_TYPE=0x47504653",
          "functionalizer",
@@ -581,13 +581,17 @@ rule parquet2syn2:
     output:
         '{nrn_dir}/circuit.syn2'
 
+    log:
+        log_path('parquet2syn2_{nrn_dir}')
+
     shell:
         bbp_env(
-            ['nix/hpc/spykfunc'],
+            ['parquet-converters/0.2.1'],
             ["parquet2syn2p",
                 "-o {output}",
                 "{wildcards.nrn_dir}/spykfunc/circuit.parquet/*.parquet",
             ],
+            dump_log=True,
             slurm_env='parquet2syn2'
         )
 
