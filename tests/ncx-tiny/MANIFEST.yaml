@@ -10,10 +10,9 @@ place_cells:
   density_factor: 0.1
   seed: 0
 
-assign_morphologies:
-  resolution: 5
+choose_morphologies:
+  max_fail_ratio: 0.5
   alpha: 3.0
-  ntasks: 100
   seed: 0
 
 assign_emodels:

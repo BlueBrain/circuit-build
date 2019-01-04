@@ -104,45 +104,6 @@ Unfortunately, we do not have a proper mechanism to ensure module version requir
 Please check ``sw_release`` value in ``MANIFEST.yaml`` and try loading the module from the corresponding archive release manually to ensure its availability.
 
 
-[spark] Failed to create any local dir
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-`assign_morphologies` phase failing with a message like:
-
-.. code-block:: bash
-
-    ERROR DiskBlockManager: Failed to create any local dir
-
-OR
-
-.. code-block:: bash
-
-    IOError: [Errno 28] No space left on device
-
-Please make sure that ``TMPDIR`` environment variable in your allocation is set and points to a writable folder on local disk with enough free space.
-
-If the allocation is obtained with ``--constraint=uc4``, ``TMPDIR`` is set up automatically and should point to a ``/nvme`` subfolder (for the details please refer to: `File systems attached to BB5 <https://bbpteam.epfl.ch/project/spaces/display/INFRA/HPC+Service#HPCService-FilesystemsattachedtoBB5>`_).
-
-
-spark-submit command not found
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-`assign_morphologies` phase failing with a message like:
-
-.. code-block:: bash
-
-    ModuleCmd_Load.c(213):ERROR:105: Unable to locate a modulefile for 'spark'
-    /nix/store/c5bazvr75ic5399apdj272pprscxfir0-generated-env-module-placement-algorithm/bin/assign-morphologies: line 3: spark-submit: command not found
-
-Cause: `assign_morphologies` phase relies on `spark` module which is stored at NFS.
-
-Fix: Make sure your Kerberos token is not expired:
-
-.. code-block:: bash
-
-    kinit
-
-
 Killed: Out of Memory
 ~~~~~~~~~~~~~~~~~~~~~
 

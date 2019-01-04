@@ -52,38 +52,30 @@ Parameters
     Please consider increasing allocation memory limit if you are facing "out of memory" errors.
 
 
-.. _ref-phase-assign-morphologies:
+.. _ref-phase-choose-morphologies:
 
-assign_morphologies
+choose_morphologies
 -------------------
 
-Assign morphologies to cell positions using `placement hints <https://bbpteam.epfl.ch/documentation/placement-algorithm-1.1/index.html>`_ approach.
+Choose morphologies for cell positions using `placement hints <https://bbpteam.epfl.ch/documentation/placement-algorithm-2.0.0/index.html>`_ approach.
 
 .. tip::
 
-    This task uses ``$TMPDIR`` environment variable to configure temporary folder for Spark.
+    This task requires at least two node SLURM allocation.
 
-    Recommended SLURM allocation (time limit depends on circuit size, 2 hours should suffice for up to 10M cells):
+    Please make sure you define it in the cluster config accordingly.
 
-    ::
-
-        -A <proj> -p prod --constraint=nvme -N1 --exclusive --mem 0 --time <time>
 
 Parameters
 ~~~~~~~~~~
 
-**resolution**
-    Cluster cell positions by Y-value with given resolution in micrometers.
-
-    Use this value to speed up morphology scoring;
-
-    *resolution=10* usually provides a good trade-off between execution speed and score precision.
-
 **alpha**
     Use `score ** alpha` as morphology choice probability.
 
-**ntasks**
-    Number of Spark tasks to use for scoring.
+**max_fail_ratio**
+    Max failure ratio for any mtype (floating point number from 0.0 to 1.0).
+
+    Optional; if omitted, defaults to 0.0 (i.e. no failures allowed).
 
 **seed**
     Pseudo-random generator seed.

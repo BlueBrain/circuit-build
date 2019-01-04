@@ -74,7 +74,7 @@ Please refer to :ref:`ref-phases` for each phase config description.
 
       * ``h5v1`` folder with morphologies in H5v1 format
       * ``ascii`` folder with morphologies in ASC format
-      * ``annotations`` folder with morphology annotations used for placement
+      * ``annotations.json`` file with compacted annotations used for placement
 
 .. tip::
 
@@ -183,7 +183,7 @@ If emodel release is not yet available, one can obtain a stub version of `extNeu
 
 This will create `extNeuronDB.dat` in the current folder with all possible me-type combinations being assigned `N/A` me_combo.
 
-Used in :ref:`ref-phase-assign-morphologies`, :ref:`ref-phase-assign-emodels`, :ref:`ref-phase-s2f` and :ref:`ref-phase-s2s` phases.
+Used in :ref:`ref-phase-choose-morphologies`, :ref:`ref-phase-assign-emodels`, :ref:`ref-phase-s2f` and :ref:`ref-phase-s2s` phases.
 
 
 placement_rules.xml
@@ -191,7 +191,7 @@ placement_rules.xml
 
 An XML file defining how to use morphology annotations for scoring morphology placement.
 
-Used in :ref:`ref-phase-assign-morphologies` phase.
+Used in :ref:`ref-phase-choose-morphologies` phase.
 
 
 builderRecipeAllPathways.xml + builderConnectivityRecipeAllPathways.xml

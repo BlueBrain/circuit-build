@@ -1,11 +1,12 @@
 __default__:
   salloc: '-A proj44 -p prod_small --time 0:05:00'
 
-assign_morphologies:
+choose_morphologies:
   salloc: >-
     -A proj44
-    -p prod
-    -C nvme
+    -p prod_small
+    -C cpu
+    -n2
     --time 0:10:00
 
 touchdetector:

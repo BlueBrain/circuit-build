@@ -249,12 +249,56 @@ rule place_cells:
         )
 
 
-rule assign_morphologies:
+rule choose_morphologies:
     message:
-        "Assign morphologies using 'placement hints' approach"
+        "Choose morphologies using 'placement hints' approach"
 
     input:
         'circuit.mvd3.metypes'
+
+    output:
+        temp('morphologies.tsv')
+
+    log:
+        log_path('choose_morphologies')
+
+    shell:
+         bbp_env(
+            ['placement-algorithm'],
+            ["choose-morphologies",
+                "--mvd3",
+                    "{input}",
+                "--atlas",
+                    ATLAS,
+                "--atlas-cache",
+                    ATLAS_CACHE_DIR,
+                "--morphdb",
+                    MORPHDB,
+                "--rules",
+                    bioname_path("placement_rules.xml"),
+                "--annotations",
+                    os.path.join(MORPH_RELEASE, "annotations.json"),
+                "--alpha",
+                    config['choose_morphologies']['alpha'],
+                "--seed",
+                    config['choose_morphologies']['seed'],
+                "--max-fail-ratio",
+                    config['choose_morphologies'].get('max_fail_ratio', 0.0),
+                "--output",
+                    "{output}",
+            ],
+            dump_log=True,
+            slurm_env='choose_morphologies'
+        )
+
+
+rule assign_morphologies:
+    message:
+        "Assign morphologies"
+
+    input:
+        mvd3 = 'circuit.mvd3.metypes',
+        morph = 'morphologies.tsv'
 
     output:
         'circuit.mvd3.morphologies'
@@ -263,30 +307,22 @@ rule assign_morphologies:
         log_path('assign_morphologies')
 
     shell:
-        bbp_env(
-            ['nix/nse/placement-algorithm'],
-            ["env",
-                "PATH=$PATH:/nfs4/bbp.epfl.ch/sw/tools/spark/2.2.0/bin",
-                "JAVA_HOME=/nfs4/bbp.epfl.ch/sw/tools/java/1.8u51",
-                "SPARK_LOCAL_DIRS=$TMPDIR",
-                "SPARK_CONF_DIR=" + bioname_path("spark/assign_morphologies"),
-             "assign-morphologies",
-                "--mvd3 {input}",
-                "--atlas {ATLAS}",
-                "--atlas-cache {ATLAS_CACHE_DIR}",
-                "--resolution {config[assign_morphologies][resolution]}",
-                "--morphdb {MORPHDB}",
-                "--annotations",
-                    os.path.join(MORPH_RELEASE, "annotations"),
-                "--rules",
-                    bioname_path("placement_rules.xml"),
-                "--alpha {config[assign_morphologies][alpha]}",
-                "--seed {config[assign_morphologies][seed]}",
-                "--ntasks {config[assign_morphologies][ntasks]}",
-                "--output {output}",
+         bbp_env(
+            ['placement-algorithm'],
+            ["assign-morphologies",
+                "--mvd3",
+                    "{input[mvd3]}",
+                "--morph",
+                    "{input[morph]}",
+                "--atlas",
+                    ATLAS,
+                "--atlas-cache",
+                    ATLAS_CACHE_DIR,
+                "--dropna",
+                "--out-mvd3",
+                    "{output}",
             ],
-            dump_log=True,
-            slurm_env='assign_morphologies'
+            dump_log=True
         )
 
 
