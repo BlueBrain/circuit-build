@@ -74,16 +74,13 @@ def bbp_env(modules, command, dump_log=False, slurm_env=None, skip_srun=False):
     full_cmd = []
 
     sw_release = config['common']['sw_release']
-    if sw_release is not None:
-        import socket
-        hostname = socket.getfqdn()
-        if hostname.startswith("bbpviz") or hostname.startswith("bbpcj"):
-            system = "lugano-viz-x86_64"
-        else:
-            system = "bbpv-x86_64"
+    if sw_release is None:
         full_cmd.append(
-            "export MODULEPATH=/nix/var/nix/profiles/per-user/modules/{system}/archive-modules/{sw_release}/release/share/modulefiles/".format(
-                system=system,
+            "export MODULEPATH=${{MODULEPATH}}:/gpfs/bbp.cscs.ch/apps/hpc/jenkins/deploy/applications/2018-12-19/modules/tcl/linux-rhel7-x86_64"
+        )
+    else:
+        full_cmd.append(
+            "export MODULEPATH=/gpfs/bbp.cscs.ch/apps/hpc/spack-deployments/{sw_release}/modules/tcl/linux-rhel7-x86_64".format(
                 sw_release=sw_release
             )
         )
@@ -226,7 +223,7 @@ rule place_cells:
 
     shell:
         bbp_env(
-            ['nix/nse/brainbuilder'],
+            ['brainbuilder'],
             ["brainbuilder cells create2",
                 "--composition",
                     bioname_path("cell_composition.yaml"),
@@ -305,8 +302,8 @@ rule assign_emodels:
 
     shell:
         bbp_env(
-            ['nix/nse/brainbuilder'],
-            ["brainbuilder cells assign_emodels",
+            ['brainbuilder'],
+            ["brainbuilder cells assign-emodels",
                 "--morphdb {MORPHDB}",
                 "--output {output}",
                 "{input}"
@@ -327,8 +324,8 @@ rule set_circuit_seeds:
 
     shell:
         bbp_env(
-            ['nix/nse/brainbuilder'],
-            ["brainbuilder mvd3 set_seeds",
+            ['brainbuilder'],
+            ["brainbuilder mvd3 set-seeds",
                 "--seeds",
                     ",".join(map(str, config['s2f']['seeds'])),
                 "--output {output}",
@@ -350,8 +347,8 @@ rule mvd3_reorder_mtypes:
 
     shell:
         bbp_env(
-            ['nix/nse/brainbuilder'],
-            ["brainbuilder mvd3 reorder_mtypes",
+            ['brainbuilder'],
+            ["brainbuilder mvd3 reorder-mtypes",
                 "--recipe {BUILDER_RECIPE}",
                 "--output {output}",
                 "{input}"
@@ -375,7 +372,7 @@ rule touchdetector:
 
     shell:
         bbp_env(
-            ['touchdetector/4.3.3'],
+            ['touchdetector'],
             ["env",
                 "BGLOCKLESSMPIO_F_TYPE=0x47504653",
              "touchdetector",
@@ -392,7 +389,7 @@ rule touchdetector:
 
 def run_functionalizer(rule, output_dir, enable_pruning):
     return bbp_env(
-        ['functionalizer/3.11.0'],
+        ['functionalizer'],
         ["env",
             "BGLOCKLESSMPIO_F_TYPE=0x47504653",
          "functionalizer",
@@ -469,7 +466,7 @@ rule nrn_merge:
 
     shell:
         bbp_env(
-            ['nix/nse/brainbuilder'],
+            ['brainbuilder'],
             ["brainbuilder nrn merge {wildcards.nrn_dir}",
                 "--only {wildcards.filename}",
                 "--link" if config.get('nrn_merge', "copy") == "link" else "",
@@ -491,7 +488,7 @@ rule touch2parquet:
 
     shell:
         bbp_env(
-            ['nix/hpc/spykfunc'],
+            ['parquet-converters'],
             ["cd %s" % os.path.join(TOUCHES_DIR, "parquet"),
              "&&",
              "touch2parquetp ../touchesData.*"
@@ -502,7 +499,7 @@ rule touch2parquet:
 
 def run_spykfunc(rule, output_dir, enable_pruning):
     return bbp_env(
-        ['nix/hpc/spykfunc'],
+        ['spykfunc'],
         ["env",
             "SPARK_USER=$(whoami)",
          "sm_run",
@@ -586,7 +583,7 @@ rule parquet2syn2:
 
     shell:
         bbp_env(
-            ['parquet-converters/0.2.1'],
+            ['parquet-converters'],
             ["parquet2syn2p",
                 "-o {output}",
                 "{wildcards.nrn_dir}/spykfunc/circuit.parquet/*.parquet",
@@ -608,8 +605,8 @@ rule targetgen_mvd3:
 
     shell:
         bbp_env(
-            ['nix/nse/brainbuilder'],
-            ["brainbuilder targets from_mvd3",
+            ['brainbuilder'],
+            ["brainbuilder targets from-mvd3",
                 ("--targets %s" % bioname_path(config['targetgen_mvd3']['targets'])
                     if 'targets' in config.get('targetgen_mvd3', {}) else ""),
                 ("--allow-empty"
@@ -647,8 +644,8 @@ rule mvd3to2:
 
     shell:
         bbp_env(
-            ['nix/nse/brainbuilder'],
-            ["brainbuilder mvd3 to_mvd2",
+            ['brainbuilder'],
+            ["brainbuilder mvd3 to-mvd2",
                 "--morph-dir {MORPH_RELEASE}",
                 "--output {output}"
             ],
@@ -717,8 +714,8 @@ rule mvd3_to_sonata:
 
     shell:
         bbp_env(
-            ['nix/nse/brainbuilder'],
-            ["brainbuilder mvd3 to_sonata",
+            ['brainbuilder'],
+            ["brainbuilder mvd3 to-sonata",
                 "--output {output}",
                 "{input}"
             ],
@@ -738,8 +735,8 @@ rule syn2_to_sonata:
 
     shell:
         bbp_env(
-            ['nix/nse/brainbuilder'],
-            ["brainbuilder syn2 to_sonata",
+            ['brainbuilder'],
+            ["brainbuilder syn2 to-sonata",
                 "--output {output}",
                 "{input}"
             ],
@@ -759,7 +756,7 @@ rule subcellular:
 
     shell:
         bbp_env(
-            ['nix/nse/brainbuilder'],
+            ['brainbuilder'],
             ["brainbuilder subcellular assign",
                 "--gene-expressions {config[subcellular][gene_expressions]}",
                 "--gene-mapping {config[subcellular][gene_mapping]}",
@@ -785,7 +782,7 @@ rule place_astrocytes:
 
     shell:
         bbp_env(
-            ['nix/nse/brainbuilder'],
+            ['brainbuilder'],
             ["brainbuilder astrocytes place",
                 "--atlas",
                     ATLAS,
@@ -820,7 +817,7 @@ rule astrocyte_domains_tesselate:
 
     shell:
         bbp_env(
-            ['nix/nse/brainbuilder'],
+            ['brainbuilder'],
             ["brainbuilder astrocytes domains tesselate",
                 "--atlas",
                     ATLAS,
@@ -850,7 +847,7 @@ rule astrocyte_domains_overlap:
 
     shell:
         bbp_env(
-            ['nix/nse/brainbuilder'],
+            ['brainbuilder'],
             ["brainbuilder astrocytes domains overlap",
                 "--distr",
                     enquote("{config[astrocyte_domains_overlap][overlap]}"),
@@ -877,7 +874,7 @@ rule astrocyte_domains_mesh:
 
     shell:
         bbp_env(
-            ['nix/nse/brainbuilder'],
+            ['brainbuilder'],
             ["brainbuilder astrocytes domains mesh",
                 "--output",
                     "{output}",

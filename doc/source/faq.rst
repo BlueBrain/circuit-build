@@ -87,14 +87,14 @@ Please refer to `Snakemake <http://snakemake.readthedocs.io/en/stable/index.html
 Troubleshooting
 ---------------
 
-Unable to locate Nix module
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Unable to locate module
+~~~~~~~~~~~~~~~~~~~~~~~
 
 If some phase fails with a message like:
 
 .. code-block:: bash
 
-    ModuleCmd_Load.c(213):ERROR:105: Unable to locate a modulefile for 'nix/nse/brainbuilder'
+    ModuleCmd_Load.c(213):ERROR:105: Unable to locate a modulefile for 'brainbuilder'
     /bin/bash: brainbuilder: command not found
 
 most likely it indicates that an older archive release is used where corresponding module is not available yet.

@@ -37,12 +37,12 @@ s2s:
 
 spykfunc_s2f:
   jobname: s2f_spark
-  salloc: '-A proj44 -p prod_small --time 0:15:00 -N2'
+  salloc: '-A proj44 -p prod_small --time 0:15:00'
   sm_run: '-H'
 
 spykfunc_s2s:
   jobname: s2s_spark
-  salloc: '-A proj44 -p prod_small --time 0:15:00 -N2'
+  salloc: '-A proj44 -p prod_small --time 0:15:00'
 
 spatial_index_segment:
   jobname: segment_index
