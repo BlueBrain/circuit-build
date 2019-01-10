@@ -425,7 +425,7 @@ rule touchdetector:
 
 def run_functionalizer(rule, output_dir, enable_pruning):
     return bbp_env(
-        ['functionalizer'],
+        ['functionalizer/3.11.0'],
         ["env",
             "BGLOCKLESSMPIO_F_TYPE=0x47504653",
          "functionalizer",
@@ -502,7 +502,7 @@ rule nrn_merge:
 
     shell:
         bbp_env(
-            ['brainbuilder'],
+            ['nix/nse/brainbuilder'],
             ["brainbuilder nrn merge {wildcards.nrn_dir}",
                 "--only {wildcards.filename}",
                 "--link" if config.get('nrn_merge', "copy") == "link" else "",
