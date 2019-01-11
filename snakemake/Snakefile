@@ -224,7 +224,7 @@ rule place_cells:
     shell:
         bbp_env(
             ['brainbuilder'],
-            ["brainbuilder cells create2",
+            ["brainbuilder cells place",
                 "--composition",
                     bioname_path("cell_composition.yaml"),
                 "--mtype-taxonomy",
@@ -235,6 +235,8 @@ rule place_cells:
                     ATLAS_CACHE_DIR,
                 ("--region " + config['common']['region']
                     if 'region' in config['common'] else ""),
+                ("--mask " + config['common']['mask']
+                    if 'mask' in config['common'] else ""),
                 "--soma-placement",
                     config['place_cells']['soma_placement'],
                 "--density-factor",

@@ -1,6 +1,7 @@
 common:
   atlas: /gpfs/bbp.cscs.ch/project/proj66/entities/dev/atlas/O1-152
   region: 'mc2_Column'
+  mask: '[mask]mc2'
   morph_release: /gpfs/bbp.cscs.ch/project/proj66/entities/morphologies/2018.02.16
   emodel_release: /gpfs/bbp.cscs.ch/project/proj66/entities/emodels/2018.02.26.dev0
   sw_release: null

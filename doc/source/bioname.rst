@@ -50,7 +50,8 @@ It starts with `common` section:
 
     common:
         atlas: http://voxels.nexus.apps.bbp.epfl.ch/api/analytics/atlas/releases/77831ACA-6198-4AA0-82EF-D0475A4E0647
-        region_ids: [120]
+        region: 'SSp-ll'
+        mask: 'left-hemisphere'
         morph_release: /gpfs/bbp.cscs.ch/project/proj59/entities/morphologies/2017.10.31
         emodel_release: /gpfs/bbp.cscs.ch/project/proj64/entities/emodels/2017.11.03
         sw_release: 2018-04-06
@@ -63,10 +64,20 @@ Please refer to :ref:`ref-phases` for each phase config description.
 **atlas**
     Atlas URL in VoxelBrain or local folder path.
 
-**region_ids**
-    Region IDs to populate (to use only subset of the atlas).
+**region**
+    Region to populate (to use only subset of the atlas).
 
-    Optional; if omitted all atlas space would be used.
+    If provided, looks for corresponding region *acronym*.
+
+    Optional; if omitted region mask is not applied.
+
+**mask**
+    Volumetric mask to populate (to use only subset of the atlas).
+
+    | If provided, looks for corresponding dataset in the atlas (should be of ``(u)int8`` datatype).
+    | Could be used both with or without **region** (in the former case, two masks are intersected).
+
+    Optional; if omitted volumetric mask is not applied.
 
 **morph_release**
     Path to morphology release folder.
