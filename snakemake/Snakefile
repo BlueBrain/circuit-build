@@ -75,8 +75,12 @@ def bbp_env(modules, command, dump_log=False, slurm_env=None, skip_srun=False):
 
     sw_release = config['common']['sw_release']
     if sw_release is None:
+        modulepath = ":".join(
+            "/gpfs/bbp.cscs.ch/apps/hpc/jenkins/modules/%s/2019-01/tcl/linux-rhel7-x86_64" % dirname
+            for dirname in os.listdir("/gpfs/bbp.cscs.ch/apps/hpc/jenkins/modules/")
+        )
         full_cmd.append(
-            "export MODULEPATH=${{MODULEPATH}}:/gpfs/bbp.cscs.ch/apps/hpc/jenkins/deploy/applications/2018-12-19/modules/tcl/linux-rhel7-x86_64"
+            "export MODULEPATH=${{MODULEPATH}}:" + modulepath
         )
     else:
         full_cmd.append(
@@ -526,7 +530,7 @@ rule touch2parquet:
 
     shell:
         bbp_env(
-            ['parquet-converters'],
+            ['parquet-converters/0.3'],
             ["cd %s" % os.path.join(TOUCHES_DIR, "parquet"),
              "&&",
              "touch2parquetp ../touchesData.*"
@@ -537,7 +541,7 @@ rule touch2parquet:
 
 def run_spykfunc(rule, output_dir, enable_pruning):
     return bbp_env(
-        ['spykfunc'],
+        ['spykfunc', 'python/3.6.5'],
         ["env",
             "SPARK_USER=$(whoami)",
          "sm_run",
@@ -621,7 +625,7 @@ rule parquet2syn2:
 
     shell:
         bbp_env(
-            ['parquet-converters'],
+            ['parquet-converters/0.3'],
             ["parquet2syn2p",
                 "-o {output}",
                 "{wildcards.nrn_dir}/spykfunc/circuit.parquet/*.parquet",
