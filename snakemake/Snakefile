@@ -633,27 +633,6 @@ rule symlink_start_target:
         'cd {wildcards.nrn_dir} && ln -s ../../{input}'
 
 
-rule mvd3to2:
-    message:
-        "MVD3 -> MVD2 (if applicable; for backwards compatibility)"
-
-    input:
-        'circuit.mvd3'
-
-    output:
-        'circuit.mvd2'
-
-    shell:
-        bbp_env(
-            ['brainbuilder'],
-            ["brainbuilder mvd3 to-mvd2",
-                "--morph-dir {MORPH_RELEASE}",
-                "--output {output}"
-            ],
-            slurm_env='mvd3to2'
-        )
-
-
 rule target_spatial_index_segment:
     message:
         "Generate segment spatial index for a given target"
