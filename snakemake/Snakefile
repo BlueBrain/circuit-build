@@ -27,21 +27,12 @@ NRN_FILES = [
     'nrn_summary.h5',
 ]
 
-INDEX_FILES = [
-    '_index.dat',
-    '_index.idx',
-    '_payload.dat',
-]
-
 LOGS_DIR = "logs"
-
-SEGMENT_INDEX = expand('SEGMENT{filename}', filename=INDEX_FILES)
 
 TOUCHES_DIR = "connectome/touches"
 
 NRN_FUNCTIONAL_DIR = "connectome/functional"
 NRN_FUNCTIONAL_DATA = expand(NRN_FUNCTIONAL_DIR + '/{filename}', filename=NRN_FILES)
-NRN_FUNCTIONAL_INDEX = expand(NRN_FUNCTIONAL_DIR + '/SYNAPSE{filename}', filename=INDEX_FILES)
 
 NRN_STRUCTURAL_DIR = "connectome/structural"
 NRN_STRUCTURAL_DATA = expand(NRN_STRUCTURAL_DIR + '/{filename}', filename=NRN_FILES)
@@ -116,6 +107,17 @@ def bbp_env(modules, command, dump_log=False, slurm_env=None, skip_srun=False):
     return result
 
 
+def spatial_index_files(prefix):
+    return [
+        "%s_%s" % (prefix, filename)
+        for filename in [
+            'index.dat',
+            'index.idx',
+            'payload.dat',
+        ]
+    ]
+
+
 localrules:
     all,
     functional,
@@ -130,49 +132,6 @@ localrules:
 rule all:
     input:
         PRE_FUNCTIONAL
-
-
-rule functional:
-    input:
-        PRE_FUNCTIONAL,
-        NRN_FUNCTIONAL_DATA,
-
-
-rule functional_syn2:
-    input:
-        PRE_FUNCTIONAL,
-        NRN_FUNCTIONAL_DIR + '/circuit.syn2',
-
-
-rule functional_sonata:
-    input:
-        PRE_FUNCTIONAL,
-        'nodes.sonata',
-        NRN_FUNCTIONAL_DIR + '/edges.sonata',
-
-
-rule functional_all:
-    input:
-        PRE_FUNCTIONAL,
-        NRN_FUNCTIONAL_DATA,
-        NRN_FUNCTIONAL_INDEX,
-        SEGMENT_INDEX,
-
-
-rule structural:
-    input:
-        'CircuitConfig_struct',
-        'circuit.mvd3',
-        NRN_STRUCTURAL_DIR + '/start.target',
-        NRN_STRUCTURAL_DATA,
-
-
-rule structural_syn2:
-    input:
-        'CircuitConfig_struct',
-        'circuit.mvd3',
-        NRN_STRUCTURAL_DIR + '/start.target',
-        NRN_STRUCTURAL_DIR + '/circuit.syn2',
 
 
 def build_circuit_config(nrn_path):
@@ -695,28 +654,63 @@ rule mvd3to2:
         )
 
 
-rule spatial_index_segment:
+rule target_spatial_index_segment:
     message:
-        "Generate segment spatial index"
+        "Generate segment spatial index for a given target"
 
     input:
         PRE_FUNCTIONAL
 
     output:
-        SEGMENT_INDEX
+        spatial_index_files('indices/{target}/SEGMENT')
 
     log:
-        log_path('spatial_index_segment')
+        log_path('spatial_index_segment_{target}')
 
     shell:
         bbp_env(
             ['nix/hpc/flatindexer'],
             [
-             "SDKGenerator CircuitConfig segment All SEGMENT",
+             "cd indices/{wildcards.target} &&"
+             "SDKGenerator",
+                "../../CircuitConfig",
+                "segment",
+                "{wildcards.target}",
+                "SEGMENT",
             ],
             dump_log=True,
             slurm_env='spatial_index_segment'
         )
+
+
+def segment_index_files(_):
+    targets = config.get('spatial_index_segment', {}).get('targets', ['All'])
+    return sum([
+        spatial_index_files('indices/%s/SEGMENT' % target)
+        for target in targets
+    ], [])
+
+
+rule spatial_index_segment:
+    message:
+        "Generate segment spatial indices"
+
+    input:
+        segment_index_files
+
+
+rule symlink_spatial_index_segment:
+    message:
+        "Symlink default segment spatial index"
+
+    output:
+        spatial_index_files('SEGMENT')
+
+    shell:
+        "\n".join(
+            "ln -sf %s" % filename for filename in spatial_index_files('indices/All/SEGMENT')
+        )
+
 
 
 rule spatial_index_synapse:
@@ -728,7 +722,7 @@ rule spatial_index_synapse:
         NRN_FUNCTIONAL_DATA,
 
     output:
-        NRN_FUNCTIONAL_INDEX
+        spatial_index_files(NRN_FUNCTIONAL_DIR + '/SYNAPSE')
 
     log:
         log_path('spatial_index_synapse')
@@ -924,6 +918,49 @@ rule astrocyte_domains_mesh:
             ],
             slurm_env='astrocyte_domains_mesh'
         )
+
+
+rule functional:
+    input:
+        PRE_FUNCTIONAL,
+        NRN_FUNCTIONAL_DATA,
+
+
+rule functional_syn2:
+    input:
+        PRE_FUNCTIONAL,
+        NRN_FUNCTIONAL_DIR + '/circuit.syn2',
+
+
+rule functional_sonata:
+    input:
+        PRE_FUNCTIONAL,
+        'nodes.sonata',
+        NRN_FUNCTIONAL_DIR + '/edges.sonata',
+
+
+rule functional_all:
+    input:
+        rules.functional.input,
+        rules.spatial_index_segment.input,
+        spatial_index_files('SEGMENT'),
+        spatial_index_files(NRN_FUNCTIONAL_DIR + '/SYNAPSE'),
+
+
+rule structural:
+    input:
+        'CircuitConfig_struct',
+        'circuit.mvd3',
+        NRN_STRUCTURAL_DIR + '/start.target',
+        NRN_STRUCTURAL_DATA,
+
+
+rule structural_syn2:
+    input:
+        'CircuitConfig_struct',
+        'circuit.mvd3',
+        NRN_STRUCTURAL_DIR + '/start.target',
+        NRN_STRUCTURAL_DIR + '/circuit.syn2',
 
 
 rule ngv:
