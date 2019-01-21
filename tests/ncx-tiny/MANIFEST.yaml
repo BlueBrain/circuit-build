@@ -25,11 +25,6 @@ targetgen_mvd3:
 s2f:
   seeds: [11, 12, 13, 14]
 
-spatial_index_segment:
-  targets:
-    - All
-    - bNAC
-
 projectionizer:
   Thalamocortical_VPM_1: {}
   Thalamocortical_VPM_2: {}

@@ -216,25 +216,6 @@ Convert `Spark Functionalizer <https://bbpteam.epfl.ch/documentation/#spykfunc>`
     We use MPI-enabled version of the converter; thus it is beneficial to configure an allocation with multiple tasks.
 
 
-.. _ref-phase-spatial-index-segment:
-
-spatial_index_segment
----------------------
-
-Generate segment spatial index.
-
-Parameters
-~~~~~~~~~~
-
-**targets**
-
-    List of targets to generate index for.
-
-    Generated indices would be placed to ``indices/{target}/`` subfolder(s).
-
-    Optional; if omitted single index is built for ``All`` target.
-
-
 .. _ref-phase-subcellular:
 
 subcellular
