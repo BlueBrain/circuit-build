@@ -1,6 +1,11 @@
 How to create a new circuit build
 =================================
 
+.. note::
+
+    | Neocortex circuit building pipeline has diverged from the "master" one.
+    | Please make sure to check :ref:`ref-neocortex` section after reading the main tutorial.
+
 Preparation
 -----------
 

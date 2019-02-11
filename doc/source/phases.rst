@@ -72,13 +72,20 @@ Parameters
 **alpha**
     Use `score ** alpha` as morphology choice probability.
 
-**max_fail_ratio**
-    Max failure ratio for any mtype (floating point number from 0.0 to 1.0).
-
-    Optional; if omitted, defaults to 0.0 (i.e. no failures allowed).
-
 **seed**
     Pseudo-random generator seed.
+
+
+.. _ref-phase-assign-morphologies:
+
+assign_morphologies
+-------------------
+
+Assign morphologies chosen with ``choose_morphologies`` to MVD3.
+
+**max_drop_ratio**
+    | Maximal ratio of positions that can be dropped for each mtype (due to failure to pick an morphology).
+    | Optional, if not provided, defaults to 0.0 (i.e., no position dropping allowed).
 
 
 .. _ref-phase-assign-emodels:

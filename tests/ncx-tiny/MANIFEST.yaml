@@ -12,9 +12,11 @@ place_cells:
   seed: 0
 
 choose_morphologies:
-  max_fail_ratio: 0.5
   alpha: 3.0
   seed: 0
+
+assign_morphologies:
+  max_drop_ratio: 0.5
 
 assign_emodels:
   seed: 0

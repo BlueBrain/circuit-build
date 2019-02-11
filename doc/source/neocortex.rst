@@ -1,0 +1,91 @@
+.. _ref-neocortex:
+
+Neocortex
+=========
+
+Neocortex circuit building pipeline has diverged from "master" branch in a number of aspects:
+
+ - synthesizing detailed morphologies "on-the-fly"
+ - using Spark Functionalizer instead of C++ one
+ - running TouchDetector / Functionalizer region-by-region
+ - running segment spatial index region-by-region
+
+Temporarily not available:
+
+ - electrical models assignment
+ - synapse spatial index
+
+Circuit data
+------------
+
+ * detailed morphologies are now generated as a part of circuit build and can be found in ``morphologies`` folder
+ * connectome is stored in multiple SYN2 files (one per region): ``connectome/functional/{region}/circuit.syn2``
+ * segment index is also chunked: ``spatial_index/{region}/SEGMENT``.
+
+Snakefile
+---------
+
+Please checkout *ncx* branch of ``circuit-build``:
+
+.. code-block:: bash
+
+    $ git clone ssh://bbpcode.epfl.ch/common/circuit-build
+    $ git checkout ncx
+
+Bioname
+-------
+
+1. ``extNeuronDB.dat`` is no longer used.
+Instead, one should provide ``neurondb-axon.dat`` file with a list of morphologies to be used as "axon donors" for synthesized dendritic trees.
+
+2. Synthesis requires two additional files in ``bioname`` folder:
+
+  * ``tmd_distributions.json``
+  * ``tmd_parameters.json``
+
+3. ``choose_morphologies`` and ``assign_morphologies`` phases are removed from ``MANIFEST.yaml`` and ``cluster.yaml``.
+
+:ref:`ref-phase-choose-axons` and :ref:`ref-phase-synthesize-morphologies` phases (see below) replace them.
+
+
+.. _ref-phase-choose-axons:
+
+choose_axons
+------------
+
+Pick axons for each position using "placement hints" approach.
+
+Parameters
+~~~~~~~~~~
+
+**alpha**
+    Use `score ** alpha` as morphology choice probability.
+
+**scales**
+    | Scaling factors to try for each axon.
+    | Optional; if not provided, axons would be checked "as is", with no scaling applied.
+
+**seed**
+    Pseudo-random generator seed.
+
+
+.. _ref-phase-synthesize-morphologies:
+
+synthesize_morphologies
+-----------------------
+
+Parameters
+~~~~~~~~~~
+
+Synthesize somas and dendritic trees; graft pre-chosen axons.
+
+**max_drop_ratio**
+    | Maximal ratio of positions that can be dropped for each mtype (due to failure to pick an axon).
+    | Optional, if not provided, defaults to 0.0 (i.e., no position dropping allowed).
+
+**max_files_per_dir**
+    | Maximal number of files per folder in hierarchical morphologies folder.
+    | Optional, if not provided, defaults to 256.
+
+**seed**
+    Pseudo-random generator seed.

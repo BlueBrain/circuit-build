@@ -76,7 +76,7 @@ def bbp_env(modules, command, dump_log=False, slurm_env=None, skip_srun=False):
     sw_release = config['common']['sw_release']
     if sw_release is None:
         modulepath = ":".join(
-            "/gpfs/bbp.cscs.ch/apps/hpc/jenkins/modules/%s/2019-01/tcl/linux-rhel7-x86_64" % dirname
+            "/gpfs/bbp.cscs.ch/apps/hpc/jenkins/modules/%s/2019-02/tcl/linux-rhel7-x86_64" % dirname
             for dirname in os.listdir("/gpfs/bbp.cscs.ch/apps/hpc/jenkins/modules/")
         )
         full_cmd.append(
@@ -263,7 +263,7 @@ rule choose_morphologies:
         'circuit.mvd3.metypes'
 
     output:
-        temp('morphologies.tsv')
+        'morphologies.tsv'
 
     log:
         log_path('choose_morphologies')
@@ -288,8 +288,6 @@ rule choose_morphologies:
                     config['choose_morphologies']['alpha'],
                 "--seed",
                     config['choose_morphologies']['seed'],
-                "--max-fail-ratio",
-                    config['choose_morphologies'].get('max_fail_ratio', 0.0),
                 "--output",
                     "{output}",
             ],
@@ -324,7 +322,8 @@ rule assign_morphologies:
                     ATLAS,
                 "--atlas-cache",
                     ATLAS_CACHE_DIR,
-                "--dropna",
+                "--max-drop-ratio",
+                    config['assign_morphologies'].get('max_drop_ratio', 0.0),
                 "--out-mvd3",
                     "{output}",
             ],

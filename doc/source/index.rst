@@ -8,5 +8,6 @@ Introduction
    bioname
    atlas
    tutorial
+   neocortex
    phases
    faq
