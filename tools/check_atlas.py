@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 """
 Smoke test if VoxelBrain atlas can be used for circuit building.
@@ -47,7 +47,7 @@ def check_aligned(vd, ref_vd):
     eq_(vd.offset, ref_vd.offset, "Offset")
 
 
-class CheckHierarchy(object):
+class CheckHierarchy:
     def __init__(self):
         self.title = "hierarchy"
 
@@ -66,7 +66,7 @@ class CheckHierarchy(object):
             )
 
 
-class CheckVoxelData(object):
+class CheckVoxelData:
     def __init__(self, name, payload_shape=()):
         self.name = name
         self.payload_shape = payload_shape
@@ -130,7 +130,7 @@ def run_checks(checks, atlas):
             traceback.print_exc()
             message += "\033[91mFAIL\033[0m"
             result = False
-        print message
+        print(message)
 
     return result
 
