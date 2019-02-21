@@ -177,7 +177,7 @@ rule structural_syn2:
 
 def build_circuit_config(nrn_path):
     return bbp_env(
-        ['jinja2-cli'],
+        ['python-dev'],
         ["jinja2 --strict",
             "-D CIRCUIT_PATH=%s" % os.path.abspath(CIRCUIT_DIR),
             "-D NRN_PATH=%s" % os.path.abspath(nrn_path),
