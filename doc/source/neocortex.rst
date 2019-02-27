@@ -89,3 +89,51 @@ Synthesize somas and dendritic trees; graft pre-chosen axons.
 
 **seed**
     Pseudo-random generator seed.
+
+
+Chunked local connectome
+------------------------
+
+To specify regions for which TouchDetector (and Functionalizer) would be run, please list them in ``touchdetector`` section in ``MANIFEST.yaml`` like in the example below:
+
+::
+
+    touchdetector:
+      targets:
+        - 'SSp-ll@left'
+        - 'SSp-ll@right'
+        - ...
+
+For each of the regions, the following files would be produced:
+
+::
+
+    connectome/[structural|functional]/<region>/CircuitConfig
+    connectome/[structural|functional]/<region>/circuit.syn2
+    connectome/[structural|functional]/<region>/edges.sonata
+    sonata/networks/[structural|functional]/<region>.edges.h5
+
+| Each of these ``CircuitConfig``\`s will reference corresponding ``edges.sonata`` file as ``nrnPath``.
+| MVD3 is shared between all the "sub-circuits".
+
+
+Chunked segment index
+---------------------
+
+Analogous to local connectome, to specify regions for which FLATIndex would be run, please list them in ``spatial_index_segment`` section in ``MANIFEST.yaml``:
+
+::
+
+    spatial_index_segment:
+      targets:
+        - 'SSp-ll@left'
+        - 'SSp-ll@right'
+        - ...
+
+For each of the regions, the following files would be produced:
+
+::
+
+    indices/<region>/SEGMENT_index.dat
+    indices/<region>/SEGMENT_index.idx
+    indices/<region>/SEGMENT_payload.dat
