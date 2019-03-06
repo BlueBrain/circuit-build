@@ -47,6 +47,15 @@ Instead, one should provide ``neurondb-axon.dat`` file with a list of morphologi
 
 :ref:`ref-phase-choose-axons` and :ref:`ref-phase-synthesize-morphologies` phases (see below) replace them.
 
+4. ``builder[Connectivity]RecipeAllPathways.xml`` is provided for every region (see :ref:`ref-chunked-local-connectome`).
+
+
+place_cells
+-----------
+
+``FAST_HEMISPHERE`` special value can be used in place of dataset name when defining :ref:`atlas-based properties <ref-phase-place-cells>`.
+
+Unlike regular atlas-based property, no volumetric dataset would be queried; cell property values would be chosen based on Z-coordinate: ``(z < 5700) ? "left" : "right")``.
 
 .. _ref-phase-choose-axons:
 
@@ -91,6 +100,8 @@ Synthesize somas and dendritic trees; graft pre-chosen axons.
     Pseudo-random generator seed.
 
 
+.. _ref-chunked-local-connectome:
+
 Chunked local connectome
 ------------------------
 
@@ -104,17 +115,29 @@ To specify regions for which TouchDetector (and Functionalizer) would be run, pl
         - 'SSp-ll@right'
         - ...
 
+Each of these regions should have corresponding ``builder[Connectivity]RecipeAllPathways.xml`` in the ``bioname/functional`` folder:
+
+::
+
+    bioname/functional/<region>/builder[Connectivity]RecipeAllPathways.xml
+    bioname/functional/<region>/builderRecipeAllPathways.xml
+
+.. warning::
+
+    | In case you opt to use symlinks for sharing common ``builderRecipeAllPathways.xml`` between regions, we recommend to avoid placing ``builderConnectivityRecipeAllPathways.xml`` near that one, to avoid surprises with symlinks being resolved.
+    | We are working on revising the recipes used by ``TouchDetector`` and ``Functionalizer`` to make managing them less tedious and error-prone.
+
 For each of the regions, the following files would be produced:
 
 ::
 
-    connectome/[structural|functional]/<region>/CircuitConfig
-    connectome/[structural|functional]/<region>/circuit.syn2
-    connectome/[structural|functional]/<region>/edges.sonata
-    sonata/networks/[structural|functional]/<region>.edges.h5
+    connectome/[structural|functional]/<region>/CircuitConfig-[aff|eff]
+    connectome/[structural|functional]/<region>/circuit-[aff|eff].syn2
+    connectome/[structural|functional]/<region>/edges-[aff|eff].sonata
+    sonata/networks/[structural|functional]/<region>.edges-[aff|eff].h5
 
-| Each of these ``CircuitConfig``\`s will reference corresponding ``edges.sonata`` file as ``nrnPath``.
-| MVD3 is shared between all the "sub-circuits".
+Each SYN2 and SONATA file has two copies: one sorted by postsynaptic GID (``-aff``); and another sorted by presynaptic GID (``-eff``). ``CircuitConfig-[aff|eff]`` references corresponding ``edges-[aff|eff].sonata`` file as ``nrnPath``; MVD3 is shared between all the "sub-circuits".
+
 
 
 Chunked segment index
