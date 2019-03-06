@@ -54,7 +54,6 @@ It starts with `common` section:
         mask: 'left-hemisphere'
         morph_release: /gpfs/bbp.cscs.ch/project/proj59/entities/morphologies/2017.10.31
         emodel_release: /gpfs/bbp.cscs.ch/project/proj64/entities/emodels/2017.11.03
-        sw_release: 2018-04-06
 
 and follows with a separate section for each phase.
 
@@ -99,11 +98,6 @@ Please refer to :ref:`ref-phases` for each phase config description.
       * ``hoc`` folder with model HOC templates
       * ``mecombo_emodel.tsv`` file with *me_combo* parameters
 
-**sw_release**
-    `BBP archive S/W modules <https://bbpteam.epfl.ch/project/spaces/display/BBPHPC/BBP+ARCHIVE+SOFTWARE+MODULES>`_ to use.
-
-.. tip::
-    If `sw_release` is set to `null`, modules available in the current environment would be used. This feature is meant for development purposes; we strongly recommend to use some specific release for the "public" circuits.
 
 An example of full ``MANIFEST.yaml``:
 

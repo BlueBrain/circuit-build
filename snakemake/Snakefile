@@ -53,6 +53,33 @@ PRE_FUNCTIONAL = [
 ]
 
 
+SPACK_MODULE_DIR = '/gpfs/bbp.cscs.ch/apps/hpc/jenkins/modules/{}/2019-03/tcl/linux-rhel7-x86_64/'
+NIX_MODULE_DIR = '/nix/var/nix/profiles/per-user/modules/bb5-x86_64/modules-all/release/share/modulefiles/'
+
+MODULES = {
+    'brainbuilder':
+        SPACK_MODULE_DIR.format('applications') + 'brainbuilder/0.10.2/python3',
+    'flatindexer':
+        NIX_MODULE_DIR + 'nix/hpc/flatindexer/1.8.12',
+    'functionalizer':
+        SPACK_MODULE_DIR.format('applications') +  'functionalizer/3.11.0',
+    'jinja2':
+        NIX_MODULE_DIR + 'nix/py27/jinja2/0.6.0',
+    'parquet-converters':
+        SPACK_MODULE_DIR.format('applications') + 'parquet-converters/0.3',
+    'placement-algorithm':
+        SPACK_MODULE_DIR.format('applications') + 'placement-algorithm/2.0.7/python3',
+    'python3.6':
+        SPACK_MODULE_DIR.format('serial-libraries') + 'python/3.6.5',
+    'spykfunc':
+        SPACK_MODULE_DIR.format('applications') + 'spykfunc/0.13.0/python3',
+    'synapsetool':
+        SPACK_MODULE_DIR.format('applications') + 'synapsetool/0.4.1/parallel',
+    'touchdetector':
+        SPACK_MODULE_DIR.format('applications') +  'touchdetector/4.4.1',
+}
+
+
 def enquote(value, quote="'"):
     return quote + value + quote
 
@@ -67,37 +94,20 @@ def log_path(name):
 
 
 def template_path(name):
-    return os.path.join(workflow.basedir, 'templates', name + ".j2")
+    return os.path.join(workflow.basedir, 'templates', name)
+
+
+def _modulepath(module):
+    if module not in MODULES:
+        raise RuntimeError("Module not specified: '%s'" % module)
+    result = MODULES[module]
+    if not os.path.exists(result):
+        raise RuntimeError("Module not found: '%s'" % result)
+    return result
 
 
 def bbp_env(modules, command, dump_log=False, slurm_env=None, skip_srun=False):
-    full_cmd = []
-
-    sw_release = config['common']['sw_release']
-    if sw_release is None:
-        modulepath = ":".join(
-            "/gpfs/bbp.cscs.ch/apps/hpc/jenkins/modules/%s/2019-02/tcl/linux-rhel7-x86_64" % dirname
-            for dirname in os.listdir("/gpfs/bbp.cscs.ch/apps/hpc/jenkins/modules/")
-        )
-        full_cmd.append(
-            "export MODULEPATH=${{MODULEPATH}}:" + modulepath
-        )
-    else:
-        full_cmd.append(
-            "export MODULEPATH=/gpfs/bbp.cscs.ch/apps/hpc/spack-deployments/{sw_release}/modules/tcl/linux-rhel7-x86_64".format(
-                sw_release=sw_release
-            )
-        )
-
-    if modules:
-        full_cmd.extend([
-            "module purge",
-            "module load " + " ".join(modules),
-        ])
-
-    full_cmd.append(" ".join(map(str, command)))
-
-    result = " && ".join(full_cmd)
+    result = " ".join(map(str, command))
 
     if (slurm_env is not None) and cluster_config:
         if slurm_env not in cluster_config:
@@ -110,21 +120,19 @@ def bbp_env(modules, command, dump_log=False, slurm_env=None, skip_srun=False):
             cmd=escape_single_quotes(result)
         )
 
+    if modules:
+        result = "(" + " && ".join([
+            "export MODULEPATH=",
+            "module purge",
+            "module load " + " ".join(map(_modulepath, modules)),
+            "module list",
+            result,
+        ]) + ")"
+
     if dump_log:
         result += " 2>&1 | tee {log}"
 
     return result
-
-
-localrules:
-    all,
-    functional,
-    functional_all,
-    structural,
-    circuitconfig,
-    circuitconfig_struct,
-    symlink_start_target,
-    ngv
 
 
 rule all:
@@ -177,7 +185,7 @@ rule structural_syn2:
 
 def build_circuit_config(nrn_path):
     return bbp_env(
-        ['python-dev'],
+        ['jinja2'],
         ["jinja2 --strict",
             "-D CIRCUIT_PATH=%s" % os.path.abspath(CIRCUIT_DIR),
             "-D NRN_PATH=%s" % os.path.abspath(nrn_path),
@@ -188,7 +196,7 @@ def build_circuit_config(nrn_path):
             "-D ATLAS={ATLAS}",
             ("-D PROJECTIONS=%s" % ":".join(config['projectionizer'])
                 if 'projectionizer' in config else ""),
-            template_path('CircuitConfig'),
+            template_path('CircuitConfig.j2'),
             "> {output}",
         ]
     )
@@ -220,7 +228,7 @@ rule place_cells:
         "Generate cell positions; assign me-types"
 
     output:
-        'circuit.mvd3.metypes'
+        'circuit.mvd3.somata'
 
     log:
         log_path('place_cells')
@@ -245,6 +253,14 @@ rule place_cells:
                     config['place_cells']['soma_placement'],
                 "--density-factor",
                     config['place_cells'].get('density_factor', 1.0),
+            ] + [
+                "--atlas-property %s %s" % item
+                for item in config['place_cells'].get('atlas_property', {'region': '~brain_regions'}).items()
+            ] + [
+                ("--append-hemisphere"
+                    if config['place_cells'].get('append_hemisphere', False) else ""),
+                ("--sort-by " + ",".join(config['place_cells']['sort_by'])
+                    if 'sort_by' in config['place_cells'] else ""),
                 "--seed",
                     config['place_cells']['seed'],
                 "--output",
@@ -260,7 +276,7 @@ rule choose_morphologies:
         "Choose morphologies using 'placement hints' approach"
 
     input:
-        'circuit.mvd3.metypes'
+        'circuit.mvd3.somata'
 
     output:
         'morphologies.tsv'
@@ -301,7 +317,7 @@ rule assign_morphologies:
         "Assign morphologies"
 
     input:
-        mvd3 = 'circuit.mvd3.metypes',
+        mvd3 = 'circuit.mvd3.somata',
         morph = 'morphologies.tsv'
 
     output:
@@ -430,7 +446,7 @@ rule touchdetector:
 
 def run_functionalizer(rule, output_dir, enable_pruning):
     return bbp_env(
-        ['functionalizer/3.11.0'],
+        ['functionalizer'],
         ["env",
             "BGLOCKLESSMPIO_F_TYPE=0x47504653",
          "functionalizer",
@@ -529,7 +545,7 @@ rule touch2parquet:
 
     shell:
         bbp_env(
-            ['parquet-converters/0.3'],
+            ['parquet-converters'],
             ["cd %s" % os.path.join(TOUCHES_DIR, "parquet"),
              "&&",
              "touch2parquetp ../touchesData.*"
@@ -540,7 +556,7 @@ rule touch2parquet:
 
 def run_spykfunc(rule, output_dir, enable_pruning):
     return bbp_env(
-        ['spykfunc', 'python/3.6.5'],
+        ['spykfunc', 'python3.6'],
         ["env",
             "SPARK_USER=$(whoami)",
          "sm_run",
@@ -624,7 +640,7 @@ rule parquet2syn2:
 
     shell:
         bbp_env(
-            ['parquet-converters/0.3'],
+            ['parquet-converters'],
             ["parquet2syn2p",
                 "-o {output}",
                 "{wildcards.nrn_dir}/spykfunc/circuit.parquet/*.parquet",
@@ -688,7 +704,7 @@ rule spatial_index_segment:
 
     shell:
         bbp_env(
-            ['nix/hpc/flatindexer'],
+            ['flatindexer'],
             [
              "SDKGenerator CircuitConfig segment All SEGMENT",
             ],
@@ -713,7 +729,7 @@ rule spatial_index_synapse:
 
     shell:
         bbp_env(
-            ['nix/hpc/flatindexer'],
+            ['flatindexer'],
             [
              "SDKGenerator CircuitConfig synapse All {NRN_FUNCTIONAL_DIR}/SYNAPSE",
             ],
@@ -735,7 +751,7 @@ rule mvd3_to_sonata:
     shell:
         bbp_env(
             ['brainbuilder'],
-            ["brainbuilder mvd3 to-sonata",
+            ["brainbuilder sonata from-mvd3",
                 "--output {output}",
                 "{input}"
             ],
@@ -756,7 +772,7 @@ rule syn2_to_sonata:
     shell:
         bbp_env(
             ['brainbuilder'],
-            ["brainbuilder syn2 to-sonata",
+            ["brainbuilder sonata from-syn2",
                 "--output {output}",
                 "{input}"
             ],

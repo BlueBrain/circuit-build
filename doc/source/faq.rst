@@ -10,7 +10,7 @@ Using `Snakemake <http://snakemake.readthedocs.io/en/stable/index.html>`_ gives 
  * tracking the needed updates (if some file changed, all its dependencies would be re-generated automatically)
  * running tasks in parallel
  * possibility to run tasks locally as well as with with SLURM
- * creating reproducible environments for tasks using `BBP archive S/W modules <https://bbpteam.epfl.ch/project/spaces/display/BBPHPC/BBP+ARCHIVE+SOFTWARE+MODULES>`_
+ * creating reproducible environments for tasks using BBP modules
 
 This could be considered an intermediate step towards more general workflow engine developed by NSE team.
 
@@ -84,25 +84,17 @@ thus will have the same effect.
 Please refer to `Snakemake <http://snakemake.readthedocs.io/en/stable/index.html>`_ documentation for more details, and other options (run *upto* particular phase, etc).
 
 
+Which modules are used for executing phases?
+--------------------------------------------
+
+The list of modules used for executing each phase is hard-coded in ``Snakefile``.
+Thus the environment created is isolated (to some degree); and replacing some module with a dev version is only a matter of changing absolute path to this module in your local copy of ``circuit-build`` (please look for ``MODULES`` mapping there).
+
+With a few exceptions, normally we are using Spack-based archive modules deployed at BB5.
+For better traceability, absolute path to the module(s) used is dumped to each phase log (for those phases where we keep logs).
+
 Troubleshooting
 ---------------
-
-Unable to locate module
-~~~~~~~~~~~~~~~~~~~~~~~
-
-If some phase fails with a message like:
-
-.. code-block:: bash
-
-    ModuleCmd_Load.c(213):ERROR:105: Unable to locate a modulefile for 'brainbuilder'
-    /bin/bash: brainbuilder: command not found
-
-most likely it indicates that an older archive release is used where corresponding module is not available yet.
-
-Unfortunately, we do not have a proper mechanism to ensure module version requirements yet.
-
-Please check ``sw_release`` value in ``MANIFEST.yaml`` and try loading the module from the corresponding archive release manually to ensure its availability.
-
 
 Killed: Out of Memory
 ~~~~~~~~~~~~~~~~~~~~~

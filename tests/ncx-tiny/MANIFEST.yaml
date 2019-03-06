@@ -4,11 +4,11 @@ common:
   mask: '[mask]mc2'
   morph_release: /gpfs/bbp.cscs.ch/project/proj66/entities/morphologies/2018.02.16
   emodel_release: /gpfs/bbp.cscs.ch/project/proj66/entities/emodels/2018.02.26.dev0
-  sw_release: null
 
 place_cells:
   soma_placement: 'basic'
   density_factor: 0.1
+  sort_by: ['region', 'mtype']
   seed: 0
 
 choose_morphologies:

@@ -12,12 +12,11 @@ Generate cell positions; assign cell orientations and properties.
 
 Properties assigned (in addition to position and orientation):
     - *region*
+    - *layer*
     - *mtype*
     - *etype*
     - *morph_class*
     - *synapse_class*
-    - *layer* [if requested]
-    - *hypercolumn* [if requested]
 
 Parameters
 ~~~~~~~~~~
@@ -32,15 +31,44 @@ Parameters
 
     Could be either *basic* for uniform random placement; or *poisson_disc* for `Poisson disc sampling <https://bbpteam.epfl.ch/project/spaces/display/BBPNSE/On+sampling+methods+to+generate+cell+positions>`_.
 
-**assign_column**
-    Add *hypercolumn* property to MVD3 (applicable for mosaic atlases only)
+**atlas_property**
+    Properties to assign based on auxiliary volumetric datasets.
 
-    Optional; if omitted, defaults to *false*.
+    More specifically, it is a mapping like:
 
-**assign_layer**
-    Add *layer* property to MVD3 (applicable for cortex atlases only)
+    ::
 
-    Optional; if omitted, defaults to *false*.
+        place_cells:
+            ...
+            atlas_property:
+                hypercolumn: 'column'
+                region: '~brain_regions'
+
+
+    where key is the property name to use in MVD3 (``hypercolumn``, ``region`` in the example above), and value is the name of volumetric dataset to query (``column``, ``brain_regions``).
+    The corresponding atlas dataset would be queried at cell positions, and the result values would go to MVD3.
+    If dataset name is prefixed with ``~``, values from the dataset would be interpreted as region IDs and re-mapped to region acronyms using atlas ``hierarchy.json``.
+
+    This mechanism provides flexibility in choosing how to assign ``region`` property in MVD3.
+    For instance, when building a model of Neocortex, one can opt for assigning ``region`` without layers (i.e., ``SSp-ll`` instead of ``SSp-ll[1-6]``.
+    It also allows to embed additional properties like cell position in brain region-specific coordinate system; or column ID for artifical mosaic circuits.
+
+    .. warning::
+
+        | Please note that it's mandatory to define ``region`` property.
+        | For backwards compatibility, if **atlas_property** section is missing from ``MANIFEST.yaml``, it will default to ``{'region': '~brain_regions'}``.
+
+**append_hemisphere**
+    Neocortex-specific flag.
+
+    | If set to ``True``, ``hemisphere`` values would be appended to ``region`` (i.e., ``SSp-ll@left`` instead of ``SSp-ll``).
+    | ``region`` and ``hemisphere`` should be specified using **atlas_property** mechanism.
+
+**sort_by**
+    Sort MVD3 by properties values.
+
+    | A list of properties is anticipated (e.g., ``['region', 'mtype']``).
+    | If omitted, cells are not sorted in any particular order
 
 **seed**
     Pseudo-random generator seed.
@@ -57,7 +85,7 @@ Parameters
 choose_morphologies
 -------------------
 
-Choose morphologies for cell positions using `placement hints <https://bbpteam.epfl.ch/documentation/placement-algorithm-2.0.0/index.html>`_ approach.
+Choose morphologies for cell positions using `placement hints <https://bbpteam.epfl.ch/documentation/placement-algorithm-2.0.7/index.html>`_ approach.
 
 .. tip::
 

@@ -48,11 +48,13 @@ Alternatively, it can be pip-installed in any Python 3.5+ virtual environment:
 
 `snakemake` can run all the tasks locally or launch every task in a separate SLURM allocation. In practice the latter option is preferred, please refer to :ref:`ref-cluster-config` section for the details.
 
+It is also recommended to always use ``-p`` flag to ensure commands spawned by `snakemake` are dumped to the logs.
+
 For all the commands below we assume that a following alias is defined:
 
 .. code-block:: bash
 
-    $ alias sm='snakemake --config bioname=<path-to-bioname> --snakefile <circuit-build>/snakemake/Snakefile --cluster-config <path-to-config>'
+    $ alias sm='snakemake -p --config bioname=<path-to-bioname> --snakefile <circuit-build>/snakemake/Snakefile --cluster-config <path-to-config>'
 
 We also assume that all ``sm`` commands are executed from circuit release folder root.
 
@@ -65,10 +67,11 @@ One command to build it all
 
 .. code-block:: bash
 
-    $ sm -j8 functional_all
+    $ sm -j99 -k functional_all
 
 would launch all the tasks needed to generate files listed in :ref:`ref-circuit-files` section.
-Providing ``-j<K>`` allows to launch up to ``<K>`` tasks in parallel.
+
+Providing ``-j<N>`` allows to launch up to ``<N>`` tasks in parallel; ``-k`` flag instructs `Snakemake` to proceed with other jobs if some independent job has failed.
 
 Alternatively, we can build circuit step by step.
 
@@ -97,7 +100,7 @@ There are also intermediate MVD3 files, dumped after each phase:
 
 ::
 
-    circuit.mvd3.metypes
+    circuit.mvd3.somata
     circuit.mvd3.morphologies
     circuit.mvd3.emodels
 
@@ -116,19 +119,6 @@ Building connectome involves three phases: :ref:`ref-phase-touchdetector` follow
 
 After the command above has completed, any analysis not involving spatial indices should be possible.
 
-
-SYN2 connectome (experimental)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-We are planning to switch to `Spark Functionalizer <https://bbpteam.epfl.ch/documentation/#spykfunc>`_ for pruning touches and converting them into synapses. At the moment we support both "old" way of obtaining connectome in NRN format (described above), and the "new" one:
-
-.. code-block:: bash
-
-    $ sm -j8 functional_syn2
-
-This will produce ``default.syn2`` file in ``connectome/functional/`` subfolder.
-
-To make it visible to BluePy, please set environmental variable `BLUEPY_USE_SYN2 <https://bbpteam.epfl.ch/documentation/bluepy-0.12.5/settings.html#bluepy-use-syn2>`_ when running any BluePy-based script with the built circuit.
 
 Spatial indices
 ~~~~~~~~~~~~~~~
