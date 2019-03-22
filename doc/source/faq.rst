@@ -65,6 +65,8 @@ Run `snakemake` with ``-p`` argument:
 
     sm -p place_cells
 
+In fact, for better traceability we recommend to specify this argument *always*.
+
 
 How can I re-build some file and all its dependencies?
 ------------------------------------------------------
@@ -91,7 +93,7 @@ The list of modules used for executing each phase is hard-coded in ``Snakefile``
 Thus the environment created is isolated (to some degree); and replacing some module with a dev version is only a matter of changing absolute path to this module in your local copy of ``circuit-build`` (please look for ``MODULES`` mapping there).
 
 With a few exceptions, normally we are using Spack-based archive modules deployed at BB5.
-For better traceability, absolute path to the module(s) used is dumped to each phase log (for those phases where we keep logs).
+For better traceability, MODULEPATH and list of modules loaded is dumped to each phase log (for those phases where we keep logs).
 
 Troubleshooting
 ---------------

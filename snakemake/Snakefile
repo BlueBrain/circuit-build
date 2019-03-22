@@ -53,30 +53,38 @@ PRE_FUNCTIONAL = [
 ]
 
 
-SPACK_MODULE_DIR = '/gpfs/bbp.cscs.ch/apps/hpc/jenkins/modules/{}/2019-03/tcl/linux-rhel7-x86_64/'
-NIX_MODULE_DIR = '/nix/var/nix/profiles/per-user/modules/bb5-x86_64/modules-all/release/share/modulefiles/'
+SPACK_MODULEPATH = ":".join(
+    '/gpfs/bbp.cscs.ch/apps/hpc/jenkins/modules/%s/2019-03/tcl/linux-rhel7-x86_64/' % component
+    for component in [
+        'applications',
+        'external-libraries',
+        'parallel-libraries',
+        'serial-libraries',
+        'tools',
+    ]
+)
+
+NIX_MODULEPATH = '/nix/var/nix/profiles/per-user/modules/bb5-x86_64/modules-all/release/share/modulefiles/'
 
 MODULES = {
     'brainbuilder':
-        SPACK_MODULE_DIR.format('applications') + 'brainbuilder/0.10.2/python3',
+        (SPACK_MODULEPATH, ['brainbuilder/0.10.2/python3']),
     'flatindexer':
-        NIX_MODULE_DIR + 'nix/hpc/flatindexer/1.8.12',
+        (NIX_MODULEPATH, ['nix/hpc/flatindexer/1.8.12']),
     'functionalizer':
-        SPACK_MODULE_DIR.format('applications') +  'functionalizer/3.11.0',
+        (SPACK_MODULEPATH, ['functionalizer/3.11.0']),
     'jinja2':
-        NIX_MODULE_DIR + 'nix/py27/jinja2/0.6.0',
+        (SPACK_MODULEPATH, ['python-dev/0.1/python3']),
     'parquet-converters':
-        SPACK_MODULE_DIR.format('applications') + 'parquet-converters/0.3',
+        (SPACK_MODULEPATH, ['parquet-converters/0.3']),
     'placement-algorithm':
-        SPACK_MODULE_DIR.format('applications') + 'placement-algorithm/2.0.7/python3',
-    'python3.6':
-        SPACK_MODULE_DIR.format('serial-libraries') + 'python/3.6.5',
+        (SPACK_MODULEPATH, ['placement-algorithm/2.0.7/python3']),
     'spykfunc':
-        SPACK_MODULE_DIR.format('applications') + 'spykfunc/0.13.0/python3',
+        (SPACK_MODULEPATH, ['spykfunc/0.13.0/python3']),
     'synapsetool':
-        SPACK_MODULE_DIR.format('applications') + 'synapsetool/0.4.1/parallel',
+        (SPACK_MODULEPATH, ['synapsetool/0.4.1/parallel']),
     'touchdetector':
-        SPACK_MODULE_DIR.format('applications') +  'touchdetector/4.4.1',
+        (SPACK_MODULEPATH, ['touchdetector/4.4.1']),
 }
 
 
@@ -97,16 +105,7 @@ def template_path(name):
     return os.path.join(workflow.basedir, 'templates', name)
 
 
-def _modulepath(module):
-    if module not in MODULES:
-        raise RuntimeError("Module not specified: '%s'" % module)
-    result = MODULES[module]
-    if not os.path.exists(result):
-        raise RuntimeError("Module not found: '%s'" % result)
-    return result
-
-
-def bbp_env(modules, command, dump_log=False, slurm_env=None, skip_srun=False):
+def bbp_env(module_env, command, dump_log=False, slurm_env=None, skip_srun=False):
     result = " ".join(map(str, command))
 
     if (slurm_env is not None) and cluster_config:
@@ -120,11 +119,13 @@ def bbp_env(modules, command, dump_log=False, slurm_env=None, skip_srun=False):
             cmd=escape_single_quotes(result)
         )
 
-    if modules:
+    if module_env is not None:
+        modulepath, modules = MODULES[module_env]
         result = "(" + " && ".join([
-            "export MODULEPATH=",
+            "export MODULEPATH=%s" % modulepath,
             "module purge",
-            "module load " + " ".join(map(_modulepath, modules)),
+            "module load %s" % " ".join(modules),
+            "echo MODULEPATH=%s" % modulepath,
             "module list",
             result,
         ]) + ")"
@@ -185,7 +186,7 @@ rule structural_syn2:
 
 def build_circuit_config(nrn_path):
     return bbp_env(
-        ['jinja2'],
+        'jinja2',
         ["jinja2 --strict",
             "-D CIRCUIT_PATH=%s" % os.path.abspath(CIRCUIT_DIR),
             "-D NRN_PATH=%s" % os.path.abspath(nrn_path),
@@ -235,7 +236,7 @@ rule place_cells:
 
     shell:
         bbp_env(
-            ['brainbuilder'],
+            'brainbuilder',
             ["brainbuilder cells place",
                 "--composition",
                     bioname_path("cell_composition.yaml"),
@@ -286,7 +287,7 @@ rule choose_morphologies:
 
     shell:
          bbp_env(
-            ['placement-algorithm'],
+            'placement-algorithm',
             ["choose-morphologies",
                 "--mvd3",
                     "{input}",
@@ -328,7 +329,7 @@ rule assign_morphologies:
 
     shell:
          bbp_env(
-            ['placement-algorithm'],
+            'placement-algorithm',
             ["assign-morphologies",
                 "--mvd3",
                     "{input[mvd3]}",
@@ -359,7 +360,7 @@ rule assign_emodels:
 
     shell:
         bbp_env(
-            ['brainbuilder'],
+            'brainbuilder',
             ["brainbuilder cells assign-emodels",
                 "--morphdb {MORPHDB}",
                 "--output {output}",
@@ -381,7 +382,7 @@ rule set_circuit_seeds:
 
     shell:
         bbp_env(
-            ['brainbuilder'],
+            'brainbuilder',
             ["brainbuilder mvd3 set-seeds",
                 "--seeds",
                     ",".join(map(str, config['s2f']['seeds'])),
@@ -404,7 +405,7 @@ rule mvd3_reorder_mtypes:
 
     shell:
         bbp_env(
-            ['brainbuilder'],
+            'brainbuilder',
             ["brainbuilder mvd3 reorder-mtypes",
                 "--recipe {BUILDER_RECIPE}",
                 "--output {output}",
@@ -429,7 +430,7 @@ rule touchdetector:
 
     shell:
         bbp_env(
-            ['touchdetector'],
+            'touchdetector',
             ["env",
                 "BGLOCKLESSMPIO_F_TYPE=0x47504653",
              "touchdetector",
@@ -446,7 +447,7 @@ rule touchdetector:
 
 def run_functionalizer(rule, output_dir, enable_pruning):
     return bbp_env(
-        ['functionalizer'],
+        'functionalizer',
         ["env",
             "BGLOCKLESSMPIO_F_TYPE=0x47504653",
          "functionalizer",
@@ -523,7 +524,7 @@ rule nrn_merge:
 
     shell:
         bbp_env(
-            ['brainbuilder'],
+            'brainbuilder',
             ["brainbuilder nrn merge {wildcards.nrn_dir}",
                 "--only {wildcards.filename}",
                 "--link" if config.get('nrn_merge', "copy") == "link" else "",
@@ -545,7 +546,7 @@ rule touch2parquet:
 
     shell:
         bbp_env(
-            ['parquet-converters'],
+            'parquet-converters',
             ["cd %s" % os.path.join(TOUCHES_DIR, "parquet"),
              "&&",
              "touch2parquetp ../touchesData.*"
@@ -556,7 +557,7 @@ rule touch2parquet:
 
 def run_spykfunc(rule, output_dir, enable_pruning):
     return bbp_env(
-        ['spykfunc', 'python3.6'],
+        'spykfunc',
         ["env",
             "SPARK_USER=$(whoami)",
          "sm_run",
@@ -640,7 +641,7 @@ rule parquet2syn2:
 
     shell:
         bbp_env(
-            ['parquet-converters'],
+            'parquet-converters',
             ["parquet2syn2p",
                 "-o {output}",
                 "{wildcards.nrn_dir}/spykfunc/circuit.parquet/*.parquet",
@@ -662,7 +663,7 @@ rule targetgen_mvd3:
 
     shell:
         bbp_env(
-            ['brainbuilder'],
+            'brainbuilder',
             ["brainbuilder targets from-mvd3",
                 ("--targets %s" % bioname_path(config['targetgen_mvd3']['targets'])
                     if 'targets' in config.get('targetgen_mvd3', {}) else ""),
@@ -704,7 +705,7 @@ rule spatial_index_segment:
 
     shell:
         bbp_env(
-            ['flatindexer'],
+            'flatindexer',
             [
              "SDKGenerator CircuitConfig segment All SEGMENT",
             ],
@@ -729,7 +730,7 @@ rule spatial_index_synapse:
 
     shell:
         bbp_env(
-            ['flatindexer'],
+            'flatindexer',
             [
              "SDKGenerator CircuitConfig synapse All {NRN_FUNCTIONAL_DIR}/SYNAPSE",
             ],
@@ -750,7 +751,7 @@ rule mvd3_to_sonata:
 
     shell:
         bbp_env(
-            ['brainbuilder'],
+            'brainbuilder',
             ["brainbuilder sonata from-mvd3",
                 "--output {output}",
                 "{input}"
@@ -771,7 +772,7 @@ rule syn2_to_sonata:
 
     shell:
         bbp_env(
-            ['brainbuilder'],
+            'brainbuilder',
             ["brainbuilder sonata from-syn2",
                 "--output {output}",
                 "{input}"
@@ -792,7 +793,7 @@ rule subcellular:
 
     shell:
         bbp_env(
-            ['brainbuilder'],
+            'brainbuilder',
             ["brainbuilder subcellular assign",
                 "--gene-expressions {config[subcellular][gene_expressions]}",
                 "--gene-mapping {config[subcellular][gene_mapping]}",
@@ -818,7 +819,7 @@ rule place_astrocytes:
 
     shell:
         bbp_env(
-            ['brainbuilder'],
+            'brainbuilder',
             ["brainbuilder astrocytes place",
                 "--atlas",
                     ATLAS,
@@ -853,7 +854,7 @@ rule astrocyte_domains_tesselate:
 
     shell:
         bbp_env(
-            ['brainbuilder'],
+            'brainbuilder',
             ["brainbuilder astrocytes domains tesselate",
                 "--atlas",
                     ATLAS,
@@ -883,7 +884,7 @@ rule astrocyte_domains_overlap:
 
     shell:
         bbp_env(
-            ['brainbuilder'],
+            'brainbuilder',
             ["brainbuilder astrocytes domains overlap",
                 "--distr",
                     enquote("{config[astrocyte_domains_overlap][overlap]}"),
@@ -910,7 +911,7 @@ rule astrocyte_domains_mesh:
 
     shell:
         bbp_env(
-            ['brainbuilder'],
+            'brainbuilder',
             ["brainbuilder astrocytes domains mesh",
                 "--output",
                     "{output}",
