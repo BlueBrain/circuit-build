@@ -46,12 +46,6 @@ NRN_FUNCTIONAL_INDEX = expand(NRN_FUNCTIONAL_DIR + '/SYNAPSE{filename}', filenam
 NRN_STRUCTURAL_DIR = "connectome/structural"
 NRN_STRUCTURAL_DATA = expand(NRN_STRUCTURAL_DIR + '/{filename}', filename=NRN_FILES)
 
-PRE_FUNCTIONAL = [
-    'CircuitConfig',
-    'circuit.mvd3',
-    NRN_FUNCTIONAL_DIR + '/start.target',
-]
-
 
 SPACK_MODULEPATH = ":".join(
     '/gpfs/bbp.cscs.ch/apps/hpc/jenkins/modules/%s/2019-03/tcl/linux-rhel7-x86_64/' % component
@@ -138,50 +132,68 @@ def bbp_env(module_env, command, dump_log=False, slurm_env=None, skip_srun=False
 
 rule all:
     input:
-        PRE_FUNCTIONAL
+        'CircuitConfig_base',
+        'circuit.mvd3',
+        'start.target',
+
+
+rule functional_base:
+    input:
+        'CircuitConfig',
+        'circuit.mvd3',
+        NRN_FUNCTIONAL_DIR + '/start.target',
 
 
 rule functional:
     input:
-        PRE_FUNCTIONAL,
+        rules.functional_base.input,
         NRN_FUNCTIONAL_DATA,
 
 
 rule functional_syn2:
     input:
-        PRE_FUNCTIONAL,
+        rules.functional_base.input,
         NRN_FUNCTIONAL_DIR + '/circuit.syn2',
 
 
 rule functional_sonata:
     input:
-        PRE_FUNCTIONAL,
+        rules.functional_base.input,
         'nodes.sonata',
         NRN_FUNCTIONAL_DIR + '/edges.sonata',
 
 
 rule functional_all:
     input:
-        PRE_FUNCTIONAL,
-        NRN_FUNCTIONAL_DATA,
+        rules.functional.input,
         NRN_FUNCTIONAL_INDEX,
         SEGMENT_INDEX,
 
 
-rule structural:
+rule structural_base:
     input:
         'CircuitConfig_struct',
         'circuit.mvd3',
         NRN_STRUCTURAL_DIR + '/start.target',
+
+
+rule structural:
+    input:
+        rules.structural_base.input,
         NRN_STRUCTURAL_DATA,
 
 
 rule structural_syn2:
     input:
-        'CircuitConfig_struct',
-        'circuit.mvd3',
-        NRN_STRUCTURAL_DIR + '/start.target',
+        rules.structural_base.input,
         NRN_STRUCTURAL_DIR + '/circuit.syn2',
+
+
+rule structural_sonata:
+    input:
+        rules.structural_base.input,
+        'nodes.sonata',
+        NRN_STRUCTURAL_DIR + '/edges.sonata',
 
 
 def build_circuit_config(nrn_path):
@@ -202,9 +214,21 @@ def build_circuit_config(nrn_path):
         ]
     )
 
-rule circuitconfig:
+
+rule circuitconfig_base:
     message:
-        "Generate CircuitConfig"
+        "Generate CircuitConfig w/o connectome"
+
+    output:
+        'CircuitConfig_base'
+
+    shell:
+        build_circuit_config(nrn_path='.')
+
+
+rule circuitconfig_functional:
+    message:
+        "Generate CircuitConfig for functional circuit"
 
     output:
         'CircuitConfig'
@@ -213,9 +237,9 @@ rule circuitconfig:
         build_circuit_config(nrn_path=NRN_FUNCTIONAL_DIR)
 
 
-rule circuitconfig_struct:
+rule circuitconfig_structural:
     message:
-        "Generate CircuitConfig_struct"
+        "Generate CircuitConfig for structural circuit"
 
     output:
         'CircuitConfig_struct'
@@ -695,7 +719,9 @@ rule spatial_index_segment:
         "Generate segment spatial index"
 
     input:
-        PRE_FUNCTIONAL
+        'CircuitConfig_base',
+        'circuit.mvd3',
+        'start.target'
 
     output:
         SEGMENT_INDEX
@@ -707,7 +733,7 @@ rule spatial_index_segment:
         bbp_env(
             'flatindexer',
             [
-             "SDKGenerator CircuitConfig segment All SEGMENT",
+             "SDKGenerator CircuitConfig_base segment All SEGMENT",
             ],
             dump_log=True,
             slurm_env='spatial_index_segment'
@@ -719,8 +745,7 @@ rule spatial_index_synapse:
         "Generate synapse spatial index"
 
     input:
-        PRE_FUNCTIONAL,
-        NRN_FUNCTIONAL_DATA,
+        rules.functional.input,
 
     output:
         NRN_FUNCTIONAL_INDEX

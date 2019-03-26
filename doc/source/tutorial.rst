@@ -89,9 +89,8 @@ After the command above has completed, the following files could be found in cir
 
 ::
 
-    CircuitConfig
+    CircuitConfig_base
     circuit.mvd3
-    connectome/functional/start.target -> ../../start.target
     start.target
 
 At this point the circuit is partially complete and should be readable by `BluePy <https://bbpcode.epfl.ch/documentation/bluepy-0.12.5/index.html>`_ for analysis not involving connectome.
