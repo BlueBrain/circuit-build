@@ -12,7 +12,7 @@ Run Default
     Atlas {{ ATLAS }}
 }
 {%- if PROJECTIONS is defined %}
-{%- for name in PROJECTIONS.split(':') %}
+{%- for name in PROJECTIONS.split(';') %}
 
 Projection {{ name }}
 {

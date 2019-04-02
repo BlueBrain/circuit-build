@@ -19,32 +19,11 @@ ATLAS_CACHE_DIR = ".atlas"
 MORPH_RELEASE = config['common']['morph_release']
 EMODEL_RELEASE = config['common']['emodel_release']
 
-NRN_FILES = [
-    'nrn.h5',
-    'nrn_efferent.h5',
-    'nrn_positions.h5',
-    'nrn_positions_efferent.h5',
-    'nrn_summary.h5',
-]
-
-INDEX_FILES = [
-    '_index.dat',
-    '_index.idx',
-    '_payload.dat',
-]
-
 LOGS_DIR = "logs"
 
-SEGMENT_INDEX = expand('SEGMENT{filename}', filename=INDEX_FILES)
-
 TOUCHES_DIR = "connectome/touches"
-
 NRN_FUNCTIONAL_DIR = "connectome/functional"
-NRN_FUNCTIONAL_DATA = expand(NRN_FUNCTIONAL_DIR + '/{filename}', filename=NRN_FILES)
-NRN_FUNCTIONAL_INDEX = expand(NRN_FUNCTIONAL_DIR + '/SYNAPSE{filename}', filename=INDEX_FILES)
-
 NRN_STRUCTURAL_DIR = "connectome/structural"
-NRN_STRUCTURAL_DATA = expand(NRN_STRUCTURAL_DIR + '/{filename}', filename=NRN_FILES)
 
 
 SPACK_MODULEPATH = ":".join(
@@ -130,70 +109,35 @@ def bbp_env(module_env, command, dump_log=False, slurm_env=None, skip_srun=False
     return result
 
 
-rule all:
+def spatial_index_files(prefix):
+    return [
+        "%s_%s" % (prefix, filename)
+        for filename in [
+            'index.dat',
+            'index.idx',
+            'payload.dat',
+        ]
+    ]
+
+
+def connectome_files(nrn_dir, suffix=""):
+    return [
+        os.path.join(nrn_dir, filename + suffix)
+        for filename in [
+            'nrn.h5',
+            'nrn_efferent.h5',
+            'nrn_positions.h5',
+            'nrn_positions_efferent.h5',
+            'nrn_summary.h5',
+        ]
+    ]
+
+
+rule default:
     input:
         'CircuitConfig_base',
         'circuit.mvd3',
         'start.target',
-
-
-rule functional_base:
-    input:
-        'CircuitConfig',
-        'circuit.mvd3',
-        NRN_FUNCTIONAL_DIR + '/start.target',
-
-
-rule functional:
-    input:
-        rules.functional_base.input,
-        NRN_FUNCTIONAL_DATA,
-
-
-rule functional_syn2:
-    input:
-        rules.functional_base.input,
-        NRN_FUNCTIONAL_DIR + '/circuit.syn2',
-
-
-rule functional_sonata:
-    input:
-        rules.functional_base.input,
-        'nodes.sonata',
-        NRN_FUNCTIONAL_DIR + '/edges.sonata',
-
-
-rule functional_all:
-    input:
-        rules.functional.input,
-        NRN_FUNCTIONAL_INDEX,
-        SEGMENT_INDEX,
-
-
-rule structural_base:
-    input:
-        'CircuitConfig_struct',
-        'circuit.mvd3',
-        NRN_STRUCTURAL_DIR + '/start.target',
-
-
-rule structural:
-    input:
-        rules.structural_base.input,
-        NRN_STRUCTURAL_DATA,
-
-
-rule structural_syn2:
-    input:
-        rules.structural_base.input,
-        NRN_STRUCTURAL_DIR + '/circuit.syn2',
-
-
-rule structural_sonata:
-    input:
-        rules.structural_base.input,
-        'nodes.sonata',
-        NRN_STRUCTURAL_DIR + '/edges.sonata',
 
 
 def build_circuit_config(nrn_path):
@@ -207,7 +151,7 @@ def build_circuit_config(nrn_path):
             "-D ME_COMBO_INFO_PATH=%s" % os.path.join(EMODEL_RELEASE, "mecombo_emodel.tsv"),
             "-D BIONAME={BIONAME}",
             "-D ATLAS={ATLAS}",
-            ("-D PROJECTIONS=%s" % ":".join(config['projectionizer'])
+            ("-D PROJECTIONS='%s'" % ";".join(config['projectionizer'])
                 if 'projectionizer' in config else ""),
             template_path('CircuitConfig.j2'),
             "> {output}",
@@ -431,8 +375,10 @@ rule mvd3_reorder_mtypes:
         bbp_env(
             'brainbuilder',
             ["brainbuilder mvd3 reorder-mtypes",
-                "--recipe {BUILDER_RECIPE}",
-                "--output {output}",
+                "--recipe",
+                    BUILDER_RECIPE,
+                "--output",
+                    "{output}",
                 "{input}"
             ],
             slurm_env='mvd3_reorder_mtypes'
@@ -498,7 +444,7 @@ rule s2s:
         touches = TOUCHES_DIR + '/_SUCCESS'
 
     output:
-        expand(NRN_STRUCTURAL_DIR + '/{filename}.0', filename=NRN_FILES)
+        connectome_files(NRN_STRUCTURAL_DIR, suffix=".0")
 
     log:
         log_path('s2s')
@@ -520,7 +466,7 @@ rule s2f:
         touches = TOUCHES_DIR + '/_SUCCESS'
 
     output:
-        expand(NRN_FUNCTIONAL_DIR + '/{filename}.0', filename=NRN_FILES)
+        connectome_files(NRN_FUNCTIONAL_DIR, suffix=".0")
 
     log:
         log_path('s2f')
@@ -535,10 +481,10 @@ rule s2f:
 
 rule nrn_merge:
     input:
-        '{nrn_dir}/{filename}.0'
+        'connectome/{nrn_dir}/{filename}.0'
 
     output:
-        '{nrn_dir}/{filename}'
+        'connectome/{nrn_dir}/{filename}'
 
     wildcard_constraints:
         filename = ".*\.h5$"
@@ -549,7 +495,9 @@ rule nrn_merge:
     shell:
         bbp_env(
             'brainbuilder',
-            ["brainbuilder nrn merge {wildcards.nrn_dir}",
+            [
+             "cd connectome/{wildcards.nrn_dir} &&",
+             "brainbuilder nrn merge .",
                 "--only {wildcards.filename}",
                 "--link" if config.get('nrn_merge', "copy") == "link" else "",
             ],
@@ -571,7 +519,7 @@ rule touch2parquet:
     shell:
         bbp_env(
             'parquet-converters',
-            ["cd %s" % os.path.join(TOUCHES_DIR, "parquet"),
+            ["cd {TOUCHES_DIR}/parquet",
              "&&",
              "touch2parquetp ../touchesData.*"
             ],
@@ -579,17 +527,19 @@ rule touch2parquet:
         )
 
 
-def run_spykfunc(rule, output_dir, enable_pruning):
+def run_spykfunc(rule, nrn_dir, enable_pruning):
+    output_dir = os.path.join(nrn_dir, 'spykfunc')
     return bbp_env(
         'spykfunc',
         ["env",
             "SPARK_USER=$(whoami)",
          "sm_run",
             cluster_config.get(rule, {}).get('sm_run', ""),
-            "-w %s" % os.path.join(output_dir, 'spykfunc', '.sm_run'),
+            "-w %s" % os.path.join(output_dir, '.sm_run'),
          "spykfunc",
             "--s2f" if enable_pruning else "--s2s",
-            "--output-dir %s" % os.path.join(output_dir, 'spykfunc'),
+            "--output-order post",
+            "--output-dir %s" % output_dir,
             "--spark-property spark.master=spark://$(srun sh -c '[ $SLURM_PROCID -eq 0 ] && hostname || true' | tail -n 1):7077",
         ] + [
             "--spark-property %s" % p
@@ -623,7 +573,7 @@ rule spykfunc_s2s:
     shell:
         run_spykfunc(
             'spykfunc_s2s',
-            output_dir=NRN_STRUCTURAL_DIR,
+            nrn_dir=NRN_STRUCTURAL_DIR,
             enable_pruning=False,
         )
 
@@ -645,7 +595,7 @@ rule spykfunc_s2f:
     shell:
         run_spykfunc(
             'spykfunc_s2f',
-            output_dir=NRN_FUNCTIONAL_DIR,
+            nrn_dir=NRN_FUNCTIONAL_DIR,
             enable_pruning=True
         )
 
@@ -693,10 +643,42 @@ rule targetgen_mvd3:
                     if 'targets' in config.get('targetgen_mvd3', {}) else ""),
                 ("--allow-empty"
                     if config.get('targetgen_mvd3', {}).get('allow_empty', False) else ""),
+                "--atlas",
+                    ATLAS,
+                "--atlas-cache",
+                    ATLAS_CACHE_DIR,
                 "--output {output}",
                 "{input}"
             ],
             slurm_env='targetgen_mvd3'
+        )
+
+
+rule node_sets:
+    message:
+        "Generate SONATA node sets"
+
+    input:
+        'circuit.mvd3'
+
+    output:
+        'sonata/networks/All.node_sets.json'
+
+    log:
+        log_path('node_sets')
+
+    shell:
+        bbp_env(
+            'brainbuilder',
+            ["brainbuilder targets node-set",
+                ("--targets %s" % bioname_path(config['targetgen_mvd3']['targets'])
+                    if 'targets' in config.get('targetgen_mvd3', {}) else ""),
+                ("--allow-empty"
+                    if config.get('targetgen_mvd3', {}).get('allow_empty', False) else ""),
+                "--output {output}",
+                "{input}"
+            ],
+            dump_log=True
         )
 
 
@@ -724,7 +706,7 @@ rule spatial_index_segment:
         'start.target'
 
     output:
-        SEGMENT_INDEX
+        spatial_index_files('SEGMENT')
 
     log:
         log_path('spatial_index_segment')
@@ -745,10 +727,13 @@ rule spatial_index_synapse:
         "Generate synapse spatial index"
 
     input:
-        rules.functional.input,
+        'CircuitConfig',
+        'circuit.mvd3',
+        NRN_FUNCTIONAL_DIR + '/start.target',
+        connectome_files(NRN_FUNCTIONAL_DIR)
 
     output:
-        NRN_FUNCTIONAL_INDEX
+        spatial_index_files(NRN_FUNCTIONAL_DIR + '/SYNAPSE')
 
     log:
         log_path('spatial_index_synapse')
@@ -757,7 +742,8 @@ rule spatial_index_synapse:
         bbp_env(
             'flatindexer',
             [
-             "SDKGenerator CircuitConfig synapse All {NRN_FUNCTIONAL_DIR}/SYNAPSE",
+             "cd {NRN_FUNCTIONAL_DIR} &&",
+             "SDKGenerator ../../CircuitConfig synapse All SYNAPSE",
             ],
             dump_log=True,
             slurm_env='spatial_index_synapse'
@@ -772,12 +758,13 @@ rule mvd3_to_sonata:
         'circuit.mvd3'
 
     output:
-        'nodes.sonata'
+        'sonata/networks/All.nodes.h5'
 
     shell:
         bbp_env(
             'brainbuilder',
             ["brainbuilder sonata from-mvd3",
+                "--population All",
                 "--output {output}",
                 "{input}"
             ],
@@ -790,15 +777,18 @@ rule syn2_to_sonata:
         "SYN2 -> SONATA Edges"
 
     input:
-        '{nrn_dir}/circuit.syn2'
+        'connectome/{nrn_dir}/circuit.syn2'
 
     output:
-        '{nrn_dir}/edges.sonata'
+        'sonata/networks/{nrn_dir}/All.edges.h5'
 
     shell:
         bbp_env(
             'brainbuilder',
             ["brainbuilder sonata from-syn2",
+                "--population All",
+                "--source All",
+                "--target All",
                 "--output {output}",
                 "{input}"
             ],
@@ -944,6 +934,106 @@ rule astrocyte_domains_mesh:
             ],
             slurm_env='astrocyte_domains_mesh'
         )
+
+
+def write_network_config(nrn_dir):
+    return bbp_env(
+        'brainbuilder',
+        ["brainbuilder sonata network-config",
+            "--base-dir",
+                'sonata',
+            "--morph-dir",
+                MORPH_RELEASE,
+            "--nodes",
+                "sonata/networks/All.nodes.h5",
+            "--edges",
+                "sonata/networks/{nrn_dir}/All.edges.h5".format(nrn_dir=nrn_dir),
+            "-o {output}"
+        ]
+    )
+
+
+rule circuitconfig_sonata:
+    message:
+        "Generate SONATA network config"
+
+    output:
+        'sonata/circuit_config.json'
+
+    shell:
+        write_network_config('functional')
+
+
+rule circuitconfig_struct_sonata:
+    message:
+        "Generate SONATA network config (structural)"
+
+    output:
+        'sonata/struct_circuit_config.json'
+
+    shell:
+        write_network_config('structural')
+
+
+rule functional_base:
+    input:
+        'CircuitConfig',
+        'circuit.mvd3',
+        NRN_FUNCTIONAL_DIR + '/start.target',
+
+
+rule functional:
+    input:
+        rules.functional_base.input,
+        connectome_files(NRN_FUNCTIONAL_DIR),
+
+
+rule functional_syn2:
+    input:
+        rules.functional_base.input,
+        NRN_FUNCTIONAL_DIR + '/circuit.syn2',
+
+
+rule functional_sonata:
+    input:
+        'sonata/circuit_config.json',
+        'sonata/networks/All.nodes.h5',
+        'sonata/networks/All.node_sets.json',
+        'sonata/networks/functional/All.edges.h5',
+
+
+rule functional_all:
+    input:
+        rules.functional.input,
+        rules.spatial_index_segment.output,
+        rules.spatial_index_synapse.output,
+
+
+rule structural_base:
+    input:
+        'CircuitConfig_struct',
+        'circuit.mvd3',
+        NRN_STRUCTURAL_DIR + '/start.target',
+
+
+rule structural:
+    input:
+        rules.structural_base.input,
+        connectome_files(NRN_STRUCTURAL_DIR),
+
+
+rule structural_syn2:
+    input:
+        rules.structural_base.input,
+        NRN_STRUCTURAL_DIR + '/circuit.syn2',
+
+
+rule structural_sonata:
+    input:
+        'sonata/struct_circuit_config.json',
+        'sonata/networks/All.nodes.h5',
+        'sonata/networks/All.node_sets.json',
+        'sonata/networks/structural/All.edges.h5',
 
 
 rule ngv:
