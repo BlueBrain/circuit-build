@@ -801,7 +801,8 @@ rule subcellular:
         "Assign gene expressions / protein concentrations to cells"
 
     input:
-        'circuit.mvd3'
+        mvd3 = 'circuit.mvd3',
+        directory = 'subcellular'
 
     output:
         'subcellular.h5'
@@ -810,13 +811,14 @@ rule subcellular:
         bbp_env(
             'brainbuilder',
             ["brainbuilder subcellular assign",
-                "--gene-expressions {config[subcellular][gene_expressions]}",
-                "--gene-mapping {config[subcellular][gene_mapping]}",
+                "{input[mvd3]}",
+                "--subcellular-dir {input[directory]}",
+                "--transcriptome {config[subcellular][transcriptome]}",
+                "--mtype-taxonomy {config[subcellular][mtype_taxonomy]}",
                 "--cell-proteins {config[subcellular][cell_proteins]}",
                 "--synapse-proteins {config[subcellular][synapse_proteins]}",
-                "--seed {config[transcriptome][seed]}",
-                "--output {output}",
-                "{input}"
+                "--seed {config[subcellular][seed]}",
+                "--output {output}"
             ],
             slurm_env='subcellular'
         )

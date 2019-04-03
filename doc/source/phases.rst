@@ -258,96 +258,166 @@ subcellular
 
 Assign gene expressions / protein concentrations to cells.
 
+Configuration
+~~~~~~~~~~~~~~
+
+Since this phase uses the ``entity_management`` package to draw data from Nexus, it is
+mandatory to set correctly your Nexus environment variables:
+
+    -  NEXUS_TOKEN to "Bearer XXX" with XXX your nexus token from the explorer's `copy token` facility
+    -  NEXUS_ORG to "ngv" to be able to work inside the ngv project
+
+.. tip::
+    To do so with bash just do:
+
+    .. code:: bash
+
+        export NEXUS_TOKEN="Bearer <my_copied_token>"
+        export NEXUS_ORG="ngv"
+
 Parameters
 ~~~~~~~~~~
 
-**gene-mapping**
-    PyTables_ HDF5 file with single ``\gene_mapping`` table storing gene to protein correspondence.
+From now on, the data parameters are directly drawn from Nexus. The data are stored in the
+synprot domain (this will change in the future).
 
-    It has four columns:
+.. warning::
+    These data should have been uploaded in Nexus using the ``subcellular-querier``
+    package. This process ensures that all data are compliant with the dedicated
+    ``brainbuilder`` app.
 
-      - ``gene`` with gene name
-      - ``lead_protein`` with the name of the main protein associated with the gene
-      - ``maj_protein`` with ';'-separated list of other proteins associated with the gene
-      - ``comment`` with free-form optional comment
+    See: https://bbpteam.epfl.ch/documentation/subcellular-querier-0.0.3/index.html
+
+To retrieve data from nexus, just provide the name of the nexus instance. The code will
+automatically look into the correct schemas and download the attachment file.
+
+**transcriptome**
+    A Nexus *transcriptomeexperiment* instance with a csv attachment file containing all the data
+    related to gene expressions. The attachment file is formatted as follow.
+
+    The first 10 rows should be ``tissue``, ``group #``, ``total mRNA mol``, ``well``, ``sex``,
+    ``age``, ``diameter``, ``cell_id``, ``level1class``, ``level2class`` for each cells.
+    Each column of this first table should be the corresponding values for all cells.
+
+    The rows from 12 to the end should contain the corresponding gene expressions for each cells.
+
+    The exact formatting must be:
+
+    +----------+------------------+-------------------+-------------------+
+    |          | tissue	          |   sscortex        |  sscortex         |
+    +----------+------------------+-------------------+-------------------+
+    |          |  group #         |   1               |  4                |
+    +----------+------------------+-------------------+-------------------+
+    |          |  total mRNA mol  |   21580           |  7267             |
+    +----------+------------------+-------------------+-------------------+
+    |          |  well            |   11              |  89               |
+    +----------+------------------+-------------------+-------------------+
+    |          |  sex             |   1               |  -1               |
+    +----------+------------------+-------------------+-------------------+
+    |          |  age             |   21              |  23               |
+    +----------+------------------+-------------------+-------------------+
+    |          |  diameter        |   0               |  10.8             |
+    +----------+------------------+-------------------+-------------------+
+    |          |  cell_id         |   1772071015_C02  |  1772071041_A12   |
+    +----------+------------------+-------------------+-------------------+
+    |          |  level1class     |   interneurons    |  oligodendrocytes |
+    +----------+------------------+-------------------+-------------------+
+    |          |  level2class     |   Int10           |  Oligo5           |
+    +----------+------------------+-------------------+-------------------+
+    |          |                  |                   |                   |
+    +----------+------------------+-------------------+-------------------+
+    | Tspan12  |        1         |        0          |         0         |
+    +----------+------------------+-------------------+-------------------+
+    | Tshz1    |        1         |        3          |         1         |
+    +----------+------------------+-------------------+-------------------+
+    | Fnbp1l   |        1         |        3          |         1         |
+    +----------+------------------+-------------------+-------------------+
+    | Adamts15 |        1         |        1          |         0         |
+    +----------+------------------+-------------------+-------------------+
+
+See:
+https://bbp-nexus.epfl.ch/staging/explorer/ngv/synprot/transcriptomeexperiment/v0.1.0/550179e8-496a-44e7-be74-0fc2cc8f3c52
+for a complete example.
+
+**mtype-taxonomy**
+    A *mtypetaxonomy* Nexus instance with a tsv attachment file containing the mapping mtypes
+    to their morph class (Interneuron / Pyramidal) and synapse class (Excitatory / Inhibitory).
 
     For instance:
 
-    +---------------+--------------+----------------------+----------------------------------+
-    | gene          | lead_protein | maj_protein          | comment                          |
-    +===============+==============+======================+==================================+
-    | 0610011F06Rik | Q9DCS2       | Q9DCS2;E9Q7K5;G5E8X1 | UPF0585 protein C16orf13 homolog |
-    +---------------+--------------+----------------------+----------------------------------+
+    +-----------+-----------+-----------+
+    |  mtype    |   mClass  |   sClass  |
+    +===========+===========+===========+
+    |  L23_NGC  |   INT     |    INH    |
+    +-----------+-----------+-----------+
+    |  L23_SBC  |   INT     |    INH    |
+    +-----------+-----------+-----------+
+    |  L2_IPC   |   PYR     |    EXC    |
+    +-----------+-----------+-----------+
 
-**gene-expressions**
-    PyTables_ HDF5 file with a collection of tables corresponding to different gene expressions.
-
-    Tables are stored in the root ``\gene_expressions`` group; each of those has a unique identifier in this group.
-    It is envisioned that eventually each of those tables will be a separate *entity instance* in Nexus data storage platform, which we can reference by its UUID.
-
-    Each of those tables has two columns:
-      - ``gene`` with gene name
-      - ``expr`` with corresponding gene expression (floating point value)
-
-    For instance:
-
-    +--------+-----+
-    | gene   |expr |
-    +========+=====+
-    | Tshz1  | 1.0 |
-    +--------+-----+
-
-
-    In addition, each table has an attribute ``mtype``, which stores '|'-separated list of mtypes "compatible" with a given gene expression (for instance, ``L1_DAC|L1_HAC``).
+    See:
+    https://bbp-nexus.epfl.ch/staging/explorer/ngv/synprot/mtypetaxonomy/v0.1.0/f5c1beac-3245-48e6-8336-c2189a1c37be
+    for a complete example.
 
 **cell-proteins**
-    PyTables_ HDF5 file with a collection of tables corresponding to different cell proteins concentration measurements.
+    A *cellproteinconcexperiment* Nexus instance with a tsv attachment file containing the
+    concentration of each gene in each organelle.
 
-    Tables are stored in the root ``\cell_proteins`` group; similar to **gene-expressions** each of those tables is a "proto-entity".
+    Columns correspond to the different organelle and rows to the different genes. The values
+    are the concentrations in [nM] (nanomoles / litre) of each gene in each organelle as
+    a floating point.
 
-    Each of those tables has nine columns corresponding to protein concentraion in each of cell organelles; plus ``total`` with protein concentration across all the cell.
-    Concentrations are measured in nM (nanomoles / litre); missing values are encoded with ``NaN``.
+    As of today, the mandatory columns to provide are:
 
-    For instance:
+        - Lead gene name
+        - Canonical lead protein ID
+        - Majority protein IDs
+        - Protein names
+        - Median cellular concentration [nM]
+        - Median Cytosol concentration [nM]
+        - Median nuclear concentration [nM]
+        - Median ER concentration [nM]
+        - Median Endosome concentration [nM]
+        - Median Golgi apparatus concentration [nM]
+        - Median Lysosome concentration [nM]
+        - Median Mitochondrion concentration [nM]
+        - Median Peroxisome concentration [nM]
+        - Median Plasma membrane concentration [nM]
+        - Median Cytosol concentration [nM].1
 
-    +---------------+--------+---------+---------+-----+----------+-------+----------+--------------+------------+----------+
-    | gene          | total  | cytosol | nucleus | ER  | endosome | golgi | lysosome | mitochodrion | peroxisome | membrane |
-    +===============+========+=========+=========+=====+==========+=======+==========+==============+============+==========+
-    | 0610009B22Rik | 37.076 | NaN     | 1.729   | NaN | NaN      | NaN   | NaN      | NaN          | NaN        | NaN      |
-    +---------------+--------+---------+---------+-----+----------+-------+----------+--------------+------------+----------+
+    See:
+    https://bbp-nexus.epfl.ch/staging/explorer/ngv/synprot/cellproteinconcexperiment/v0.1.5/fcb284f3-6143-46a6-a34a-3cd8ea7277ba
+    for a complete example.
 
 **synapse-proteins**
-    PyTables_ HDF5 file with a collection of tables corresponding to different synapse proteins concentration measurements.
+    A *synapticproteinconcexperiment* Nexus instance with a tsv attachment file containing the
+    concentration of each gene inside the different kind of synapses.
 
-    Tables are stored in the root ``\synapse_proteins`` group; similar to **gene-expressions** each of those tables is a "proto-entity".
+    The attachment file must contain at least four columns:
 
-    Each of those tables has three columns:
+     - gene names Linerson
+     - PSD excitatory, #/um^2
+     - PSD inhibitory, #/um^2
+     - Presynaptic terminals, nM
 
-      - ``post_exc`` with protein *density* in excitatory synapses on postsynaptic side [count / um^2]
-      - ``post_inh`` with protein *density* in inhibitory synapses on postsynaptic side [count / um^2]
-      - ``pre`` with protein *concentration* on presynaptic side (without distinguishing synapse type) [nM]
+    Rows correspond to the gene name and concentrations.
 
-    For instance:
+    Example:
 
-    +---------------+----------+----------+-------+
-    | gene          | post_exc | post_inh | pre   |
-    +===============+==========+==========+=======+
-    | 0610005C13Rik | 0.947    | 0.390    | 0.528 |
-    +---------------+----------+----------+-------+
+    +-----------------------+---------------------------+--------------------------+-----------------------------+
+    |  gene names Linerson  |   PSD excitatory, #/um^2  |  PSD inhibitory, #/um^2  | Presynaptic terminals, nM   |
+    +=======================+===========================+==========================+=============================+
+    |        Camk2a         |            24570          |             0            |               71950         |
+    +-----------------------+---------------------------+--------------------------+-----------------------------+
+    |        Camk2b         |             5730          |             0            |               17150         |
+    +-----------------------+---------------------------+--------------------------+-----------------------------+
+
 
 **seed**
     Pseudo-random generator seed.
 
-.. warning::
+Intermediate files
+~~~~~~~~~~~~~~~~~~
 
-    | It is assumed that gene namespace is same across all subcellular data sources;
-    | though cell or synapse protein concentrations tables don't necessarily have *all* the genes.
-    | It is up to data source provider to ensure that; ``circuit-build`` makes no extra effort to check that assumption.
-
-.. note::
-
-    | One can observe that source data layout is far from being optimal (for instance, "squashing" gene expressions collection into a single table could reduce the file size by ~20 times).
-    | The main intent here is to provide an (experimental) uniform approach for storing the source data for gene expressions and cell / synapse protein concentrations, which could be later extended to using Nexus entities.
-
-
-.. _PyTables: <https://www.pytables.org/>
+Intermediate files will be created in a subcellular directory. These HDF5 files will be
+used to create the subcellular.h5 final file.
