@@ -27,7 +27,7 @@ NRN_STRUCTURAL_DIR = "connectome/structural"
 
 
 SPACK_MODULEPATH = ":".join(
-    '/gpfs/bbp.cscs.ch/apps/hpc/jenkins/modules/%s/2019-03/tcl/linux-rhel7-x86_64/' % component
+    '/gpfs/bbp.cscs.ch/apps/hpc/jenkins/modules/%s/2019-04/tcl/linux-rhel7-x86_64/' % component
     for component in [
         'applications',
         'external-libraries',
@@ -41,11 +41,11 @@ NIX_MODULEPATH = '/nix/var/nix/profiles/per-user/modules/bb5-x86_64/modules-all/
 
 MODULES = {
     'brainbuilder':
-        (SPACK_MODULEPATH, ['brainbuilder/0.10.2/python3']),
+        (SPACK_MODULEPATH, ['brainbuilder/0.10.5/python3']),
     'flatindexer':
         (NIX_MODULEPATH, ['nix/hpc/flatindexer/1.8.12']),
     'functionalizer':
-        (SPACK_MODULEPATH, ['functionalizer/3.11.0']),
+        (SPACK_MODULEPATH, ['functionalizer/3.12.1']),
     'jinja2':
         (SPACK_MODULEPATH, ['python-dev/0.1/python3']),
     'parquet-converters':
@@ -53,11 +53,11 @@ MODULES = {
     'placement-algorithm':
         (SPACK_MODULEPATH, ['placement-algorithm/2.0.7/python3']),
     'spykfunc':
-        (SPACK_MODULEPATH, ['spykfunc/0.13.0/python3']),
+        (SPACK_MODULEPATH, ['spykfunc/0.13.2/python3']),
     'synapsetool':
         (SPACK_MODULEPATH, ['synapsetool/0.4.1/parallel']),
     'touchdetector':
-        (SPACK_MODULEPATH, ['touchdetector/4.4.1']),
+        (SPACK_MODULEPATH, ['touchdetector/4.4.2']),
 }
 
 
@@ -662,7 +662,7 @@ rule node_sets:
         'circuit.mvd3'
 
     output:
-        'sonata/networks/All.node_sets.json'
+        'sonata/networks/nodes/All/node_sets.json'
 
     log:
         log_path('node_sets')
@@ -670,7 +670,7 @@ rule node_sets:
     shell:
         bbp_env(
             'brainbuilder',
-            ["brainbuilder targets node-set",
+            ["brainbuilder targets node-sets",
                 ("--targets %s" % bioname_path(config['targetgen_mvd3']['targets'])
                     if 'targets' in config.get('targetgen_mvd3', {}) else ""),
                 ("--allow-empty"
@@ -758,7 +758,7 @@ rule mvd3_to_sonata:
         'circuit.mvd3'
 
     output:
-        'sonata/networks/All.nodes.h5'
+        'sonata/networks/nodes/All/nodes.h5'
 
     shell:
         bbp_env(
@@ -780,7 +780,7 @@ rule syn2_to_sonata:
         'connectome/{nrn_dir}/circuit.syn2'
 
     output:
-        'sonata/networks/{nrn_dir}/All.edges.h5'
+        'sonata/networks/edges/{nrn_dir}/All/edges.h5'
 
     shell:
         bbp_env(
@@ -943,13 +943,17 @@ def write_network_config(nrn_dir):
         'brainbuilder',
         ["brainbuilder sonata network-config",
             "--base-dir",
-                'sonata',
+                "'.'",
             "--morph-dir",
-                MORPH_RELEASE,
+                "morphologies",
+            "--nodes-dir",
+                "networks/nodes",
             "--nodes",
-                "sonata/networks/All.nodes.h5",
+                "All",
+            "--edges-dir",
+                "networks/edges/%s" % nrn_dir,
             "--edges",
-                "sonata/networks/{nrn_dir}/All.edges.h5".format(nrn_dir=nrn_dir),
+                "All",
             "-o {output}"
         ]
     )
@@ -999,9 +1003,9 @@ rule functional_syn2:
 rule functional_sonata:
     input:
         'sonata/circuit_config.json',
-        'sonata/networks/All.nodes.h5',
-        'sonata/networks/All.node_sets.json',
-        'sonata/networks/functional/All.edges.h5',
+        'sonata/networks/nodes/All/nodes.h5',
+        'sonata/networks/nodes/All/node_sets.json',
+        'sonata/networks/edges/functional/All/edges.h5',
 
 
 rule functional_all:
@@ -1033,9 +1037,9 @@ rule structural_syn2:
 rule structural_sonata:
     input:
         'sonata/struct_circuit_config.json',
-        'sonata/networks/All.nodes.h5',
-        'sonata/networks/All.node_sets.json',
-        'sonata/networks/structural/All.edges.h5',
+        'sonata/networks/nodes/All/nodes.h5',
+        'sonata/networks/nodes/All/node_sets.json',
+        'sonata/networks/edges/structural/All/edges.h5',
 
 
 rule ngv:
