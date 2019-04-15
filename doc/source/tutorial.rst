@@ -93,15 +93,14 @@ After the command above has completed, the following files could be found in cir
     circuit.mvd3
     start.target
 
-At this point the circuit is partially complete and should be readable by `BluePy <https://bbpcode.epfl.ch/documentation/bluepy-0.12.5/index.html>`_ for analysis not involving connectome.
+At this point the circuit is partially complete and should be readable by `BluePy <https://bbpcode.epfl.ch/documentation/bluepy-0.13.5/index.html>`_ for analysis not involving connectome.
 
-There are also intermediate MVD3 files, dumped after each phase:
+There are also some intermediate partial MVD3 files:
 
 ::
 
     circuit.mvd3.somata
     circuit.mvd3.morphologies
-    circuit.mvd3.emodels
 
 These could be safely removed, should you not need them.
 We recommend to keep them however, at least until the circuit build is finalized to speed up potential rebuilds.
@@ -110,7 +109,7 @@ We recommend to keep them however, at least until the circuit build is finalized
 Connectome
 ~~~~~~~~~~
 
-Building connectome involves three phases: :ref:`ref-phase-touchdetector` followed by :ref:`ref-phase-s2f`; and finally merging chunked NRN files.
+Building connectome involves two phases: :ref:`ref-phase-touchdetector`, followed by :ref:`ref-phase-spykfunc_s2f`.
 
 .. code-block:: bash
 
@@ -223,22 +222,4 @@ After build is complete
 
 Once circuit build is complete, we'd recommend to make its `bioname`, as well as the result circuit files, read-only.
 
-If you've merged NRN files by copy (default mode), you can also remove ``nrn*.h5.*`` chunk files from ``connectome/functional/``.
-
-
-How to speed up NRN merging?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-By default NRN files produced by `functionalizer` are merged by copying their content to the merged file.
-
-Instead one can produce a merged file using HDF5 *external links*. This could be less robust, but reduces significantly time needed to produce merged files (which could be particularly useful for structural circuits). To instruct `snakemake` to merge NRN files by linking use:
-
-.. code-block:: bash
-
-    $ sm -j8 structural --config nrn_merge=link
-
-instead of:
-
-.. code-block:: bash
-
-    $ sm -j8 structural
+You can also remove intermediate files and folders like ``circuit.mvd3.<suffix>`` or ``connectome/<type>/spykfunc``.

@@ -24,9 +24,6 @@ assign_emodels:
 targetgen_mvd3:
   targets: 'targets.yaml'
 
-s2f:
-  seeds: [11, 12, 13, 14]
-
 projectionizer:
   Thalamocortical_VPM_1: {}
   Thalamocortical_VPM_2: {}

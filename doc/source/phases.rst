@@ -178,27 +178,12 @@ Detect touches between neurites using `TouchDetector <https://bbpteam.epfl.ch/do
 
         -A <proj> -p prod --constraint=cpu -n<tasks> --time <time>
 
-
 .. warning::
 
     Unlike nost other phases, ``TouchDetector`` is stateful: i.e., during the run it writes checkpoints to the disk, and automatically resumes from those on restart.
 
     While it saves a lot of computational time in regular cases when resume from checkpoint is desirable, beware to clean up ``connectome/touches`` folder when you restart `TouchDetector` knowing some input (including `TouchDetector` version itself) has changed.
 
-.. _ref-phase-s2f:
-
-s2f
----
-
-Prune touches and convert them into synapses using `Functionalizer <https://bbpteam.epfl.ch/documentation/#functionalizer>`_.
-
-
-.. _ref-phase-s2s:
-
-s2s
----
-
-Analogous to ``s2f``, but does not prune touches.
 
 .. _ref-phase-touch2parquet:
 
@@ -217,6 +202,10 @@ spykfunc_s2f
 ------------
 
 Prune touches and convert them into synapses (S2F) using `Spark Functionalizer <https://bbpteam.epfl.ch/documentation/#spykfunc>`_.
+
+.. note::
+
+    Unlike most other phases, pseudo-random generator seed for ``spykfunc_s2f`` phase is not specified in ``MANIFEST.yaml``, but taken from ``builderRecipeAllPathways.xml`` recipe (``synapseSeed`` attribute of ``<Seeds>`` element).
 
 .. tip::
 

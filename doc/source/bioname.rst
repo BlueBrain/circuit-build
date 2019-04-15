@@ -188,7 +188,7 @@ If emodel release is not yet available, one can obtain a stub version of `extNeu
 
 This will create `extNeuronDB.dat` in the current folder with all possible me-type combinations being assigned `N/A` me_combo.
 
-Used in :ref:`ref-phase-choose-morphologies`, :ref:`ref-phase-assign-emodels`, :ref:`ref-phase-s2f` and :ref:`ref-phase-s2s` phases.
+Used in :ref:`ref-phase-choose-morphologies` and :ref:`ref-phase-assign-emodels` phases.
 
 
 placement_rules.xml
@@ -209,7 +209,7 @@ This pair used to fully defined the circuit composition; now it is still relevan
 
     We apologize for this inconvenience that is due to ongoing transition from column-based circuit building to atlas-based one.
 
-Used in :ref:`ref-phase-touchdetector`, :ref:`ref-phase-s2f` and :ref:`ref-phase-s2s` phases.
+Used in :ref:`ref-phase-touchdetector`, :ref:`ref-phase-spykfunc_s2f` and :ref:`ref-phase-spykfunc_s2s` phases.
 
 
 .. _ref-bioname-targets:
@@ -219,7 +219,7 @@ Target definitions (YAML)
 
 Custom targets to be added to the circuit. During circuit build, they are resolved into named GID sets stored in ``start.target``.
 
-At the moment we support only query-based target definitions. These should be defined inside ``targets/query_based`` section as mappings with `BluePy-like <https://bbpteam.epfl.ch/documentation/bluepy-0.12.5/circuit.html#cells-get>`_ cell property filters.
+At the moment we support only query-based target definitions. These should be defined inside ``targets/query_based`` section as mappings with `BluePy-like <https://bbpteam.epfl.ch/documentation/bluepy-0.13.5/circuit.html#cells-get>`_ cell property filters.
 
 Example:
 

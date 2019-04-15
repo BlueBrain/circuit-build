@@ -27,7 +27,7 @@ NRN_STRUCTURAL_DIR = "connectome/structural"
 
 
 SPACK_MODULEPATH = ":".join(
-    '/gpfs/bbp.cscs.ch/apps/hpc/jenkins/modules/%s/2019-05/tcl/linux-rhel7-x86_64/' % component
+    '/gpfs/bbp.cscs.ch/apps/hpc/jenkins/modules/%s/2019-06/tcl/linux-rhel7-x86_64/' % component
     for component in [
         'applications',
         'external-libraries',
@@ -44,20 +44,18 @@ MODULES = {
         (SPACK_MODULEPATH, ['brainbuilder/0.11.1/python3']),
     'flatindexer':
         (NIX_MODULEPATH, ['nix/hpc/flatindexer/1.8.12']),
-    'functionalizer':
-        (SPACK_MODULEPATH, ['functionalizer/3.12.1']),
     'jinja2':
         (SPACK_MODULEPATH, ['python-dev/0.1/python3']),
     'parquet-converters':
-        (SPACK_MODULEPATH, ['parquet-converters/0.3']),
+        (SPACK_MODULEPATH, ['parquet-converters/0.4.1']),
     'placement-algorithm':
         (SPACK_MODULEPATH, ['placement-algorithm/2.0.8/python3']),
     'spykfunc':
-        (SPACK_MODULEPATH, ['spykfunc/0.13.2/python3']),
+        (SPACK_MODULEPATH, ['spykfunc/0.14.3/python3']),
     'synapsetool':
         (SPACK_MODULEPATH, ['synapsetool/0.4.1/parallel']),
     'touchdetector':
-        (SPACK_MODULEPATH, ['touchdetector/4.4.2']),
+        (SPACK_MODULEPATH, ['touchdetector/5.0.1']),
 }
 
 
@@ -170,6 +168,17 @@ rule circuitconfig_base:
         build_circuit_config(nrn_path='.')
 
 
+rule circuitconfig_nrn:
+    message:
+        "Generate CircuitConfig for functional circuit (nrn.h5)"
+
+    output:
+        'CircuitConfig_nrn'
+
+    shell:
+        build_circuit_config(nrn_path=NRN_FUNCTIONAL_DIR)
+
+
 rule circuitconfig_functional:
     message:
         "Generate CircuitConfig for functional circuit"
@@ -178,7 +187,7 @@ rule circuitconfig_functional:
         'CircuitConfig'
 
     shell:
-        build_circuit_config(nrn_path=NRN_FUNCTIONAL_DIR)
+        build_circuit_config(nrn_path=(NRN_FUNCTIONAL_DIR + '/edges.sonata'))
 
 
 rule circuitconfig_structural:
@@ -189,7 +198,7 @@ rule circuitconfig_structural:
         'CircuitConfig_struct'
 
     shell:
-        build_circuit_config(nrn_path=NRN_STRUCTURAL_DIR)
+        build_circuit_config(nrn_path=(NRN_STRUCTURAL_DIR + '/edges.sonata'))
 
 
 rule place_cells:
@@ -324,7 +333,7 @@ rule assign_emodels:
         'circuit.mvd3.morphologies'
 
     output:
-        'circuit.mvd3.emodels'
+        'circuit.mvd3'
 
     shell:
         bbp_env(
@@ -338,59 +347,12 @@ rule assign_emodels:
         )
 
 
-rule set_circuit_seeds:
-    message:
-        "Set MVD3 /circuit/seeds"
-
-    input:
-        'circuit.mvd3.emodels'
-
-    output:
-        'circuit.mvd3'
-
-    shell:
-        bbp_env(
-            'brainbuilder',
-            ["brainbuilder mvd3 set-seeds",
-                "--seeds",
-                    ",".join(map(str, config['s2f']['seeds'])),
-                "--output {output}",
-                "{input}"
-            ],
-            slurm_env='set_circuit_seeds'
-        )
-
-
-rule mvd3_reorder_mtypes:
-    message:
-        "Re-order /library/mtypes to be aligned with builder recipe"
-
-    input:
-        'circuit.mvd3'
-
-    output:
-        'circuit.mvd3.reordered'
-
-    shell:
-        bbp_env(
-            'brainbuilder',
-            ["brainbuilder mvd3 reorder-mtypes",
-                "--recipe",
-                    BUILDER_RECIPE,
-                "--output",
-                    "{output}",
-                "{input}"
-            ],
-            slurm_env='mvd3_reorder_mtypes'
-        )
-
-
 rule touchdetector:
     message:
         "Detect touches between neurites"
 
     input:
-        'circuit.mvd3.reordered',
+        mvd3 = 'circuit.mvd3',
 
     output:
         touch(TOUCHES_DIR + '/_SUCCESS')
@@ -401,107 +363,16 @@ rule touchdetector:
     shell:
         bbp_env(
             'touchdetector',
-            ["env",
-                "BGLOCKLESSMPIO_F_TYPE=0x47504653",
-             "touchdetector",
-                "--mvdFilePath={input}",
-                "--morphologyPath={MORPH_RELEASE}/h5v1",
-                "--recipePath={BUILDER_RECIPE}",
-                "--enableSaveState",
-                "--outputFolder={TOUCHES_DIR}",
+            ["touchdetector",
+                "--output",
+                    "{TOUCHES_DIR}",
+                "--save-state",
+                "{BUILDER_RECIPE}",
+                "{input[mvd3]}",
+                "{MORPH_RELEASE}/h5v1"
             ],
             dump_log=True,
             slurm_env='touchdetector'
-        )
-
-
-def run_functionalizer(rule, output_dir, enable_pruning):
-    return bbp_env(
-        'functionalizer',
-        ["env",
-            "BGLOCKLESSMPIO_F_TYPE=0x47504653",
-         "functionalizer",
-            "--inMVD-file={input[mvd3]}",
-            "--inDetector-file={TOUCHES_DIR}/touches",
-            "--recipe-file={BUILDER_RECIPE}",
-            "--database={MORPH_RELEASE}/h5v1",
-            "--pruningType=%d" % (1 if enable_pruning else 0),
-            "--disableDeltaOutput",
-            "--outNCS-file=%s" % os.path.join(output_dir, "a.ncs"),
-        ],
-        dump_log=True,
-        slurm_env=rule
-    )
-
-
-rule s2s:
-    message:
-        "Convert touches into synapses (S2S)"
-
-    input:
-        mvd3 = 'circuit.mvd3',
-        touches = TOUCHES_DIR + '/_SUCCESS'
-
-    output:
-        connectome_files(NRN_STRUCTURAL_DIR, suffix=".0")
-
-    log:
-        log_path('s2s')
-
-    shell:
-        run_functionalizer(
-            's2s',
-            output_dir=NRN_STRUCTURAL_DIR,
-            enable_pruning=False,
-        )
-
-
-rule s2f:
-    message:
-        "Prune touches and convert them into synapses (S2F)"
-
-    input:
-        mvd3 = 'circuit.mvd3',
-        touches = TOUCHES_DIR + '/_SUCCESS'
-
-    output:
-        connectome_files(NRN_FUNCTIONAL_DIR, suffix=".0")
-
-    log:
-        log_path('s2f')
-
-    shell:
-        run_functionalizer(
-            's2f',
-            output_dir=NRN_FUNCTIONAL_DIR,
-            enable_pruning=True,
-        )
-
-
-rule nrn_merge:
-    input:
-        'connectome/{nrn_dir}/{filename}.0'
-
-    output:
-        'connectome/{nrn_dir}/{filename}'
-
-    wildcard_constraints:
-        filename = ".*\.h5$"
-
-    log:
-        log_path('nrn_merge_{nrn_dir}_{filename}')
-
-    shell:
-        bbp_env(
-            'brainbuilder',
-            [
-             "cd connectome/{wildcards.nrn_dir} &&",
-             "brainbuilder nrn merge .",
-                "--only {wildcards.filename}",
-                "--link" if config.get('nrn_merge', "copy") == "link" else "",
-            ],
-            dump_log=True,
-            slurm_env='nrn_merge'
         )
 
 
@@ -726,10 +597,10 @@ rule spatial_index_synapse:
         "Generate synapse spatial index"
 
     input:
-        'CircuitConfig',
+        'CircuitConfig_nrn',
         'circuit.mvd3',
-        NRN_FUNCTIONAL_DIR + '/start.target',
-        connectome_files(NRN_FUNCTIONAL_DIR)
+        NRN_FUNCTIONAL_DIR + '/nrn.h5',
+        NRN_FUNCTIONAL_DIR + '/start.target'
 
     output:
         spatial_index_files(NRN_FUNCTIONAL_DIR + '/SYNAPSE')
@@ -742,7 +613,7 @@ rule spatial_index_synapse:
             'flatindexer',
             [
              "cd {NRN_FUNCTIONAL_DIR} &&",
-             "SDKGenerator ../../CircuitConfig synapse All SYNAPSE",
+             "SDKGenerator ../../CircuitConfig_nrn synapse All SYNAPSE",
             ],
             dump_log=True,
             slurm_env='spatial_index_synapse'
@@ -797,6 +668,44 @@ rule syn2_to_sonata:
             ],
             slurm_env='syn2_to_sonata'
         )
+
+
+rule syn2_to_nrn:
+    message:
+        "SYN2 -> nrn.h5"
+
+    input:
+        'connectome/{nrn_dir}/circuit.syn2'
+
+    output:
+        'connectome/{nrn_dir}/nrn.h5'
+
+    shell:
+        bbp_env(
+            'brainbuilder',
+            ["brainbuilder nrn from-syn2",
+                "--output connectome/{wildcards.nrn_dir}",
+                "{input}"
+            ],
+            slurm_env='syn2_to_nrn'
+        )
+
+
+rule symlink_sonata_edges:
+    message:
+        "Symlink {wildcards.nrn_dir} SONATA edges"
+
+    input:
+        'sonata/networks/edges/{nrn_dir}/All/edges.h5'
+
+    output:
+        'connectome/{nrn_dir}/edges.sonata'
+
+    shell:
+        """
+        cd connectome/{wildcards.nrn_dir}/ &&
+        ln -s ../../sonata/networks/edges/{wildcards.nrn_dir}/All/edges.h5 edges.sonata
+        """
 
 
 rule subcellular:
@@ -872,23 +781,19 @@ rule circuitconfig_struct_sonata:
         write_network_config('structural')
 
 
-rule functional_base:
+rule functional:
     input:
         'CircuitConfig',
         'circuit.mvd3',
-        NRN_FUNCTIONAL_DIR + '/start.target',
+        'start.target',
+        NRN_FUNCTIONAL_DIR + '/edges.sonata',
 
 
-rule functional:
+rule functional_all:
     input:
-        rules.functional_base.input,
-        connectome_files(NRN_FUNCTIONAL_DIR),
-
-
-rule functional_syn2:
-    input:
-        rules.functional_base.input,
-        NRN_FUNCTIONAL_DIR + '/circuit.syn2',
+        rules.functional.input,
+        rules.spatial_index_segment.output,
+        rules.spatial_index_synapse.output,
 
 
 rule functional_sonata:
@@ -899,30 +804,20 @@ rule functional_sonata:
         'sonata/networks/edges/functional/All/edges.h5',
 
 
-rule functional_all:
+rule functional_nrn:
     input:
-        rules.functional.input,
-        rules.spatial_index_segment.output,
-        rules.spatial_index_synapse.output,
-
-
-rule structural_base:
-    input:
-        'CircuitConfig_struct',
+        'CircuitConfig_nrn',
         'circuit.mvd3',
-        NRN_STRUCTURAL_DIR + '/start.target',
+        NRN_FUNCTIONAL_DIR + '/nrn.h5',
+        NRN_FUNCTIONAL_DIR + '/start.target'
 
 
 rule structural:
     input:
-        rules.structural_base.input,
-        connectome_files(NRN_STRUCTURAL_DIR),
-
-
-rule structural_syn2:
-    input:
-        rules.structural_base.input,
-        NRN_STRUCTURAL_DIR + '/circuit.syn2',
+        'CircuitConfig_struct',
+        'circuit.mvd3',
+        'start.target',
+        NRN_STRUCTURAL_DIR + '/edges.sonata',
 
 
 rule structural_sonata:

@@ -18,31 +18,15 @@ touchdetector:
     -n2
     --time 0:05:00
 
-s2f:
-  jobname: s2f
-  salloc: >-
-    -A proj44
-    -p prod_small
-    -C cpu
-    -n2
-    --time 0:05:00
-
-s2s:
-  jobname: s2s
-  salloc: >-
-    -A proj44
-    -p prod_small
-    -C cpu
-    -n2
-    --time 0:05:00
-
+# running on 'prod' since '-C nvme' is not available on 'prod_small'
 spykfunc_s2f:
-  jobname: s2f_spark
-  salloc: '-A proj44 -p prod_small -C nvme --exclusive --mem 0 --time 0:15:00'
+  jobname: s2f
+  salloc: '-A proj44 -p prod -C nvme --exclusive --mem 0 --time 0:15:00'
 
+# running on 'prod' since '-C nvme' is not available on 'prod_small'
 spykfunc_s2s:
-  jobname: s2s_spark
-  salloc: '-A proj44 -p prod_small -C nvme --exclusive --mem 0 --time 0:15:00'
+  jobname: s2s
+  salloc: '-A proj44 -p prod -C nvme --exclusive --mem 0 --time 0:15:00'
 
 spatial_index_segment:
   jobname: segment_index
