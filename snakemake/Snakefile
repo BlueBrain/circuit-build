@@ -425,7 +425,6 @@ def run_functionalizer(rule, output_dir, enable_pruning):
             "--inDetector-file={TOUCHES_DIR}/touches",
             "--recipe-file={BUILDER_RECIPE}",
             "--database={MORPH_RELEASE}/h5v1",
-            "--database-file={MORPHDB}",
             "--pruningType=%d" % (1 if enable_pruning else 0),
             "--disableDeltaOutput",
             "--outNCS-file=%s" % os.path.join(output_dir, "a.ncs"),
