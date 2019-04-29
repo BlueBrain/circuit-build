@@ -144,7 +144,7 @@ def _column_hierarchy(column, layers, region_ids):
         'name': "hypercolumn {}".format(column),
         'children': [{
             'id': region_ids[(column, layer)],
-                'acronym': 'mc{};{}'.format(region_ids[(column, layer)], layer),
+             'acronym': 'mc{};{}'.format(column, layer),
             'name': "hypercolumn {}, {}".format(column, layer)
         } for layer in layers]
     }
