@@ -3,6 +3,7 @@
 Build artificial atlas.
 """
 import os
+import sys
 import json
 import logging
 import itertools
@@ -13,6 +14,11 @@ import numpy as np
 from six import iteritems
 
 from voxcell import build, math_utils, VoxelData
+
+
+if sys.version_info < (3, 6):
+    raise RuntimeError("Sorry, Python<3.6 is not supported")
+
 
 L = logging.getLogger(__name__)
 
