@@ -1,12 +1,12 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 """
 Build artificial atlas.
 """
 import os
-import sys
 import json
 import logging
 import itertools
+from collections import OrderedDict
 
 import click
 import numpy as np
@@ -14,10 +14,6 @@ import numpy as np
 from six import iteritems
 
 from voxcell import build, math_utils, VoxelData
-
-
-if sys.version_info < (3, 6):
-    raise RuntimeError("Sorry, Python<3.6 is not supported")
 
 
 L = logging.getLogger(__name__)
@@ -67,9 +63,9 @@ def _build_brain_regions(width, hex_side, layers, voxel_side):
 
     columns = np.unique(mosaic_2D[mosaic_2D >= 0])
 
-    region_ids = {
-        (column, None): k for k, column in enumerate(columns, 1)
-    }
+    region_ids = OrderedDict(
+        ((column, None), k) for k, column in enumerate(columns, 1)
+    )
 
     for name, thickness in iteritems(layers):
         pattern = np.zeros_like(mosaic_2D, dtype=np.uint16)
@@ -136,7 +132,7 @@ def _build_y(brain_regions):
 
 def _normalize_hierarchy(hierarchy):
     """ Sort keys in hierarchy dict. """
-    result = {key: hierarchy[key] for key in ['id', 'acronym', 'name']}
+    result = OrderedDict((key, hierarchy[key]) for key in ['id', 'acronym', 'name'])
     if 'children' in hierarchy:
         result['children'] = [_normalize_hierarchy(c) for c in hierarchy['children']]
     return result
@@ -144,29 +140,27 @@ def _normalize_hierarchy(hierarchy):
 
 def _column_hierarchy(column, layers, region_ids):
     """ Build 'hierarchy' dict for single hypercolumn. """
-    return {
-        'id': region_ids[(column, None)],
-        'acronym': "mc{}_Column".format(column),
-        'name': "hypercolumn {}".format(column),
-        'children': [{
-            'id': region_ids[(column, layer)],
-             'acronym': 'mc{};{}'.format(column, layer),
-            'name': "hypercolumn {}, {}".format(column, layer)
-        } for layer in layers]
-    }
+    return OrderedDict([
+        ('id', region_ids[(column, None)]),
+        ('acronym', "mc{}_Column".format(column)),
+        ('name', "hypercolumn {}".format(column)),
+        ('children', [OrderedDict([
+            ('id', region_ids[(column, layer)]),
+            ('acronym', 'mc{};{}'.format(column, layer)),
+            ('name', "hypercolumn {}, {}".format(column, layer))
+        ]) for layer in layers])
+    ])
 
 
 def _mosaic_hierarchy(width, layers, region_ids):
     """ Build 'hierarchy' dict for 'mosaic' atlas. """
     COLUMNS = sorted(set(column for column, _ in region_ids))
-    return {
-        'id': 65535,
-        'acronym': "O{}".format(width),
-        'name': "O{} mosaic".format(width),
-        'children': [
-            _column_hierarchy(c, layers, region_ids) for c in COLUMNS
-        ]
-    }
+    return OrderedDict([
+        ('id', 65535),
+        ('acronym', "O{}".format(width)),
+        ('name', "O{} mosaic".format(width)),
+        ('children', [_column_hierarchy(c, layers, region_ids) for c in COLUMNS])
+    ])
 
 
 def _align_thickness(thickness, voxel_side):
@@ -219,7 +213,7 @@ def app(width, hex_side, layer_names, thickness, voxel_side, output_dir):
     L.info("Total thickness before aligment: %s", sum(raw_thickness))
     L.info("Total thickness after aligment: %s", sum(aligned_thickness))
 
-    layers = dict(zip(names, aligned_thickness))
+    layers = OrderedDict(zip(names, aligned_thickness))
 
     output_dir = os.path.abspath(output_dir)
     if not os.path.exists(output_dir):
