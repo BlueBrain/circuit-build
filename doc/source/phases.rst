@@ -179,6 +179,12 @@ Detect touches between neurites using `TouchDetector <https://bbpteam.epfl.ch/do
         -A <proj> -p prod --constraint=cpu -n<tasks> --time <time>
 
 
+.. warning::
+
+    Unlike nost other phases, ``TouchDetector`` is stateful: i.e., during the run it writes checkpoints to the disk, and automatically resumes from those on restart.
+
+    While it saves a lot of computational time in regular cases when resume from checkpoint is desirable, beware to clean up ``connectome/touches`` folder when you restart `TouchDetector` knowing some input (including `TouchDetector` version itself) has changed.
+
 .. _ref-phase-s2f:
 
 s2f

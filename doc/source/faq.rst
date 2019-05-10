@@ -85,6 +85,17 @@ thus will have the same effect.
 
 Please refer to `Snakemake <http://snakemake.readthedocs.io/en/stable/index.html>`_ documentation for more details, and other options (run *upto* particular phase, etc).
 
+How can I avoid regenerating files if I know they won't change?
+---------------------------------------------------------------
+
+`Snakemake` operates similar to `make` utility, and treats an output file as "outdated", if some of its inputs has a more recent timestamp.
+
+To suppress this behavior (for instance, to skip TouchDetector re-run if MVD3 was re-generated in a way that does not affect touch detection), one can trick `Snakemake` by manually updating the timestamp of the output:
+
+.. code-block:: bash
+
+    touch connectome/touches/_SUCCESS
+
 
 Which modules are used for executing phases?
 --------------------------------------------
