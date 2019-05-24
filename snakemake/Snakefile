@@ -27,7 +27,7 @@ NRN_STRUCTURAL_DIR = "connectome/structural"
 
 
 SPACK_MODULEPATH = ":".join(
-    '/gpfs/bbp.cscs.ch/apps/hpc/jenkins/modules/%s/2019-04/tcl/linux-rhel7-x86_64/' % component
+    '/gpfs/bbp.cscs.ch/apps/hpc/jenkins/modules/%s/2019-05/tcl/linux-rhel7-x86_64/' % component
     for component in [
         'applications',
         'external-libraries',
@@ -41,7 +41,7 @@ NIX_MODULEPATH = '/nix/var/nix/profiles/per-user/modules/bb5-x86_64/modules-all/
 
 MODULES = {
     'brainbuilder':
-        (SPACK_MODULEPATH, ['brainbuilder/0.10.5/python3']),
+        (SPACK_MODULEPATH, ['brainbuilder/0.11.1/python3']),
     'flatindexer':
         (NIX_MODULEPATH, ['nix/hpc/flatindexer/1.8.12']),
     'functionalizer':
@@ -51,7 +51,7 @@ MODULES = {
     'parquet-converters':
         (SPACK_MODULEPATH, ['parquet-converters/0.3']),
     'placement-algorithm':
-        (SPACK_MODULEPATH, ['placement-algorithm/2.0.7/python3']),
+        (SPACK_MODULEPATH, ['placement-algorithm/2.0.8/python3']),
     'spykfunc':
         (SPACK_MODULEPATH, ['spykfunc/0.13.2/python3']),
     'synapsetool':
@@ -763,8 +763,12 @@ rule mvd3_to_sonata:
         bbp_env(
             'brainbuilder',
             ["brainbuilder sonata from-mvd3",
-                "--population All",
-                "--output {output}",
+                "--mecombo-info",
+                    os.path.join(EMODEL_RELEASE, "mecombo_emodel.tsv"),
+                "--population",
+                    "All",
+                "--output",
+                    "{output}",
                 "{input}"
             ],
             slurm_env='mvd3_to_sonata'
@@ -830,7 +834,9 @@ def write_network_config(nrn_dir):
             "--base-dir",
                 "'.'",
             "--morph-dir",
-                "morphologies",
+                "components/morphologies",
+            "--emodel-dir",
+                "components/biophysical_neuron_models",
             "--nodes-dir",
                 "networks/nodes",
             "--nodes",
