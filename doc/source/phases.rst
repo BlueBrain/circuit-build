@@ -85,13 +85,18 @@ Parameters
 choose_morphologies
 -------------------
 
-Choose morphologies for cell positions using `placement hints <https://bbpteam.epfl.ch/documentation/placement-algorithm-2.0.7/index.html>`_ approach.
+Choose morphologies for cell positions using `placement hints <https://bbpteam.epfl.ch/documentation/placement-algorithm-2.0.8/index.html>`_ approach.  This creates the ``morphologies.tsv`` described `here <https://bbpteam.epfl.ch/documentation/placement-algorithm-2.0.8/index.html#choose-morphologies>`_.
 
 .. tip::
 
-    This task requires at least two node SLURM allocation.
+    This task requires at least a two task SLURM allocation.
 
-    Please make sure you define it in the cluster config accordingly.
+    Please make sure you define it in the cluster config accordingly: ie ``-n2``
+
+    Also, the memory requirements vary according to the atlas, please follow the process like in :ref:`place_cells <ref-phase-place-cells>`.
+
+    Scaling should be good, so if this phase is running slow, increasing the
+    number of SLURM tasks will help.
 
 
 Parameters
