@@ -137,7 +137,7 @@ rule default:
 def build_circuit_config(nrn_path):
     return bbp_env(
         'jinja2',
-        ["jinja2 --outfile={output} --strict",
+        ["jinja2 --strict",
             "-D CIRCUIT_PATH=%s" % os.path.abspath(CIRCUIT_DIR),
             "-D NRN_PATH=%s" % os.path.abspath(nrn_path),
             "-D MORPH_PATH={MORPH_RELEASE}",
@@ -148,6 +148,7 @@ def build_circuit_config(nrn_path):
             ("-D PROJECTIONS='%s'" % ";".join(config['projectionizer'])
                 if 'projectionizer' in config else ""),
             template_path('CircuitConfig.j2'),
+            "> {output}",
         ]
     )
 
