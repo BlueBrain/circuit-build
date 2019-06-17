@@ -1,6 +1,8 @@
 FAQ
 ===
 
+.. _ref-faq-why-snakemake:
+
 Why Snakemake?
 --------------
 
@@ -9,7 +11,7 @@ Using `Snakemake <http://snakemake.readthedocs.io/en/stable/index.html>`_ gives 
  * minimum boilerplate for describing task dependencies
  * tracking the needed updates (if some file changed, all its dependencies would be re-generated automatically)
  * running tasks in parallel
- * possibility to run tasks locally as well as with with SLURM
+ * possibility to run tasks locally as well as with with Slurm
  * creating reproducible environments for tasks using BBP modules
 
 This could be considered an intermediate step towards more general workflow engine developed by NSE team.
@@ -37,7 +39,7 @@ Where can I find logs for a given circuit build?
 
 `Snakemake` execution logs (which rules we launched along with full launch commands) can be found in ``.snakemake/logs`` subfolder of each circuit build folder.
 
-Stdout / stderr output for most of the rules can be found in ``logs`` subfolder.
+STDOUT / STDERR output for most of the rules can be found in ``logs`` subfolder.
 
 
 How can I see the full list of the phases and their status?
@@ -105,6 +107,7 @@ Thus the environment created is isolated (to some degree); and replacing some mo
 
 With a few exceptions, normally we are using Spack-based archive modules deployed at BB5.
 For better traceability, MODULEPATH and list of modules loaded is dumped to each phase log (for those phases where we keep logs).
+
 
 Troubleshooting
 ---------------

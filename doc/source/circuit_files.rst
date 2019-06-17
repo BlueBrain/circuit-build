@@ -1,7 +1,7 @@
 .. _ref-circuit-files:
 
-What constitues a circuit release?
-==================================
+What constitutes a circuit release?
+===================================
 
 A typical circuit release folder would look like:
 

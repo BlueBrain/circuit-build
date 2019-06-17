@@ -40,13 +40,8 @@ On BB5 cluster `snakemake` is available as a module:
 
     $ module load nix/py36/snakemake
 
-Alternatively, it can be pip-installed in any Python 3.5+ virtual environment:
-
-.. code-block:: bash
-
-    $ pip install snakemake
-
-`snakemake` can run all the tasks locally or launch every task in a separate SLURM allocation. In practice the latter option is preferred, please refer to :ref:`ref-cluster-config` section for the details.
+`snakemake` can run all the tasks locally or launch every task in a separate `Slurm` allocation.
+In practice the latter option is preferred, please refer to :ref:`ref-cluster-config` section for the details.
 
 It is also recommended to always use ``-p`` flag to ensure commands spawned by `snakemake` are dumped to the logs.
 
@@ -62,18 +57,10 @@ We also assume that all ``sm`` commands are executed from circuit release folder
 Running
 -------
 
-One command to build it all
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+With `snakemake`, one can choose which phases to run.
+To get a feel for the process, and to only run a subset of the pipeline, it's instructive to run the `Cell collection`_.
 
-.. code-block:: bash
-
-    $ sm -j99 -k functional_all
-
-would launch all the tasks needed to generate files listed in :ref:`ref-circuit-files` section.
-
-Providing ``-j<N>`` allows to launch up to ``<N>`` tasks in parallel; ``-k`` flag instructs `Snakemake` to proceed with other jobs if some independent job has failed.
-
-Alternatively, we can build circuit step by step.
+The reasoning for using `snakemake` is available here: :ref:`ref-faq-why-snakemake`
 
 
 Cell collection
@@ -169,6 +156,17 @@ To assign gene expressions and protein concentrations to the cells:
 
     $ sm subcellular
 
+One command to build it all
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: bash
+
+    $ sm -j99 -k functional_all
+
+would launch all the tasks needed to generate files listed in :ref:`ref-circuit-files` section.
+
+Providing ``-j<N>`` allows to launch up to ``<N>`` tasks in parallel; ``-k`` flag instructs `Snakemake` to proceed with other jobs if some independent job has failed.
+
 
 .. _ref-cluster-config:
 
@@ -176,13 +174,13 @@ Cluster config
 --------------
 
 By default `snakemake` launches all the tasks locally.
-To use *cluster mode* (i.e. launch every task in a separate SLURM allocation) one has to provide YAML file with allocation parameters for each phase.
+To use *cluster mode* (i.e. launch every task in a separate Slurm allocation) one has to provide YAML file with allocation parameters for each phase.
 
 .. code-block:: bash
 
     $ snakemake --cluster-config cluster.yaml ...
 
-For instance, to specify SLURM allocation for ``touchdetector`` phase, YAML should contain an entry like:
+For instance, to specify Slurm allocation for ``touchdetector`` phase, YAML should contain an entry like:
 
 ::
 
@@ -190,7 +188,7 @@ For instance, to specify SLURM allocation for ``touchdetector`` phase, YAML shou
         jobname: td
         salloc: '-A proj68 -p prod --constraint=cpu -n100 --time 1:00:00'
 
-``jobname`` key is optional (if omitted, SLURM job will be given some default name).
+``jobname`` key is optional (if omitted, Slurm job will be given some default name).
 
 Sometimes it can be convenient to use multi-line string for ``salloc`` key:
 
@@ -205,7 +203,7 @@ Sometimes it can be convenient to use multi-line string for ``salloc`` key:
             -n100
             --time 1:00:00
 
-YAML *must* also contain ``__default__`` section which will be used for phases with no corresponding section, for instance:
+`YAML` *must* also contain ``__default__`` section which will be used for phases with no corresponding section, for instance:
 
 ::
 
