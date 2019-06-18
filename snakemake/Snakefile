@@ -41,7 +41,7 @@ NIX_MODULEPATH = '/nix/var/nix/profiles/per-user/modules/bb5-x86_64/modules-all/
 
 MODULES = {
     'brainbuilder':
-        (SPACK_MODULEPATH, ['brainbuilder/0.11.1/python3']),
+        (SPACK_MODULEPATH, ['brainbuilder/0.11.3/python3']),
     'flatindexer':
         (NIX_MODULEPATH, ['nix/hpc/flatindexer/1.8.12']),
     'jinja2':
