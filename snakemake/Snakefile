@@ -393,9 +393,33 @@ rule touch2parquet:
         )
 
 
-def run_spykfunc(rule, nrn_dir, enable_pruning):
+def run_spykfunc(rule, nrn_dir):
+    assert rule in ("spykfunc_s2s", "spykfunc_s2f", ), "Unknown rule calling run_spykfunc"
+
+    filters = config.get(rule, {}).get("filters", [])
+    assert " " not in filters, "Filters cannot have spaces"
+
+    if filters:
+        mode = "--filters %s" % ','.join(filters)
+
+        # https://bbpteam.epfl.ch/project/issues/browse/FUNCZ-208?focusedCommentId=89736&page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-89736
+        if rule == "spykfunc_s2s":
+            for filter_rule in ("BoutonDistance", "SynapseProperties", ):
+                assert filter_rule in filters, "s2s should have rule %s" % filter_rule
+        elif rule == "spykfunc_s2f":
+            for filter_rule in ("BoutonDistance",
+                                "TouchRules",
+                                "ReduceAndCut",
+                                "SynapseProperties",
+                                ):
+                assert filter_rule in filters, "s2f should have rule %s" % filter_rule
+    elif rule == "spykfunc_s2s":
+        mode = "--s2s"
+    elif rule == "spykfunc_s2f":
+        mode = "--s2f"
+
     output_dir = os.path.join(nrn_dir, 'spykfunc')
-    return bbp_env(
+    cmd = bbp_env(
         'spykfunc',
         ["env",
             "SPARK_USER=$(whoami)",
@@ -403,7 +427,7 @@ def run_spykfunc(rule, nrn_dir, enable_pruning):
             cluster_config.get(rule, {}).get('sm_run', ""),
             "-w %s" % os.path.join(output_dir, '.sm_run'),
          "spykfunc",
-            "--s2f" if enable_pruning else "--s2s",
+            mode,
             "--output-order post",
             "--output-dir %s" % output_dir,
             "--spark-property spark.master=spark://$(srun sh -c '[ $SLURM_PROCID -eq 0 ] && hostname || true' | tail -n 1):7077",
@@ -420,6 +444,7 @@ def run_spykfunc(rule, nrn_dir, enable_pruning):
         slurm_env=rule,
         skip_srun=True
     )
+    return cmd
 
 
 rule spykfunc_s2s:
@@ -439,8 +464,7 @@ rule spykfunc_s2s:
     shell:
         run_spykfunc(
             'spykfunc_s2s',
-            nrn_dir=NRN_STRUCTURAL_DIR,
-            enable_pruning=False,
+            nrn_dir=NRN_STRUCTURAL_DIR
         )
 
 
@@ -461,8 +485,7 @@ rule spykfunc_s2f:
     shell:
         run_spykfunc(
             'spykfunc_s2f',
-            nrn_dir=NRN_FUNCTIONAL_DIR,
-            enable_pruning=True
+            nrn_dir=NRN_FUNCTIONAL_DIR
         )
 
 

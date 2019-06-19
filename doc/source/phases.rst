@@ -235,6 +235,12 @@ For instance, to disable HDFS mode:
 
 Please refer to `Spark Functionalizer <https://bbpteam.epfl.ch/documentation/#spykfunc>`_ documentation for the details.
 
+.. note::
+
+   An experimental feature exists to control which filters are used.
+   They can be specified with the key 'filters' with a list of filter names in the spykfunc_s2\* stanza in the ``MANIFEST.yaml``.
+   See `FUNCZ-208 <https://bbpteam.epfl.ch/project/issues/browse/FUNCZ-208>`_ for more details
+
 
 .. _ref-phase-spykfunc_s2s:
 
