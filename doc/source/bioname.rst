@@ -124,7 +124,7 @@ How the recipe is organized:
  * ``region`` is used for building region mask based on ``brain_regions`` atlas dataset + region hierarchy, by matching against region *acronym*. If ``region`` starts with '@' it is interpreted as regular expression (for instance, ``@1$`` stands for "acronym ends with '1'")
  * ``density`` could be either a scalar value or a reference to atlas dataset encoded as ``{<dataset-name}``
  * if ``density`` is a scalar value, region mask defines where to apply this constant density
- * otherwise, if ``density`` is a volumetric dataset, it is checked against region mask; a warning is emitted if it prescribes non-zero density outside of region mask
+ * otherwise, if ``density`` is a volumetric dataset, all values outside of region mask are set to 0
  * cell groups are built independent of each other (and thus are cumulative)
 
 Example:
