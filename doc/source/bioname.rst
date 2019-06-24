@@ -101,7 +101,7 @@ Please refer to :ref:`ref-phases` for each phase config description.
 
 An example of full ``MANIFEST.yaml``:
 
-.. literalinclude:: ../../tests/ncx-tiny/MANIFEST.yaml
+.. literalinclude:: ../../tests/proj66-tiny/MANIFEST.yaml
    :language: yaml
 
 cell_composition.yaml
@@ -223,7 +223,7 @@ At the moment we support only query-based target definitions. These should be de
 
 Example:
 
-.. literalinclude:: ../../tests/ncx-tiny/targets.yaml
+.. literalinclude:: ../../tests/proj66-tiny/targets.yaml
    :language: yaml
 
 .. note::
