@@ -204,6 +204,13 @@ Convert touches to Parquet format (to use as input for `SpykFunc`_).
 .. tip::
 
     We use MPI-enabled version of the converter; thus it is beneficial to configure an allocation with multiple tasks.
+    For instance, the `salloc` key could include:
+
+    ::
+
+        -A <proj> -p prod --constraint=cpu -n200 --time <time>
+
+    as described in `touch2parquet salloc recommendation`_.
 
 .. _ref-phase-spykfunc_s2f:
 
@@ -437,3 +444,4 @@ These HDF5 files will be used to create the `subcellular.h5` final file.
 .. _BrainBuilder: https://bbpteam.epfl.ch/documentation/brainbuilder-0.11.3/index.html
 .. _placement_algorithm: https://bbpteam.epfl.ch/documentation/placement-algorithm-2.0.8/index.html
 .. _SpykFunc: https://bbpteam.epfl.ch/documentation/#spykfunc
+.. _touch2parquet salloc recommendation: https://bbpteam.epfl.ch/project/issues/browse/FUNCZ-215?focusedCommentId=90821&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel
