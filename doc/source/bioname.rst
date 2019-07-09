@@ -84,7 +84,7 @@ Please refer to :ref:`ref-phases` for each phase config description.
 
       * ``h5v1`` folder with morphologies in H5v1 format
       * ``ascii`` folder with morphologies in ASC format
-      * ``annotations.json`` file with compacted annotations used for placement
+      * ``annotations.json`` file with compacted annotations used for placement, created with `compact-annotations` in the `placement-algorithm` module
 
 .. tip::
 
