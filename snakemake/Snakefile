@@ -55,7 +55,7 @@ MODULES = {
     'synapsetool':
         (SPACK_MODULEPATH, ['synapsetool/0.4.1/parallel']),
     'touchdetector':
-        (SPACK_MODULEPATH, ['touchdetector/5.0.1']),
+        (SPACK_MODULEPATH, ['touchdetector/5.1.0']),
 }
 
 
@@ -362,6 +362,7 @@ rule touchdetector:
             ["touchdetector",
                 "--output",
                     "{TOUCHES_DIR}",
+                "--touchspace=axodendritic",
                 "--save-state",
                 "{BUILDER_RECIPE}",
                 "{input[mvd3]}",
