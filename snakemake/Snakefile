@@ -1,3 +1,4 @@
+import itertools as it
 import datetime
 
 CIRCUIT_DIR = '.'
@@ -27,14 +28,17 @@ NRN_STRUCTURAL_DIR = "connectome/structural"
 
 
 SPACK_MODULEPATH = ":".join(
-    '/gpfs/bbp.cscs.ch/apps/hpc/jenkins/modules/%s/2019-06/tcl/linux-rhel7-x86_64/' % component
-    for component in [
-        'applications',
-        'external-libraries',
-        'parallel-libraries',
-        'serial-libraries',
-        'tools',
-    ]
+    path % component
+    for path, component in it.product(
+        ('/gpfs/bbp.cscs.ch/apps/hpc/jenkins/modules/%s/2019-06/tcl/linux-rhel7-x86_64/',
+         '/gpfs/bbp.cscs.ch/apps/hpc/jenkins/modules/%s/2019-07/tcl/linux-rhel7-x86_64/',
+        ),
+        ('applications',
+         'external-libraries',
+         'parallel-libraries',
+         'serial-libraries',
+         'tools', )
+         )
 )
 
 NIX_MODULEPATH = '/nix/var/nix/profiles/per-user/modules/bb5-x86_64/modules-all/release/share/modulefiles/'
