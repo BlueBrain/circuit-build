@@ -10,6 +10,7 @@ place_cells:
   density_factor: 0.1
   sort_by: ['region', 'mtype']
   seed: 0
+  mini_frequencies: True
 
 choose_morphologies:
   alpha: 3.0

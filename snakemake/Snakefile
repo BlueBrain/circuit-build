@@ -223,6 +223,8 @@ rule place_cells:
                     ATLAS,
                 "--atlas-cache",
                     ATLAS_CACHE_DIR,
+                ("--mini-frequencies " + bioname_path("mini_frequencies.tsv")
+                    if config["place_cells"].get("mini_frequencies", False) else ""),
                 ("--region " + config['common']['region']
                     if 'region' in config['common'] else ""),
                 ("--mask " + config['common']['mask']
