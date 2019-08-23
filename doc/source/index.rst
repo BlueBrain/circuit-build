@@ -11,3 +11,4 @@ Introduction
    neocortex
    phases
    faq
+   changelog
