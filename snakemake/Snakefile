@@ -391,12 +391,13 @@ rule touch2parquet:
         TOUCHES_DIR + '/_SUCCESS'
 
     output:
-        TOUCHES_DIR + '/parquet/touchesData.0.parquet'
+        directory(TOUCHES_DIR + '/parquet')
 
     shell:
+        "mkdir -p {output} && " + \
         bbp_env(
             'parquet-converters',
-            ["cd {TOUCHES_DIR}/parquet",
+            ["cd {output}",
              "&&",
              "touch2parquet ../touchesData.*"
             ],
@@ -450,7 +451,7 @@ def run_spykfunc(rule, nrn_dir):
             "--to", os.path.abspath("{input[neurons]}"), "All",
             BUILDER_RECIPE,
             MORPH_RELEASE + '/h5v1/',
-            "--parquet", os.path.abspath(TOUCHES_DIR + '/parquet/'),
+            "--parquet", os.path.abspath("{input[touches]}/*.parquet"),
         ],
         dump_log=True,
         slurm_env=rule,
@@ -465,7 +466,7 @@ rule spykfunc_s2s:
 
     input:
         neurons = 'sonata/networks/nodes/All/nodes.h5',
-        touches = TOUCHES_DIR + '/parquet/touchesData.0.parquet'
+        touches = TOUCHES_DIR + '/parquet'
 
     output:
         NRN_STRUCTURAL_DIR + '/spykfunc/circuit.parquet/_SUCCESS'
@@ -486,7 +487,7 @@ rule spykfunc_s2f:
 
     input:
         neurons = 'sonata/networks/nodes/All/nodes.h5',
-        touches = TOUCHES_DIR + '/parquet/touchesData.0.parquet'
+        touches = TOUCHES_DIR + '/parquet'
 
     output:
         NRN_FUNCTIONAL_DIR + '/spykfunc/circuit.parquet/_SUCCESS'

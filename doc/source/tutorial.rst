@@ -38,7 +38,7 @@ On BB5 cluster `snakemake` is available as a module:
 
 .. code-block:: bash
 
-    $ module load nix/py36/snakemake
+    $ module load snakemake
 
 `snakemake` can run all the tasks locally or launch every task in a separate `Slurm` allocation.
 In practice the latter option is preferred, please refer to :ref:`ref-cluster-config` section for the details.

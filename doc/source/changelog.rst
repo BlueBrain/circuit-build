@@ -1,6 +1,9 @@
 Changelog
 ^^^^^^^^^
 
+current
+-------
+* Move to SnakeMake 5.6+
 
 v2.0.1 (2019-08-23)
 -------------------
