@@ -31,7 +31,7 @@ SPACK_MODULEPATH = ":".join(
     path % component
     for path, component in it.product(
         ('/gpfs/bbp.cscs.ch/apps/hpc/jenkins/modules/%s/2019-06/tcl/linux-rhel7-x86_64/',
-         '/gpfs/bbp.cscs.ch/apps/hpc/jenkins/modules/%s/2019-07/tcl/linux-rhel7-x86_64/',
+         '/gpfs/bbp.cscs.ch/apps/hpc/jenkins/modules/%s/2019-09/tcl/linux-rhel7-x86_64/',
         ),
         ('applications',
          'external-libraries',
@@ -45,21 +45,21 @@ NIX_MODULEPATH = '/nix/var/nix/profiles/per-user/modules/bb5-x86_64/modules-all/
 
 MODULES = {
     'brainbuilder':
-        (SPACK_MODULEPATH, ['brainbuilder/0.11.3/python3']),
+        (SPACK_MODULEPATH, ['brainbuilder/0.11.5/python3']),
     'flatindexer':
         (NIX_MODULEPATH, ['nix/hpc/flatindexer/1.8.12']),
     'jinja2':
         (SPACK_MODULEPATH, ['python-dev/0.1/python3']),
     'parquet-converters':
-        (SPACK_MODULEPATH, ['parquet-converters/0.4.1']),
+        (SPACK_MODULEPATH, ['parquet-converters/0.5.1']),
     'placement-algorithm':
         (SPACK_MODULEPATH, ['placement-algorithm/2.0.8/python3']),
     'spykfunc':
-        (SPACK_MODULEPATH, ['spykfunc/0.14.3/python3']),
+        (SPACK_MODULEPATH, ['spykfunc/0.15.0/python3']),
     'synapsetool':
         (SPACK_MODULEPATH, ['synapsetool/0.4.1/parallel']),
     'touchdetector':
-        (SPACK_MODULEPATH, ['touchdetector/5.1.0']),
+        (SPACK_MODULEPATH, ['touchdetector/5.3.0']),
 }
 
 
@@ -94,6 +94,7 @@ def bbp_env(module_env, command, dump_log=False, slurm_env=None, skip_srun=False
         modulepath, modules = MODULES[module_env]
         result = "(" + " && ".join([
             "export MODULEPATH=%s" % modulepath,
+            ". /etc/profile.d/modules.sh",
             "module purge",
             "module load %s" % " ".join(modules),
             "echo MODULEPATH=%s" % modulepath,
@@ -354,7 +355,7 @@ rule touchdetector:
         "Detect touches between neurites"
 
     input:
-        mvd3 = 'circuit.mvd3',
+        neurons = 'sonata/networks/nodes/All/nodes.h5',
 
     output:
         touch(TOUCHES_DIR + '/_SUCCESS')
@@ -371,9 +372,10 @@ rule touchdetector:
                 "--touchspace=" +
                     config.get('touchdetector', {}).get("touchspace", "axodendritic"),
                 "--save-state",
+                "--from {input[neurons]} All",
+                "--to {input[neurons]} All",
                 "{BUILDER_RECIPE}",
-                "{input[mvd3]}",
-                "{MORPH_RELEASE}/h5v1"
+                "{MORPH_RELEASE}/h5v1",
             ],
             dump_log=True,
             slurm_env='touchdetector'
@@ -443,8 +445,9 @@ def run_spykfunc(rule, nrn_dir):
             "--spark-property %s" % p
                 for p in config.get(rule, {}).get('spark_property', [])
         ] + [
+            "--from", os.path.abspath("{input[neurons]}"), "All",
+            "--to", os.path.abspath("{input[neurons]}"), "All",
             BUILDER_RECIPE,
-            os.path.abspath("{input[mvd3]}"),
             MORPH_RELEASE + '/h5v1/',
             os.path.abspath(TOUCHES_DIR + '/parquet/'),
         ],
@@ -460,7 +463,7 @@ rule spykfunc_s2s:
         "Convert touches into synapses (S2S)"
 
     input:
-        mvd3 = 'circuit.mvd3',
+        neurons = 'sonata/networks/nodes/All/nodes.h5',
         touches = TOUCHES_DIR + '/parquet/touchesData.0.parquet'
 
     output:
@@ -481,7 +484,7 @@ rule spykfunc_s2f:
         "Prune touches and convert them into synapses (S2F)"
 
     input:
-        mvd3 = 'circuit.mvd3',
+        neurons = 'sonata/networks/nodes/All/nodes.h5',
         touches = TOUCHES_DIR + '/parquet/touchesData.0.parquet'
 
     output:
@@ -494,31 +497,6 @@ rule spykfunc_s2f:
         run_spykfunc(
             'spykfunc_s2f',
             nrn_dir=NRN_FUNCTIONAL_DIR
-        )
-
-
-rule parquet2syn2:
-    message:
-        "Convert synapses from Parquet to SYN2 format"
-
-    input:
-        '{nrn_dir}/spykfunc/circuit.parquet/_SUCCESS'
-
-    output:
-        '{nrn_dir}/circuit.syn2'
-
-    log:
-        log_path('parquet2syn2_{nrn_dir}')
-
-    shell:
-        bbp_env(
-            'parquet-converters',
-            ["parquet2syn2p",
-                "-o {output}",
-                "{wildcards.nrn_dir}/spykfunc/circuit.parquet/*.parquet",
-            ],
-            dump_log=True,
-            slurm_env='parquet2syn2'
         )
 
 
@@ -663,6 +641,8 @@ rule mvd3_to_sonata:
             ["brainbuilder sonata from-mvd3",
                 "--mecombo-info",
                     os.path.join(EMODEL_RELEASE, "mecombo_emodel.tsv"),
+                "--library-properties",
+                    "etype,morph_class,morphology,mtype,synapse_class",
                 "--population",
                     "All",
                 "--output",
@@ -673,27 +653,27 @@ rule mvd3_to_sonata:
         )
 
 
-rule syn2_to_sonata:
+rule parquet_to_sonata:
     message:
-        "SYN2 -> SONATA Edges"
+        "Convert synapses from Parquet to SYN2 format"
 
     input:
-        'connectome/{nrn_dir}/circuit.syn2'
+        'connectome/{nrn_dir}/spykfunc/circuit.parquet/_SUCCESS'
 
     output:
         'sonata/networks/edges/{nrn_dir}/All/edges.h5'
 
     shell:
         bbp_env(
-            'brainbuilder',
-            ["brainbuilder sonata from-syn2",
-                "--population All",
-                "--source All",
-                "--target All",
-                "--output {output}",
-                "{input}"
+            'parquet-converters',
+            [
+                "parquet2hdf5",
+                "--format SONATA",
+                "-o {output}",
+                "connectome/{wildcards.nrn_dir}/spykfunc/circuit.parquet/*.parquet",
             ],
-            slurm_env='syn2_to_sonata'
+            dump_log=True,
+            slurm_env='parquet2syn2'
         )
 
 
