@@ -368,7 +368,8 @@ rule touchdetector:
             ["touchdetector",
                 "--output",
                     "{TOUCHES_DIR}",
-                "--touchspace=axodendritic",
+                "--touchspace=" +
+                    config.get('touchdetector', {}).get("touchspace", "axodendritic"),
                 "--save-state",
                 "{BUILDER_RECIPE}",
                 "{input[mvd3]}",
