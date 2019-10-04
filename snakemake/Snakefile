@@ -32,6 +32,7 @@ SPACK_MODULEPATH = ":".join(
     for path, component in it.product(
         ('/gpfs/bbp.cscs.ch/apps/hpc/jenkins/modules/%s/2019-06/tcl/linux-rhel7-x86_64/',
          '/gpfs/bbp.cscs.ch/apps/hpc/jenkins/modules/%s/2019-09/tcl/linux-rhel7-x86_64/',
+         '/gpfs/bbp.cscs.ch/apps/hpc/jenkins/modules/%s/2019-10/tcl/linux-rhel7-x86_64/',
         ),
         ('applications',
          'external-libraries',
@@ -51,15 +52,15 @@ MODULES = {
     'jinja2':
         (SPACK_MODULEPATH, ['python-dev/0.1/python3']),
     'parquet-converters':
-        (SPACK_MODULEPATH, ['parquet-converters/0.5.1']),
+        (SPACK_MODULEPATH, ['parquet-converters/0.5.2']),
     'placement-algorithm':
         (SPACK_MODULEPATH, ['placement-algorithm/2.0.8/python3']),
     'spykfunc':
-        (SPACK_MODULEPATH, ['spykfunc/0.15.0/python3']),
+        (SPACK_MODULEPATH, ['spykfunc/0.15.1/python3']),
     'synapsetool':
         (SPACK_MODULEPATH, ['synapsetool/0.4.1/parallel']),
     'touchdetector':
-        (SPACK_MODULEPATH, ['touchdetector/5.3.0']),
+        (SPACK_MODULEPATH, ['touchdetector/5.3.1']),
 }
 
 
@@ -397,7 +398,7 @@ rule touch2parquet:
             'parquet-converters',
             ["cd {TOUCHES_DIR}/parquet",
              "&&",
-             "touch2parquetp ../touchesData.*"
+             "touch2parquet ../touchesData.*"
             ],
             slurm_env='touch2parquet'
         )
@@ -449,7 +450,7 @@ def run_spykfunc(rule, nrn_dir):
             "--to", os.path.abspath("{input[neurons]}"), "All",
             BUILDER_RECIPE,
             MORPH_RELEASE + '/h5v1/',
-            os.path.abspath(TOUCHES_DIR + '/parquet/'),
+            "--parquet", os.path.abspath(TOUCHES_DIR + '/parquet/'),
         ],
         dump_log=True,
         slurm_env=rule,
@@ -677,12 +678,12 @@ rule parquet_to_sonata:
         )
 
 
-rule syn2_to_nrn:
+rule sonata_to_nrn:
     message:
-        "SYN2 -> nrn.h5"
+        "SONATA -> nrn.h5"
 
     input:
-        'connectome/{nrn_dir}/circuit.syn2'
+        'connectome/{nrn_dir}/edges.sonata'
 
     output:
         'connectome/{nrn_dir}/nrn.h5'
@@ -690,7 +691,7 @@ rule syn2_to_nrn:
     shell:
         bbp_env(
             'brainbuilder',
-            ["brainbuilder nrn from-syn2",
+            ["brainbuilder nrn from-sonata",
                 "--output connectome/{wildcards.nrn_dir}",
                 "{input}"
             ],
