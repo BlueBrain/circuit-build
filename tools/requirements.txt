@@ -1,3 +1,0 @@
-numpy>=1.9
-voxcell>=2.4
-Click>=7.0
