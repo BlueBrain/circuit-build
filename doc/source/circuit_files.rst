@@ -89,7 +89,7 @@ It has ``\library`` group with a collection of gene expressions / protein concen
   - ``cell_proteins`` with UUID of one of the tables from ``/library/cell_proteins``
   - ``synapse_proteins`` with UUID of one of the tables from ``/library/synapse_proteins``
 
-Each row correspond to a different GID.
+Each row corresponds to a different GID.
 
 For instance, one row from ``/cells`` table can look like:
 

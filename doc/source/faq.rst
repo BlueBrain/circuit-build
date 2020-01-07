@@ -3,6 +3,28 @@ FAQ
 
 .. _ref-faq-why-snakemake:
 
+How to contribute to this documentation?
+----------------------------------------
+
+1. Fetch the circuit building pipeline repository:
+
+.. code-block:: bash
+
+    $ git clone ssh://bbpcode.epfl.ch/common/circuit-build
+
+2. Edit the documentation in ``doc/source``
+
+3. Bump the version in ``doc/source/conf.py`` so that the change is deployed on merge
+
+4. Ensure the documentation still builds and renders as expected
+
+.. code-block:: bash
+
+    $ push doc
+    $ make html
+
+5. Submit the patchset to Gerrit
+
 Why Snakemake?
 --------------
 
