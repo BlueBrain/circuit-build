@@ -33,6 +33,7 @@ SPACK_MODULEPATH = ":".join(
         ('/gpfs/bbp.cscs.ch/apps/hpc/jenkins/modules/%s/2019-06/tcl/linux-rhel7-x86_64/',
          '/gpfs/bbp.cscs.ch/apps/hpc/jenkins/modules/%s/2019-09/tcl/linux-rhel7-x86_64/',
          '/gpfs/bbp.cscs.ch/apps/hpc/jenkins/modules/%s/2019-10/tcl/linux-rhel7-x86_64/',
+         '/gpfs/bbp.cscs.ch/apps/hpc/jenkins/modules/%s/2020-01/tcl/linux-rhel7-x86_64/',
         ),
         ('applications',
          'external-libraries',
@@ -52,7 +53,7 @@ MODULES = {
     'jinja2':
         (SPACK_MODULEPATH, ['python-dev/0.1/python3']),
     'parquet-converters':
-        (SPACK_MODULEPATH, ['parquet-converters/0.5.2']),
+        (SPACK_MODULEPATH, ['parquet-converters/0.5.3']),
     'placement-algorithm':
         (SPACK_MODULEPATH, ['placement-algorithm/2.0.8/python3']),
     'spykfunc':
@@ -660,7 +661,8 @@ rule parquet_to_sonata:
         "Convert synapses from Parquet to SYN2 format"
 
     input:
-        'connectome/{nrn_dir}/spykfunc/circuit.parquet/_SUCCESS'
+        parquet = 'connectome/{nrn_dir}/spykfunc/circuit.parquet/_SUCCESS',
+        cells = 'sonata/networks/nodes/All/nodes.h5'
 
     output:
         'sonata/networks/edges/{nrn_dir}/All/edges.h5'
@@ -671,6 +673,8 @@ rule parquet_to_sonata:
             [
                 "parquet2hdf5",
                 "--format SONATA",
+                "--from {input[cells]} All",
+                "--to {input[cells]} All",
                 "-o {output}",
                 "connectome/{wildcards.nrn_dir}/spykfunc/circuit.parquet/*.parquet",
             ],
