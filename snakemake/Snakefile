@@ -27,41 +27,27 @@ NRN_FUNCTIONAL_DIR = "connectome/functional"
 NRN_STRUCTURAL_DIR = "connectome/structural"
 
 
-SPACK_MODULEPATH = ":".join(
-    path % component
-    for path, component in it.product(
-        ('/gpfs/bbp.cscs.ch/apps/hpc/jenkins/modules/%s/2019-06/tcl/linux-rhel7-x86_64/',
-         '/gpfs/bbp.cscs.ch/apps/hpc/jenkins/modules/%s/2019-09/tcl/linux-rhel7-x86_64/',
-         '/gpfs/bbp.cscs.ch/apps/hpc/jenkins/modules/%s/2019-10/tcl/linux-rhel7-x86_64/',
-         '/gpfs/bbp.cscs.ch/apps/hpc/jenkins/modules/%s/2020-01/tcl/linux-rhel7-x86_64/',
-        ),
-        ('applications',
-         'external-libraries',
-         'parallel-libraries',
-         'serial-libraries',
-         'tools', )
-         )
-)
+SPACK_MODULEPATH = "/gpfs/bbp.cscs.ch/ssd/apps/hpc/jenkins/modules/all"
 
 NIX_MODULEPATH = '/nix/var/nix/profiles/per-user/modules/bb5-x86_64/modules-all/release/share/modulefiles/'
 
 MODULES = {
     'brainbuilder':
-        (SPACK_MODULEPATH, ['brainbuilder/0.11.6/python3']),
+        (SPACK_MODULEPATH, ['archive/2020-01', 'brainbuilder/0.11.6/python3']),
     'flatindexer':
         (NIX_MODULEPATH, ['nix/hpc/flatindexer/1.8.12']),
     'jinja2':
-        (SPACK_MODULEPATH, ['python-dev/0.1/python3']),
+        (SPACK_MODULEPATH, ['archive/2020-01', 'python-dev/0.1/python3']),
     'parquet-converters':
-        (SPACK_MODULEPATH, ['parquet-converters/0.5.3']),
+        (SPACK_MODULEPATH, ['archive/2020-01', 'parquet-converters/0.5.3']),
     'placement-algorithm':
-        (SPACK_MODULEPATH, ['placement-algorithm/2.0.8/python3']),
+        (SPACK_MODULEPATH, ['archive/2019-06', 'placement-algorithm/2.0.8/python3']),
     'spykfunc':
-        (SPACK_MODULEPATH, ['spykfunc/0.15.1/python3']),
+        (SPACK_MODULEPATH, ['archive/2019-11', 'spykfunc/0.15.1/python3']),
     'synapsetool':
-        (SPACK_MODULEPATH, ['synapsetool/0.5.2/parallel']),
+        (SPACK_MODULEPATH, ['archive/2020-01', 'synapsetool/0.5.2/parallel']),
     'touchdetector':
-        (SPACK_MODULEPATH, ['touchdetector/5.3.2']),
+        (SPACK_MODULEPATH, ['archive/2019-12', 'touchdetector/5.3.2']),
 }
 
 
