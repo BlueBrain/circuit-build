@@ -12,7 +12,7 @@ fi
 source /etc/profile.d/modules.sh
 
 module purge
-module load snakemake/5.6.0/python3
+module load unstable snakemake
 
 BUILD_DIR=$CIRCUIT_PATH/build
 

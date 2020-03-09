@@ -33,21 +33,21 @@ NIX_MODULEPATH = '/nix/var/nix/profiles/per-user/modules/bb5-x86_64/modules-all/
 
 MODULES = {
     'brainbuilder':
-        (SPACK_MODULEPATH, ['archive/2020-01', 'brainbuilder/0.11.6/python3']),
+        (SPACK_MODULEPATH, ['archive/2020-02', 'brainbuilder/0.11.7']),
     'flatindexer':
         (NIX_MODULEPATH, ['nix/hpc/flatindexer/1.8.12']),
     'jinja2':
-        (SPACK_MODULEPATH, ['archive/2020-01', 'python-dev/0.1/python3']),
+        (SPACK_MODULEPATH, ['archive/2020-02', 'python-dev/0.3']),
     'parquet-converters':
-        (SPACK_MODULEPATH, ['archive/2020-01', 'parquet-converters/0.5.3']),
+        (SPACK_MODULEPATH, ['archive/2020-02', 'parquet-converters/0.5.3']),
     'placement-algorithm':
-        (SPACK_MODULEPATH, ['archive/2019-06', 'placement-algorithm/2.0.8/python3']),
+        (SPACK_MODULEPATH, ['archive/2020-02', 'placement-algorithm/2.0.8']),
     'spykfunc':
-        (SPACK_MODULEPATH, ['archive/2019-11', 'spykfunc/0.15.1/python3']),
+        (SPACK_MODULEPATH, ['archive/2020-02', 'spykfunc/0.15.2']),
     'synapsetool':
-        (SPACK_MODULEPATH, ['archive/2020-01', 'synapsetool/0.5.2/parallel']),
+        (SPACK_MODULEPATH, ['archive/2020-02', 'synapsetool/0.5.8']),
     'touchdetector':
-        (SPACK_MODULEPATH, ['archive/2019-12', 'touchdetector/5.3.2']),
+        (SPACK_MODULEPATH, ['archive/2020-02', 'touchdetector/5.3.3']),
 }
 
 
@@ -359,7 +359,6 @@ rule touchdetector:
                     "{TOUCHES_DIR}",
                 "--touchspace=" +
                     config.get('touchdetector', {}).get("touchspace", "axodendritic"),
-                "--save-state",
                 "--from {input[neurons]} All",
                 "--to {input[neurons]} All",
                 "{BUILDER_RECIPE}",
