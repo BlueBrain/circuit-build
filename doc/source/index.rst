@@ -1,9 +1,12 @@
 Introduction
 ============
 
-.. toctree::
-   :maxdepth: 1
+This documentation outline the Blue Brain Project circuit building pipeline.
 
+.. toctree::
+   :hidden:
+
+   Home <self>
    circuit_files
    bioname
    atlas

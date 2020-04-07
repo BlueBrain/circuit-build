@@ -30,21 +30,21 @@ Why Snakemake?
 
 Using `Snakemake <http://snakemake.readthedocs.io/en/stable/index.html>`_ gives us certain advantages in comparison with the previous solutions used, in particular:
 
- * minimum boilerplate for describing task dependencies
- * tracking the needed updates (if some file changed, all its dependencies would be re-generated automatically)
- * running tasks in parallel
- * possibility to run tasks locally as well as with with Slurm
- * creating reproducible environments for tasks using BBP modules
+* minimum boilerplate for describing task dependencies
+* tracking the needed updates (if some file changed, all its dependencies would be re-generated automatically)
+* running tasks in parallel
+* possibility to run tasks locally as well as with with Slurm
+* creating reproducible environments for tasks using BBP modules
 
 This could be considered an intermediate step towards more general workflow engine developed by NSE team.
 
 Why making an intermediate step?
 
- * to make circuit build description more transparent to new users
- * to speed up circuit building by running the tasks in parallel where possible
- * to provide a better documented solution than the previous one
- * to improve circuit build reproducibility
- * to facilitate merging circuit building pipelines for different projects (SSCX, Hippocampus, Thalamus)
+* to make circuit build description more transparent to new users
+* to speed up circuit building by running the tasks in parallel where possible
+* to provide a better documented solution than the previous one
+* to improve circuit build reproducibility
+* to facilitate merging circuit building pipelines for different projects (SSCX, Hippocampus, Thalamus)
 
 .. _ref-faq-bioname:
 

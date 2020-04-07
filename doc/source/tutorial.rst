@@ -3,8 +3,8 @@ How to create a new circuit build
 
 .. note::
 
-    | Neocortex circuit building pipeline has diverged from the "master" one.
-    | Please make sure to check :ref:`ref-neocortex` section after reading the main tutorial.
+    Neocortex circuit building pipeline has diverged from the "master" one.
+    Please make sure to check :ref:`ref-neocortex` section after reading the main tutorial.
 
 Preparation
 -----------
@@ -182,7 +182,7 @@ To use *cluster mode* (i.e. launch every task in a separate Slurm allocation) on
 
 For instance, to specify Slurm allocation for ``touchdetector`` phase, YAML should contain an entry like:
 
-::
+.. code-block:: yaml
 
     touchdetector:
         jobname: td
@@ -192,7 +192,7 @@ For instance, to specify Slurm allocation for ``touchdetector`` phase, YAML shou
 
 Sometimes it can be convenient to use multi-line string for ``salloc`` key:
 
-::
+.. code-block:: yaml
 
     touchdetector:
         jobname: td
@@ -205,7 +205,7 @@ Sometimes it can be convenient to use multi-line string for ``salloc`` key:
 
 `YAML` *must* also contain ``__default__`` section which will be used for phases with no corresponding section, for instance:
 
-::
+.. code-block:: yaml
 
     __default__:
         salloc: '-A proj68 -p prod_small --time 0:15:00'

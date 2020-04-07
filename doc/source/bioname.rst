@@ -24,12 +24,12 @@ Absolute path to this folder is put to CircuitConfig *BioName* attribute.
 
 In particular, the following files should be placed there:
 
- * ``MANIFEST.yaml``
- * ``cell_composition.yaml``
- * ``mtype_taxonomy.tsv``
- * ``extNeuronDB.dat``
- * ``placement_rules.xml``
- * ``builder[Connectivity]RecipeAllPathways.xml``
+* ``MANIFEST.yaml``
+* ``cell_composition.yaml``
+* ``mtype_taxonomy.tsv``
+* ``extNeuronDB.dat``
+* ``placement_rules.xml``
+* ``builder[Connectivity]RecipeAllPathways.xml``
 
 Optionally, `bioname` can also contain YAML files with cell target definitions. If used, these should be referenced from :ref:`ref-phase-targetgen-mvd3` section in ``MANIFEST.yaml``.
 
@@ -38,15 +38,15 @@ MANIFEST.yaml
 ~~~~~~~~~~~~~
 
 Main config defining:
- * atlas space
- * morphology release
- * electrical model release
- * S/W modules version
- * individual task parameters
+* atlas space
+* morphology release
+* electrical model release
+* S/W modules version
+* individual task parameters
 
 It starts with `common` section:
 
-::
+.. code-block:: yaml
 
     common:
         atlas: http://voxels.nexus.apps.bbp.epfl.ch/api/analytics/atlas/releases/77831ACA-6198-4AA0-82EF-D0475A4E0647
@@ -82,9 +82,9 @@ Please refer to :ref:`ref-phases` for each phase config description.
     Path to morphology release folder.
     It should contain:
 
-      * ``h5v1`` folder with morphologies in H5v1 format
-      * ``ascii`` folder with morphologies in ASC format
-      * ``annotations.json`` file with compacted annotations used for placement, created with `compact-annotations` in the `placement-algorithm` module
+    * ``h5v1`` folder with morphologies in H5v1 format
+    * ``ascii`` folder with morphologies in ASC format
+    * ``annotations.json`` file with compacted annotations used for placement, created with `compact-annotations` in the `placement-algorithm` module
 
 .. tip::
 
@@ -95,8 +95,8 @@ Please refer to :ref:`ref-phases` for each phase config description.
     Path to emodel release folder.
     It should contain:
 
-      * ``hoc`` folder with model HOC templates
-      * ``mecombo_emodel.tsv`` file with *me_combo* parameters
+    * ``hoc`` folder with model HOC templates
+    * ``mecombo_emodel.tsv`` file with *me_combo* parameters
 
 
 An example of full ``MANIFEST.yaml``:
@@ -116,19 +116,20 @@ YAML file which defines which mtypes are used, their density and associated etyp
 
 How the recipe is organized:
 
- * cell composition is represented as "flat" collection of cell groups within root ``neurons`` element
- * each cell group should have ``mtype``, ``etype`` and ``layer`` traits, which should correspond to those used in the morphology release
- * each of the "traits" can be either a single value or 'value -> probability' mapping (probabilities should sum up to 1.0)
- * at the moment mappings are used mostly for defining etypes for each group
- * location is prescribed with two required attributes: ``density`` and ``region``
- * ``region`` is used for building region mask based on ``brain_regions`` atlas dataset + region hierarchy, by matching against region *acronym*. If ``region`` starts with '@' it is interpreted as regular expression (for instance, ``@1$`` stands for "acronym ends with '1'")
- * ``density`` could be either a scalar value or a reference to atlas dataset encoded as ``{<dataset-name}``
- * if ``density`` is a scalar value, region mask defines where to apply this constant density
- * otherwise, if ``density`` is a volumetric dataset, all values outside of region mask are set to 0
- * cell groups are built independent of each other (and thus are cumulative)
+* cell composition is represented as "flat" collection of cell groups within root ``neurons`` element
+* each cell group should have ``mtype``, ``etype`` and ``layer`` traits, which should correspond to those used in the morphology release
+* each of the "traits" can be either a single value or 'value -> probability' mapping (probabilities should sum up to 1.0)
+* at the moment mappings are used mostly for defining etypes for each group
+* location is prescribed with two required attributes: ``density`` and ``region``
+* ``region`` is used for building region mask based on ``brain_regions`` atlas dataset + region hierarchy, by matching against region *acronym*. If ``region`` starts with '@' it is interpreted as regular expression (for instance, ``@1$`` stands for "acronym ends with '1'")
+* ``density`` could be either a scalar value or a reference to atlas dataset encoded as ``{<dataset-name}``
+* if ``density`` is a scalar value, region mask defines where to apply this constant density
+* otherwise, if ``density`` is a volumetric dataset, all values outside of region mask are set to 0
+* cell groups are built independent of each other (and thus are cumulative)
 
 Example:
-::
+
+.. code-block:: yaml
 
     version: v2.0
     neurons:

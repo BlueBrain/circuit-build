@@ -3,6 +3,9 @@
 What constitutes a circuit release?
 ===================================
 
+Expected data
+-------------
+
 A typical circuit release folder would look like:
 
 ::
@@ -84,10 +87,10 @@ It has ``\library`` group with a collection of gene expressions / protein concen
 
 ``cells`` library has four columns:
 
-  - ``gid`` for cell GID
-  - ``gene_expressions`` with UUID of one of the tables from ``/library/gene_expressions``
-  - ``cell_proteins`` with UUID of one of the tables from ``/library/cell_proteins``
-  - ``synapse_proteins`` with UUID of one of the tables from ``/library/synapse_proteins``
+- ``gid`` for cell GID
+- ``gene_expressions`` with UUID of one of the tables from ``/library/gene_expressions``
+- ``cell_proteins`` with UUID of one of the tables from ``/library/cell_proteins``
+- ``synapse_proteins`` with UUID of one of the tables from ``/library/synapse_proteins``
 
 Each row corresponds to a different GID.
 

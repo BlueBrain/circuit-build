@@ -5,22 +5,22 @@ Neocortex
 
 Neocortex circuit building pipeline has diverged from "master" branch in a number of aspects:
 
- - synthesizing detailed morphologies "on-the-fly"
- - using Spark Functionalizer instead of C++ one
- - running TouchDetector / Functionalizer region-by-region
- - running segment spatial index region-by-region
+- synthesizing detailed morphologies "on-the-fly"
+- using Spark Functionalizer instead of C++ one
+- running TouchDetector / Functionalizer region-by-region
+- running segment spatial index region-by-region
 
 Temporarily not available:
 
- - electrical models assignment
- - synapse spatial index
+- electrical models assignment
+- synapse spatial index
 
 Circuit data
 ------------
 
- * detailed morphologies are now generated as a part of circuit build and can be found in ``morphologies`` folder
- * connectome is stored in multiple SYN2 files (one per region): ``connectome/functional/{region}/circuit.syn2``
- * segment index is also chunked: ``spatial_index/{region}/SEGMENT``.
+* detailed morphologies are now generated as a part of circuit build and can be found in ``morphologies`` folder
+* connectome is stored in multiple SYN2 files (one per region): ``connectome/functional/{region}/circuit.syn2``
+* segment index is also chunked: ``spatial_index/{region}/SEGMENT``.
 
 Snakefile
 ---------
@@ -40,8 +40,8 @@ Instead, one should provide ``neurondb-axon.dat`` file with a list of morphologi
 
 2. Synthesis requires two additional files in ``bioname`` folder:
 
-  * ``tmd_distributions.json``
-  * ``tmd_parameters.json``
+* ``tmd_distributions.json``
+* ``tmd_parameters.json``
 
 3. ``choose_morphologies`` and ``assign_morphologies`` phases are removed from ``MANIFEST.yaml`` and ``cluster.yaml``.
 
@@ -145,7 +145,7 @@ Chunked segment index
 
 Analogous to local connectome, to specify regions for which FLATIndex would be run, please list them in ``spatial_index_segment`` section in ``MANIFEST.yaml``:
 
-::
+.. code-block:: yaml
 
     spatial_index_segment:
       targets:
