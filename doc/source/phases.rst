@@ -177,7 +177,7 @@ Parameters
 touchdetector
 -------------
 
-Detect touches between neurites using `TouchDetector <https://bbpteam.epfl.ch/documentation/#touchdetector>`_.
+Detect touches between neurites using `TouchDetector`_.
 
 .. tip::
 
@@ -199,7 +199,7 @@ Detect touches between neurites using `TouchDetector <https://bbpteam.epfl.ch/do
 touch2parquet
 -------------
 
-Convert touches to Parquet format (to use as input for `SpykFunc`_).
+Convert touches to Parquet format (to use as input for `Spykfunc`_).
 
 .. tip::
 
@@ -217,7 +217,8 @@ Convert touches to Parquet format (to use as input for `SpykFunc`_).
 spykfunc_s2f
 ------------
 
-Prune touches and convert them into synapses (S2F) using `SpykFunc`_.
+Prune touches and convert them into synapses (S2F) using the `Spark
+Functionalizer`_.
 
 .. note::
 
@@ -240,7 +241,7 @@ For instance, to disable HDFS mode:
         salloc: ...
         sm_run: '-H'
 
-Please refer to `Spark Functionalizer <https://bbpteam.epfl.ch/documentation/#spykfunc>`_ documentation for the details.
+Please refer to the `Spykfunc`_ documentation for the details.
 
 .. note::
 
@@ -261,7 +262,7 @@ Analogous to ``spykfunc_s2f``, but does not prune touches.
 parquet2syn2
 ------------
 
-Convert `SpykFunc`_ output to SYN2 format.
+Convert the `Spykfunc`_ output to SYN2 format.
 
 .. tip::
 
@@ -441,7 +442,8 @@ Intermediate files will be created in a subcellular directory.
 These HDF5 files will be used to create the `subcellular.h5` final file.
 
 
-.. _BrainBuilder: https://bbpteam.epfl.ch/documentation/brainbuilder-0.11.3/index.html
-.. _placement_algorithm: https://bbpteam.epfl.ch/documentation/placement-algorithm-2.0.8/index.html
-.. _SpykFunc: https://bbpteam.epfl.ch/documentation/#spykfunc
-.. _touch2parquet salloc recommendation: https://bbpteam.epfl.ch/project/issues/browse/FUNCZ-215?focusedCommentId=90821&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel
+.. _BrainBuilder: https://bbpteam.epfl.ch/documentation/projects/brainbuilder
+.. _placement_algorithm: https://bbpteam.epfl.ch/documentation/projects/placement-algorithm
+.. _Spykfunc: https://bbpteam.epfl.ch/documentation/projects/spykfunc
+.. _TouchDetector: https://bbpteam.epfl.ch/documentation/projects/TouchDetector
+.. _touch2parquet salloc recommendation: https://bbpteam.epfl.ch/project/issues/browse/FUNCZ-215?focusedCommentId=90821
