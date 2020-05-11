@@ -38,15 +38,15 @@ MODULES = {
     'jinja2':
         (SPACK_MODULEPATH, ['archive/2020-02', 'python-dev/0.3']),
     'parquet-converters':
-        (SPACK_MODULEPATH, ['archive/2020-02', 'parquet-converters/0.5.3']),
+        (SPACK_MODULEPATH, ['archive/2020-05', 'parquet-converters/0.5.5']),
     'placement-algorithm':
         (SPACK_MODULEPATH, ['unstable', 'placement-algorithm/2.1.0']),
     'spykfunc':
-        (SPACK_MODULEPATH, ['archive/2020-02', 'spykfunc/0.15.2']),
+        (SPACK_MODULEPATH, ['archive/2020-06', 'spykfunc/0.15.6']),
     'synapsetool':
-        (SPACK_MODULEPATH, ['archive/2020-02', 'synapsetool/0.5.8']),
+        (SPACK_MODULEPATH, ['archive/2020-05', 'synapsetool/0.5.9']),
     'touchdetector':
-        (SPACK_MODULEPATH, ['archive/2020-02', 'touchdetector/5.3.3', 'hpe-mpi']),
+        (SPACK_MODULEPATH, ['archive/2020-05', 'touchdetector/5.4.0', 'hpe-mpi']),
 }
 
 
