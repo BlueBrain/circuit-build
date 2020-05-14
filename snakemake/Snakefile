@@ -519,7 +519,7 @@ rule node_sets:
         'circuit.mvd3'
 
     output:
-        'sonata/networks/nodes/All/node_sets.json'
+        'sonata/node_sets.json'
 
     log:
         log_path('node_sets')
@@ -532,6 +532,12 @@ rule node_sets:
                     if 'targets' in config.get('targetgen_mvd3', {}) else ""),
                 ("--allow-empty"
                     if config.get('targetgen_mvd3', {}).get('allow_empty', False) else ""),
+                "--population",
+                    "All",
+                "--atlas",
+                    ATLAS,
+                "--atlas-cache",
+                    ATLAS_CACHE_DIR,
                 "--output {output}",
                 "{input}"
             ],
@@ -742,6 +748,8 @@ def write_network_config(nrn_dir):
                 "networks/nodes",
             "--nodes",
                 "All",
+            "--node-sets",
+                "node_sets.json"
             "--edges-dir",
                 "networks/edges/%s" % nrn_dir,
             "--edges",
@@ -792,7 +800,7 @@ rule functional_sonata:
     input:
         'sonata/circuit_config.json',
         'sonata/networks/nodes/All/nodes.h5',
-        'sonata/networks/nodes/All/node_sets.json',
+        'sonata/node_sets.json',
         'sonata/networks/edges/functional/All/edges.h5',
 
 
@@ -816,5 +824,5 @@ rule structural_sonata:
     input:
         'sonata/struct_circuit_config.json',
         'sonata/networks/nodes/All/nodes.h5',
-        'sonata/networks/nodes/All/node_sets.json',
+        'sonata/node_sets.json',
         'sonata/networks/edges/structural/All/edges.h5',
