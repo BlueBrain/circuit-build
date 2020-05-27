@@ -158,22 +158,28 @@ rule circuitconfig_functional:
     message:
         "Generate CircuitConfig for functional circuit"
 
+    input:
+        NRN_FUNCTIONAL_DIR + '/edges.sonata'
+
     output:
         'CircuitConfig'
 
     shell:
-        build_circuit_config(nrn_path=(NRN_FUNCTIONAL_DIR + '/edges.sonata'))
+        build_circuit_config(nrn_path=NRN_FUNCTIONAL_DIR + '/edges.sonata')
 
 
 rule circuitconfig_structural:
     message:
         "Generate CircuitConfig for structural circuit"
 
+    input:
+        NRN_STRUCTURAL_DIR + '/edges.sonata'
+
     output:
         'CircuitConfig_struct'
 
     shell:
-        build_circuit_config(nrn_path=(NRN_STRUCTURAL_DIR + '/edges.sonata'))
+        build_circuit_config(nrn_path=NRN_STRUCTURAL_DIR + '/edges.sonata')
 
 
 rule place_cells:
