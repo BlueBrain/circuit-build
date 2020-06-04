@@ -13,7 +13,7 @@ from nose.tools import assert_raises
 from click.testing import CliRunner
 from circuit_build.cli import run
 
-from utils import tmp_cwd, edit_yaml, TEST_DIR, TEST_DATA_DIR, SNAKEMAKE_ARGS, SNAKE_FILE
+from utils import tmp_cwd, edit_yaml, TEST_DIR, TEST_DATA_DIR, SNAKEMAKE_ARGS, SNAKEFILE
 
 
 def test_functional_all():
@@ -70,6 +70,7 @@ def test_no_emodel():
         assert tmp_dir.joinpath('circuit.h5').stat().st_size > 100
 
 
+# this patch is necessary to capture stderr into CliRunner output
 @patch('subprocess.run', partial(subprocess.run, capture_output=True))
 def test_custom_module():
     with tmp_cwd():
@@ -78,8 +79,22 @@ def test_custom_module():
         runner = CliRunner()
         with assert_raises(CalledProcessError) as err:
             runner.invoke(run, args + ['circuitconfig_nrn'], catch_exceptions=False)
-        assert "Unable to locate a modulefile for 'invalid_module1'" in \
+        assert 'Unable to locate a modulefile for \'invalid_module1\'' in \
                err.exception.stderr.decode('utf-8')
+
+
+# this patch is necessary to capture stderr into CliRunner output
+@patch('subprocess.run', partial(subprocess.run, capture_output=True))
+def test_no_git_bioname():
+    """This test verifies that bioname is checked to be under git."""
+    with tempfile.TemporaryDirectory() as data_copy_dir:
+        data_copy_dir = Path(data_copy_dir) / TEST_DATA_DIR.name
+        shutil.copytree(TEST_DATA_DIR, data_copy_dir)
+        args = ['--bioname', str(data_copy_dir), '-u', str(data_copy_dir / 'cluster.yaml')]
+        runner = CliRunner()
+        with assert_raises(CalledProcessError) as err:
+            runner.invoke(run, args, catch_exceptions=False)
+        assert f'{str(data_copy_dir)} must be under git' in err.exception.stderr.decode('utf-8')
 
 
 def test_snakemake_circuit_config():
@@ -88,10 +103,23 @@ def test_snakemake_circuit_config():
     with tmp_cwd() as tmp_dir:
         args = ['--jobs', '8', '-p', '--config', f'bioname={TEST_DATA_DIR}', '-u',
                 str(TEST_DATA_DIR / 'cluster.yaml')]
-        cmd = ['snakemake', '--snakefile', SNAKE_FILE] + args + ['CircuitConfig_base']
+        cmd = ['snakemake', '--snakefile', SNAKEFILE] + args + ['CircuitConfig_base']
         result = subprocess.run(cmd, check=True)
 
         assert result.returncode == 0
         tmp_dir = Path(tmp_dir)
         assert tmp_dir.joinpath('CircuitConfig_base').stat().st_size > 100
         assert f'CellLibraryFile circuit.mvd3' in (tmp_dir / 'CircuitConfig_base').open().read()
+
+
+def test_snakemake_no_git_bioname():
+    """This test verifies that bioname is checked to be under git when called via `snakemake`."""
+    with tempfile.TemporaryDirectory() as data_copy_dir:
+        data_copy_dir = Path(data_copy_dir) / TEST_DATA_DIR.name
+        shutil.copytree(TEST_DATA_DIR, data_copy_dir)
+        args = ['--jobs', '8', '-p', '--config', f'bioname={data_copy_dir}', '-u',
+                str(TEST_DATA_DIR / 'cluster.yaml')]
+        cmd = ['snakemake', '--snakefile', SNAKEFILE] + args + ['CircuitConfig_base']
+        with assert_raises(CalledProcessError) as err:
+            subprocess.check_output(cmd, stderr=subprocess.STDOUT)
+        assert f'{str(data_copy_dir)} must be under git' in err.exception.output.decode('utf-8')

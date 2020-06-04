@@ -1,9 +1,21 @@
 import datetime
 import warnings
+from subprocess import CalledProcessError
 
 CIRCUIT_DIR = '.'
 
 BIONAME = os.path.realpath(os.path.expanduser(config.get('bioname', 'bioname')))
+
+def get_git_info(file):
+    try:
+        info = subprocess.check_output("git describe; git diff; git diff --staged",
+                                       stderr=subprocess.STDOUT,
+                                       shell=True,
+                                       encoding='utf-8',
+                                       cwd=file if os.path.isdir(file) else os.path.dirname(file))
+    except CalledProcessError:
+        return None
+    return info
 
 def bioname_path(filename):
     return os.path.join(BIONAME, filename)
@@ -18,6 +30,11 @@ def validate_node_population_name(name):
         warnings.warn(msg)
     elif name[0] not in allowed_parts or name[1] not in allowed_types:
         warnings.warn(msg)
+
+if get_git_info(BIONAME) is None:
+    raise ValueError("bioname folder: %s must be under git (version control system)" % BIONAME)
+else:
+    print('##################\nBioname git info:\n', get_git_info(BIONAME))
 
 # Load MANIFEST.yaml into workflow config
 workflow.configfile(bioname_path('MANIFEST.yaml'))

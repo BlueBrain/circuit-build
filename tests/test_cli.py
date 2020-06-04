@@ -4,7 +4,7 @@ from nose.tools import assert_raises
 
 from circuit_build.cli import run, snakefile_path
 
-from utils import TEST_DATA_DIR, SNAKEMAKE_ARGS, SNAKE_FILE
+from utils import TEST_DATA_DIR, SNAKEMAKE_ARGS, SNAKEFILE
 
 
 @patch('subprocess.run')
@@ -17,7 +17,7 @@ def test_ok(subprocess_mock):
     assert args == [
         'snakemake', '--jobs', '8', '--printshellcmds',
         '--config', f'bioname={TEST_DATA_DIR}',
-        '--snakefile', SNAKE_FILE,
+        '--snakefile', SNAKEFILE,
         '--cluster-config', str(TEST_DATA_DIR / 'cluster.yaml')]
 
 
@@ -39,7 +39,7 @@ def test_printshellcmds_is_not_set(subprocess_mock):
     assert args == [
         'snakemake', '--jobs', '8', '--printshellcmds',
         '--config', f'bioname={TEST_DATA_DIR}',
-        '--snakefile', SNAKE_FILE,
+        '--snakefile', SNAKEFILE,
         '--cluster-config', str(TEST_DATA_DIR / 'cluster.yaml')]
 
 
@@ -59,7 +59,7 @@ def test_modules(subprocess_mock):
         'snakemake', '--jobs', '8', '--printshellcmds',
         '--config', f'bioname={TEST_DATA_DIR}',
         f'modules=["{custom_module1}", "{custom_module2}"]',
-        '--snakefile', SNAKE_FILE,
+        '--snakefile', SNAKEFILE,
         '--cluster-config', str(TEST_DATA_DIR / 'cluster.yaml')]
 
 
@@ -67,4 +67,4 @@ def test_snakefile_path():
     runner = CliRunner()
     result = runner.invoke(snakefile_path, catch_exceptions=False)
     assert result.exit_code == 0
-    assert result.output.strip() == SNAKE_FILE
+    assert result.output.strip() == SNAKEFILE
