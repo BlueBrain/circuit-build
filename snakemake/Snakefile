@@ -46,7 +46,7 @@ MODULES = {
     'synapsetool':
         (SPACK_MODULEPATH, ['archive/2020-02', 'synapsetool/0.5.8']),
     'touchdetector':
-        (SPACK_MODULEPATH, ['archive/2020-02', 'touchdetector/5.3.3']),
+        (SPACK_MODULEPATH, ['archive/2020-02', 'touchdetector/5.3.3', 'hpe-mpi']),
 }
 
 
@@ -346,7 +346,9 @@ rule touchdetector:
     shell:
         bbp_env(
             'touchdetector',
-            ["touchdetector",
+            [
+                "omplace",
+                "touchdetector",
                 "--output",
                     "{TOUCHES_DIR}",
                 "--touchspace=" +
