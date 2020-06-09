@@ -1,9 +1,13 @@
 Changelog
 ^^^^^^^^^
 
-current
--------
-* Move to SnakeMake 5.6+
+v2.0.6 (2020-07-09)
+-------------------
+* Changed `.mvd3` to `sonata` for the circuit building. SONATA now is the default circuit.
+* Added `functional_sonata` to tests
+* Added .tox for documentation building
+* Changed modules versions to: parquet-converters/0.5.5, spykfunc/0.15.6, synapsetool/0.5.9, touchdetector/5.4.0
+* Fixed write_network_config for sonata rules
 
 v2.0.1 (2019-08-23)
 -------------------

@@ -22,7 +22,7 @@ assign_morphologies:
 assign_emodels:
   seed: 0
 
-targetgen_mvd3:
+targetgen:
   targets: 'targets.yaml'
 
 projectionizer:

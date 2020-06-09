@@ -217,8 +217,7 @@ Convert touches to Parquet format (to use as input for `Spykfunc`_).
 spykfunc_s2f
 ------------
 
-Prune touches and convert them into synapses (S2F) using the `Spark
-Functionalizer`_.
+Prune touches and convert them into synapses (S2F) using the `Spark Functionalizer`.
 
 .. note::
 

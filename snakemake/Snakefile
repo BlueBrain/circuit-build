@@ -32,7 +32,7 @@ NIX_MODULEPATH = '/nix/var/nix/profiles/per-user/modules/bb5-x86_64/modules-all/
 
 MODULES = {
     'brainbuilder':
-        (SPACK_MODULEPATH, ['unstable', 'brainbuilder/0.12.1']),
+        (SPACK_MODULEPATH, ['unstable', 'brainbuilder/0.13.1']),
     'flatindexer':
         (NIX_MODULEPATH, ['nix/hpc/flatindexer/1.8.12']),
     'jinja2':
@@ -109,7 +109,7 @@ def spatial_index_files(prefix):
 rule default:
     input:
         'CircuitConfig_base',
-        'circuit.mvd3',
+        'circuit.h5',
         'start.target',
 
 
@@ -182,12 +182,31 @@ rule circuitconfig_structural:
         build_circuit_config(nrn_path=NRN_STRUCTURAL_DIR + '/edges.sonata')
 
 
+rule init_cells:
+    message:
+        "Create an empty cell collection with a correct population name. This collection will be populated further."
+
+    output:
+        'circuit.empty.h5'
+
+    shell:
+        bbp_env(
+            'brainbuilder',
+            ['python -c "from voxcell import CellCollection;',
+                "cells = CellCollection('All');",
+                "cells.save('{output}');",
+              '"'])
+
+
 rule place_cells:
     message:
         "Generate cell positions; assign me-types"
 
+    input:
+        'circuit.empty.h5'
+
     output:
-        'circuit.mvd3.somata'
+        'circuit.somata.h5'
 
     log:
         log_path('place_cells')
@@ -196,6 +215,8 @@ rule place_cells:
         bbp_env(
             'brainbuilder',
             ["brainbuilder cells place",
+                "--input",
+                    "{input}",
                 "--composition",
                     bioname_path("cell_composition.yaml"),
                 "--mtype-taxonomy",
@@ -237,7 +258,7 @@ rule choose_morphologies:
         "Choose morphologies using 'placement hints' approach"
 
     input:
-        'circuit.mvd3.somata'
+        'circuit.somata.h5'
 
     output:
         'morphologies.tsv'
@@ -278,11 +299,11 @@ rule assign_morphologies:
         "Assign morphologies"
 
     input:
-        mvd3 = 'circuit.mvd3.somata',
+        cells = 'circuit.somata.h5',
         morph = 'morphologies.tsv'
 
     output:
-        'circuit.mvd3.morphologies'
+        'circuit.morphologies.h5'
 
     log:
         log_path('assign_morphologies')
@@ -292,7 +313,7 @@ rule assign_morphologies:
             'placement-algorithm',
             ["assign-morphologies",
                 "--cells-path",
-                    "{input[mvd3]}",
+                    "{input[cells]}",
                 "--morph",
                     "{input[morph]}",
                 "--atlas",
@@ -308,15 +329,15 @@ rule assign_morphologies:
         )
 
 
-rule assign_emodels:
+rule assign_emodels_per_type:
     message:
         "Assign electrical models"
 
     input:
-        'circuit.mvd3.morphologies'
+        'circuit.morphologies.h5'
 
     output:
-        'circuit.mvd3'
+        'circuit.{ext}'
 
     shell:
         bbp_env(
@@ -327,6 +348,37 @@ rule assign_emodels:
                 "{input}"
             ],
             slurm_env='assign_emodels'
+        )
+
+
+rule assign_emodels:
+    input:
+        expand(['circuit.{ext}'], ext=['h5', 'mvd3'])
+
+
+rule provide_me_info:
+    message:
+        "Provide MorphoElectrical info for SONATA Nodes"
+
+    input:
+        'circuit.h5'
+
+    output:
+        'sonata/networks/nodes/All/nodes.h5'
+
+    shell:
+        bbp_env(
+            'brainbuilder',
+            ["brainbuilder sonata provide-me-info",
+                "--mecombo-info",
+                    os.path.join(EMODEL_RELEASE, "mecombo_emodel.tsv"),
+                "--model-type",
+                    "biophysical",
+                "--output",
+                    "{output}",
+                "{input}"
+            ],
+            slurm_env='sonata_provide_me_info'
         )
 
 
@@ -482,12 +534,21 @@ rule spykfunc_s2f:
         )
 
 
-rule targetgen_mvd3:
+def get_targetgen_config(key, default_value=None):
+    old = config.get('targetgen_mvd3', {})
+    new = config.get('targetgen', {})
+    if old and not new:
+         print('"targetgen_mvd3" should be replaced by "targetgen" in MANIFEST.yaml')
+         new = old
+    return new.get(key, default_value)
+
+
+rule targetgen:
     message:
         "Generate start.target file"
 
     input:
-        'circuit.mvd3'
+        'circuit.h5'
 
     output:
         'start.target'
@@ -496,10 +557,9 @@ rule targetgen_mvd3:
         bbp_env(
             'brainbuilder',
             ["brainbuilder targets from-input",
-                ("--targets %s" % bioname_path(config['targetgen_mvd3']['targets'])
-                    if 'targets' in config.get('targetgen_mvd3', {}) else ""),
-                ("--allow-empty"
-                    if config.get('targetgen_mvd3', {}).get('allow_empty', False) else ""),
+                ("--targets %s" % bioname_path(get_targetgen_config('targets'))
+                    if get_targetgen_config('targets', False) else ""),
+                ("--allow-empty" if get_targetgen_config('allow_empty', False) else ""),
                 "--atlas",
                     ATLAS,
                 "--atlas-cache",
@@ -516,7 +576,7 @@ rule node_sets:
         "Generate SONATA node sets"
 
     input:
-        'circuit.mvd3'
+        'sonata/networks/nodes/All/nodes.h5'
 
     output:
         'sonata/node_sets.json'
@@ -528,10 +588,10 @@ rule node_sets:
         bbp_env(
             'brainbuilder',
             ["brainbuilder targets node-sets",
-                ("--targets %s" % bioname_path(config['targetgen_mvd3']['targets'])
-                    if 'targets' in config.get('targetgen_mvd3', {}) else ""),
+                ("--targets %s" % bioname_path(get_targetgen_config('targets'))
+                    if get_targetgen_config('targets', False) else ""),
                 ("--allow-empty"
-                    if config.get('targetgen_mvd3', {}).get('allow_empty', False) else ""),
+                    if get_targetgen_config('allow_empty', False) else ""),
                 "--population",
                     "All",
                 "--atlas",
@@ -613,34 +673,6 @@ rule spatial_index_synapse:
         )
 
 
-rule mvd3_to_sonata:
-    message:
-        "MVD3 -> SONATA Nodes"
-
-    input:
-        'circuit.mvd3'
-
-    output:
-        'sonata/networks/nodes/All/nodes.h5'
-
-    shell:
-        bbp_env(
-            'brainbuilder',
-            ["brainbuilder sonata from-mvd3",
-                "--mecombo-info",
-                    os.path.join(EMODEL_RELEASE, "mecombo_emodel.tsv"),
-                "--model-type",
-                    "biophysical",
-                "--population",
-                    "All",
-                "--output",
-                    "{output}",
-                "{input}"
-            ],
-            slurm_env='mvd3_to_sonata'
-        )
-
-
 rule parquet_to_sonata:
     message:
         "Convert synapses from Parquet to SYN2 format"
@@ -711,7 +743,7 @@ rule subcellular:
         "Assign gene expressions / protein concentrations to cells"
 
     input:
-        mvd3 = 'circuit.mvd3',
+        file = 'circuit.h5',
         directory = 'subcellular'
 
     output:
@@ -721,7 +753,7 @@ rule subcellular:
         bbp_env(
             'brainbuilder',
             ["brainbuilder subcellular assign",
-                "{input[mvd3]}",
+                "{input[file]}",
                 "--subcellular-dir {input[directory]}",
                 "--transcriptome {config[subcellular][transcriptome]}",
                 "--mtype-taxonomy {config[subcellular][mtype_taxonomy]}",
@@ -784,7 +816,7 @@ rule circuitconfig_struct_sonata:
 rule functional:
     input:
         'CircuitConfig',
-        'circuit.mvd3',
+        'circuit.h5',
         'start.target',
         NRN_FUNCTIONAL_DIR + '/edges.sonata',
 

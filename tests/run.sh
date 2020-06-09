@@ -31,6 +31,6 @@ snakemake -p -j8                                \
   --config "bioname=$CIRCUIT_PATH"              \
   --cluster-config "$CIRCUIT_PATH/cluster.yaml" \
   --                                            \
-  functional_all
+  functional_all functional_sonata
 
 popd
