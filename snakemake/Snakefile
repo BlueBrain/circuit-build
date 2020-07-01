@@ -32,7 +32,7 @@ NIX_MODULEPATH = '/nix/var/nix/profiles/per-user/modules/bb5-x86_64/modules-all/
 
 MODULES = {
     'brainbuilder':
-        (SPACK_MODULEPATH, ['archive/2020-02', 'brainbuilder/0.11.7']),
+        (SPACK_MODULEPATH, ['unstable', 'brainbuilder/0.12.1']),
     'flatindexer':
         (NIX_MODULEPATH, ['nix/hpc/flatindexer/1.8.12']),
     'jinja2':
@@ -40,7 +40,7 @@ MODULES = {
     'parquet-converters':
         (SPACK_MODULEPATH, ['archive/2020-02', 'parquet-converters/0.5.3']),
     'placement-algorithm':
-        (SPACK_MODULEPATH, ['archive/2020-02', 'placement-algorithm/2.0.8']),
+        (SPACK_MODULEPATH, ['unstable', 'placement-algorithm/2.1.0']),
     'spykfunc':
         (SPACK_MODULEPATH, ['archive/2020-02', 'spykfunc/0.15.2']),
     'synapsetool':
@@ -249,7 +249,7 @@ rule choose_morphologies:
          bbp_env(
             'placement-algorithm',
             ["choose-morphologies",
-                "--mvd3",
+                "--cells-path",
                     "{input}",
                 "--atlas",
                     ATLAS,
@@ -291,7 +291,7 @@ rule assign_morphologies:
          bbp_env(
             'placement-algorithm',
             ["assign-morphologies",
-                "--mvd3",
+                "--cells-path",
                     "{input[mvd3]}",
                 "--morph",
                     "{input[morph]}",
@@ -301,7 +301,7 @@ rule assign_morphologies:
                     ATLAS_CACHE_DIR,
                 "--max-drop-ratio",
                     config['assign_morphologies'].get('max_drop_ratio', 0.0),
-                "--out-mvd3",
+                "--out-cells-path",
                     "{output}",
             ],
             dump_log=True
@@ -495,7 +495,7 @@ rule targetgen_mvd3:
     shell:
         bbp_env(
             'brainbuilder',
-            ["brainbuilder targets from-mvd3",
+            ["brainbuilder targets from-input",
                 ("--targets %s" % bioname_path(config['targetgen_mvd3']['targets'])
                     if 'targets' in config.get('targetgen_mvd3', {}) else ""),
                 ("--allow-empty"
@@ -629,8 +629,8 @@ rule mvd3_to_sonata:
             ["brainbuilder sonata from-mvd3",
                 "--mecombo-info",
                     os.path.join(EMODEL_RELEASE, "mecombo_emodel.tsv"),
-                "--library-properties",
-                    "etype,morph_class,morphology,mtype,synapse_class",
+                "--model-type",
+                    "biophysical",
                 "--population",
                     "All",
                 "--output",
