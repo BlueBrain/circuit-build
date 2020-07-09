@@ -749,7 +749,7 @@ def write_network_config(nrn_dir):
             "--nodes",
                 "All",
             "--node-sets",
-                "node_sets.json"
+                "node_sets.json",
             "--edges-dir",
                 "networks/edges/%s" % nrn_dir,
             "--edges",
