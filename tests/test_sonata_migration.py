@@ -1,13 +1,13 @@
-import subprocess
-import tempfile
 from pathlib import Path
-
-from numpy.testing import assert_equal, assert_almost_equal
-from pandas.testing import assert_frame_equal
 
 from voxcell import CellCollection
 
-from utils import TEST_DIR, SNAKEMAKE_ARGS
+from click.testing import CliRunner
+from circuit_build.cli import run
+from numpy.testing import assert_equal, assert_almost_equal
+from pandas.testing import assert_frame_equal
+
+from utils import tmp_cwd, SNAKEMAKE_ARGS
 
 
 def assert_equal_cells(c0, c1):
@@ -24,25 +24,24 @@ def assert_equal_cells(c0, c1):
 
 
 def test_default_rule():
-    with tempfile.TemporaryDirectory(dir=TEST_DIR) as tmpdirname:
-        cmd = ['snakemake'] + SNAKEMAKE_ARGS
-        result = subprocess.run(cmd, cwd=tmpdirname, check=True, timeout=60 * 60)
-        assert result.returncode == 0
+    with tmp_cwd() as tmpdirname:
+        runner = CliRunner()
+        result = runner.invoke(run, SNAKEMAKE_ARGS + ['assign_emodels'], catch_exceptions=False)
+        assert result.exit_code == 0
         tmpdirname = Path(tmpdirname)
 
         assert tmpdirname.joinpath('circuit.mvd3').stat().st_size > 100
         mvd3_cells = CellCollection.load_mvd3(tmpdirname / 'circuit.mvd3')
         assert tmpdirname.joinpath('circuit.h5').stat().st_size > 100
         sonata_cells = CellCollection.load_sonata(tmpdirname / 'circuit.h5')
-        assert tmpdirname.joinpath('start.target').stat().st_size > 100
 
     assert_equal_cells(mvd3_cells, sonata_cells)
 
 
 def test_node_sets():
-    with tempfile.TemporaryDirectory(dir=TEST_DIR) as tmpdirname:
-        cmd = ['snakemake'] + SNAKEMAKE_ARGS + ['node_sets']
-        result = subprocess.run(cmd, cwd=tmpdirname, check=True, timeout=60 * 60)
-        assert result.returncode == 0
+    with tmp_cwd() as tmpdirname:
+        runner = CliRunner()
+        result = runner.invoke(run, SNAKEMAKE_ARGS + ['node_sets'], catch_exceptions=False)
+        assert result.exit_code == 0
         node_sets = Path(tmpdirname).joinpath('sonata/node_sets.json').read_text()
         assert len(node_sets) > 100

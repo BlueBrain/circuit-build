@@ -1,0 +1,4 @@
+include circuit_build/snakemake/**/*
+global-exclude *.py[co] .DS_Store
+prune venv
+prune .tox

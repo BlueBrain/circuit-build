@@ -1,15 +1,15 @@
-import subprocess
-import tempfile
 from pathlib import Path
 
-from utils import TEST_DIR, SNAKEMAKE_ARGS
+from click.testing import CliRunner
+from circuit_build.cli import run
+from utils import tmp_cwd, SNAKEMAKE_ARGS
 
 
 def test_functional_all():
-    with tempfile.TemporaryDirectory(dir=TEST_DIR) as tmpdirname:
-        cmd = ['snakemake'] + SNAKEMAKE_ARGS + ['functional_all']
-        result = subprocess.run(cmd, cwd=tmpdirname, check=True, timeout=60 * 60)
-        assert result.returncode == 0
+    with tmp_cwd() as tmpdirname:
+        runner = CliRunner()
+        result = runner.invoke(run, SNAKEMAKE_ARGS + ['functional_all'], catch_exceptions=False)
+        assert result.exit_code == 0
         tmpdirname = Path(tmpdirname)
         assert tmpdirname.joinpath('CircuitConfig').stat().st_size > 100
         assert tmpdirname.joinpath('CircuitConfig_nrn').stat().st_size > 100
