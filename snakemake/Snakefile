@@ -18,6 +18,10 @@ ATLAS_CACHE_DIR = ".atlas"
 
 MORPH_RELEASE = config['common']['morph_release']
 EMODEL_RELEASE = config['common']['emodel_release']
+if EMODEL_RELEASE:
+    mecombo = os.path.join(EMODEL_RELEASE, "mecombo_emodel.tsv")
+    if not os.path.exists(mecombo):
+        raise ValueError("%s must contain 'mecombo_emodel.tsv' file or remove 'emodel_release' from your from MANIFEST.yaml " % EMODEL_RELEASE)
 
 LOGS_DIR = "logs"
 
@@ -370,8 +374,8 @@ rule provide_me_info:
         bbp_env(
             'brainbuilder',
             ["brainbuilder sonata provide-me-info",
-                "--mecombo-info",
-                    os.path.join(EMODEL_RELEASE, "mecombo_emodel.tsv"),
+                ("--mecombo-info %s" % os.path.join(EMODEL_RELEASE, "mecombo_emodel.tsv")
+                    if EMODEL_RELEASE else ""),
                 "--model-type",
                     "biophysical",
                 "--output",

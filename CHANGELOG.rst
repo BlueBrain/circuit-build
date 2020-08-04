@@ -7,6 +7,7 @@ Version 3.0.0 (2020-07-28)
 - Wrap project into a python package
 - Add local tests
 - Drop separate Jenkins plan for tests
+- Add a possibility to build circuits without emodels
 
 Version 2.0.6 (2020-07-09)
 --------------------------

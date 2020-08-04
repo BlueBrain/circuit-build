@@ -92,8 +92,7 @@ Please refer to :ref:`ref-phases` for each phase config description.
 
 
 **emodel_release**
-    Path to emodel release folder.
-    It should contain:
+    Path to emodel release folder. It should contain:
 
     * ``hoc`` folder with model HOC templates
     * ``mecombo_emodel.tsv`` file with *me_combo* parameters
@@ -103,6 +102,9 @@ An example of full ``MANIFEST.yaml``:
 
 .. literalinclude:: ../../tests/proj66-tiny/MANIFEST.yaml
    :language: yaml
+
+If **emodel_release** is not specified then the circuit will be built without emodels. It is strongly
+recommended to always specify this property.
 
 cell_composition.yaml
 ~~~~~~~~~~~~~~~~~~~~~

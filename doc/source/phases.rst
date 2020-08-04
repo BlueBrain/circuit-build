@@ -128,7 +128,8 @@ Assign morphologies chosen with `choose_morphologies`_ to MVD3 using the `placem
 assign_emodels
 --------------
 
-Add *me_combo* property to MVD3.
+Add *me_combo* property to MVD3. If **emodel_release** is not specified in ``MANIFEST.yaml`` then
+this phase is skipped and the final circuit is not guaranteed to run a simulation.
 
 Handled by `BrainBuilder`_: ``brainbuilder cells assign-emodels``.
 
