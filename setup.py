@@ -26,7 +26,8 @@ setup(
     # see `basepython` in tox.ini for explanation on the version.
     python_requires='>=3.7',
     install_requires=[
-        'click>=7.0',
+        'click>=7.0,<8',
+        'pyyaml>=3.10,<4',
         'snakemake>=5.10.0,<6.0.0',
     ],
     packages=find_packages(),

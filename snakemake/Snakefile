@@ -18,10 +18,13 @@ ATLAS_CACHE_DIR = ".atlas"
 
 MORPH_RELEASE = config['common']['morph_release']
 EMODEL_RELEASE = config['common'].get('emodel_release')
+EMODEL_RELEASE_MECOMBO = None
+EMODEL_RELEASE_HOC = None
 if EMODEL_RELEASE:
-    mecombo = os.path.join(EMODEL_RELEASE, "mecombo_emodel.tsv")
-    if not os.path.exists(mecombo):
-        raise ValueError("%s must contain 'mecombo_emodel.tsv' file or remove 'emodel_release' from your from MANIFEST.yaml " % EMODEL_RELEASE)
+    EMODEL_RELEASE_MECOMBO = os.path.join(EMODEL_RELEASE, "mecombo_emodel.tsv")
+    EMODEL_RELEASE_HOC = os.path.join(EMODEL_RELEASE, "hoc")
+    if not os.path.exists(EMODEL_RELEASE_MECOMBO) or not os.path.exists(EMODEL_RELEASE_HOC):
+        raise ValueError("%s must contain 'mecombo_emodel.tsv' file and 'hoc' folder" % EMODEL_RELEASE)
 
 LOGS_DIR = "logs"
 
@@ -36,7 +39,7 @@ NIX_MODULEPATH = '/nix/var/nix/profiles/per-user/modules/bb5-x86_64/modules-all/
 
 MODULES = {
     'brainbuilder':
-        (SPACK_MODULEPATH, ['unstable', 'brainbuilder/0.13.1']),
+        (SPACK_MODULEPATH, ['unstable', 'brainbuilder/0.14.0']),
     'flatindexer':
         (NIX_MODULEPATH, ['nix/hpc/flatindexer/1.8.12']),
     'jinja2':
@@ -124,8 +127,9 @@ def build_circuit_config(nrn_path):
             "-D CIRCUIT_PATH=%s" % os.path.abspath(CIRCUIT_DIR),
             "-D NRN_PATH=%s" % os.path.abspath(nrn_path),
             "-D MORPH_PATH={MORPH_RELEASE}",
-            "-D ME_TYPE_PATH=%s" % os.path.join(EMODEL_RELEASE, "hoc"),
-            "-D ME_COMBO_INFO_PATH=%s" % os.path.join(EMODEL_RELEASE, "mecombo_emodel.tsv"),
+            "-D ME_TYPE_PATH=%s" % EMODEL_RELEASE_HOC,
+            ("-D ME_COMBO_INFO_PATH=%s" % EMODEL_RELEASE_MECOMBO
+                 if EMODEL_RELEASE_MECOMBO else ""),
             "-D BIONAME={BIONAME}",
             "-D ATLAS={ATLAS}",
             ("-D PROJECTIONS='%s'" % ";".join(config['projectionizer'])
@@ -374,8 +378,8 @@ rule provide_me_info:
         bbp_env(
             'brainbuilder',
             ["brainbuilder sonata provide-me-info",
-                ("--mecombo-info %s" % os.path.join(EMODEL_RELEASE, "mecombo_emodel.tsv")
-                    if EMODEL_RELEASE else ""),
+                ("--mecombo-info %s" % EMODEL_RELEASE_MECOMBO
+                    if EMODEL_RELEASE_MECOMBO else ""),
                 "--model-type",
                     "biophysical",
                 "--output",
