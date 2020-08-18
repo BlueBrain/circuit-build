@@ -17,7 +17,7 @@ ATLAS = config['common']['atlas']
 ATLAS_CACHE_DIR = ".atlas"
 
 MORPH_RELEASE = config['common']['morph_release']
-EMODEL_RELEASE = config['common']['emodel_release']
+EMODEL_RELEASE = config['common'].get('emodel_release')
 if EMODEL_RELEASE:
     mecombo = os.path.join(EMODEL_RELEASE, "mecombo_emodel.tsv")
     if not os.path.exists(mecombo):
