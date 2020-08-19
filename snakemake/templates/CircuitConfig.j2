@@ -3,11 +3,13 @@ Run Default
     CircuitPath {{ CIRCUIT_PATH }}
     nrnPath {{ NRN_PATH }}
     MorphologyPath {{ MORPH_PATH }}
+{%- if ME_TYPE_PATH is defined %}
     METypePath {{ ME_TYPE_PATH }}
-{%- if ME_COMBO_INFO_PATH %}
-    MEComboInfoFile {{ ME_COMBO_INFO_PATH }}
-    CellLibraryFile circuit.mvd3
 {%- endif %}
+{%- if ME_COMBO_INFO_PATH is defined %}
+    MEComboInfoFile {{ ME_COMBO_INFO_PATH }}
+{%- endif %}
+    CellLibraryFile circuit.mvd3
     BioName {{ BIONAME }}
     Atlas {{ ATLAS }}
 }

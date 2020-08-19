@@ -1,6 +1,10 @@
 Changelog
 =========
 
+Version 3.0.1 (2020-08-19)
+--------------------------
+- Fix 'circuitconfig_nrn' when no 'emodel_release'
+
 Version 3.0.0 (2020-07-28)
 --------------------------
 

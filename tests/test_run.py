@@ -37,7 +37,8 @@ def test_no_emodel():
         args = ['--bioname', str(data_copy_dir), '-u', str(data_copy_dir / 'cluster.yaml')]
 
         runner = CliRunner()
-        result = runner.invoke(run, args + ['provide_me_info'], catch_exceptions=False)
+        result = runner.invoke(run, args + ['assign_emodels', 'circuitconfig_nrn'], catch_exceptions=False)
         assert result.exit_code == 0
         tmp_dir = Path(tmp_dir)
-        assert tmp_dir.joinpath('sonata/networks/nodes/All/nodes.h5').stat().st_size > 100
+        assert tmp_dir.joinpath('CircuitConfig_nrn').stat().st_size > 100
+        assert tmp_dir.joinpath('circuit.h5').stat().st_size > 100
