@@ -1,6 +1,10 @@
 Changelog
 =========
 
+Version 3.0.2 (2020-08-21)
+--------------------------
+- Update documentation about the change from MVD3 to Sonata
+
 Version 3.0.1 (2020-08-19)
 --------------------------
 - Fix 'circuitconfig_nrn' when no 'emodel_release'

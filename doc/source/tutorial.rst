@@ -107,7 +107,7 @@ After the command above has completed, the following files could be found in cir
 
 At this point the circuit is partially complete and should be readable by
 `BluePy <https://bbpcode.epfl.ch/documentation/bluepy-0.13.5/index.html>`_ for analysis not
-involving connectome. There are also some intermediate partial MVD3 files:
+involving connectome. There are also some intermediate partial Sonata files:
 
 ::
 
@@ -250,5 +250,5 @@ After build is complete
 ~~~~~~~~~~~~~~~~~~~~~~~
 
 Once circuit build is complete, we'd recommend to make its `bioname`, as well as the result circuit
-files, read-only. You can also remove intermediate files and folders like `circuit.mvd3.<suffix>`
+files, read-only. You can also remove intermediate files and folders like `circuit.<suffix>.h5`
 or `connectome/<type>/spykfunc`.

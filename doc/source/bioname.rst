@@ -31,7 +31,7 @@ In particular, the following files should be placed there:
 * ``placement_rules.xml``
 * ``builder[Connectivity]RecipeAllPathways.xml``
 
-Optionally, `bioname` can also contain YAML files with cell target definitions. If used, these should be referenced from :ref:`ref-phase-targetgen-mvd3` section in ``MANIFEST.yaml``.
+Optionally, `bioname` can also contain YAML files with cell target definitions. If used, these should be referenced from :ref:`ref-phase-targetgen` section in ``MANIFEST.yaml``.
 
 
 MANIFEST.yaml

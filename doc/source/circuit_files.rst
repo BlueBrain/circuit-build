@@ -11,7 +11,7 @@ A typical circuit release folder would look like:
 ::
 
     CircuitConfig
-    circuit.mvd3
+    circuit.h5 or circuit.mvd3
     connectome/
       functional/
         nrn.h5
@@ -51,8 +51,9 @@ A typical circuit release folder would look like:
     }
 
 
-**circuit.mvd3**
-  `MVD3 <https://bbpteam.epfl.ch/documentation/Circuit%20Documentation-0.0.1/mvd3.html>`_ file with cell properties.
+**circuit.h5** or **circuit.mvd3**
+  File with cell properties either in `SONATA <https://github.com/AllenInstitute/sonata/blob/master/docs/SONATA_DEVELOPER_GUIDE.md>`_
+  or `MVD3 <https://bbpteam.epfl.ch/documentation/Circuit%20Documentation-0.0.1/mvd3.html>`_ format.
 
 **nrn*.h5**
   `NRN <https://bbpteam.epfl.ch/project/spaces/pages/viewpage.action?pageId=10919530>`_ files with synapse properties.
