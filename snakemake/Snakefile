@@ -127,7 +127,7 @@ def build_circuit_config(nrn_path):
             "-D CIRCUIT_PATH=%s" % os.path.abspath(CIRCUIT_DIR),
             "-D NRN_PATH=%s" % os.path.abspath(nrn_path),
             "-D MORPH_PATH={MORPH_RELEASE}",
-            ("-D ME_TYPE_PATH=%s" % EMODEL_RELEASE_HOC if EMODEL_RELEASE_HOC else ""),
+            "-D ME_TYPE_PATH=%s" % (EMODEL_RELEASE_HOC if EMODEL_RELEASE_HOC else "SPECIFY_ME"),
             ("-D ME_COMBO_INFO_PATH=%s" % EMODEL_RELEASE_MECOMBO if EMODEL_RELEASE_MECOMBO else ""),
             "-D BIONAME={BIONAME}",
             "-D ATLAS={ATLAS}",
