@@ -1,10 +1,14 @@
 import shutil
 import tempfile
 from pathlib import Path
+from subprocess import CalledProcessError
+
 import yaml
+from nose.tools import assert_raises
 
 from click.testing import CliRunner
 from circuit_build.cli import run
+
 from utils import tmp_cwd, TEST_DIR, TEST_DATA_DIR, SNAKEMAKE_ARGS
 
 
@@ -37,8 +41,20 @@ def test_no_emodel():
         args = ['--bioname', str(data_copy_dir), '-u', str(data_copy_dir / 'cluster.yaml')]
 
         runner = CliRunner()
-        result = runner.invoke(run, args + ['assign_emodels', 'circuitconfig_nrn'], catch_exceptions=False)
+        result = runner.invoke(
+            run, args + ['assign_emodels', 'circuitconfig_nrn'], catch_exceptions=False)
         assert result.exit_code == 0
         tmp_dir = Path(tmp_dir)
         assert tmp_dir.joinpath('CircuitConfig_nrn').stat().st_size > 100
         assert tmp_dir.joinpath('circuit.h5').stat().st_size > 100
+
+
+def test_custom_module():
+    with tmp_cwd():
+        args = SNAKEMAKE_ARGS + ['-m', 'jinja2:invalid_module1:invalid_module_path']
+
+        runner = CliRunner()
+        with assert_raises(CalledProcessError) as err:
+            runner.invoke(run, args + ['circuitconfig_nrn'], catch_exceptions=False)
+        assert "Unable to locate a modulefile for 'invalid_module1'" in \
+               err.exception.stderr.decode('utf-8')

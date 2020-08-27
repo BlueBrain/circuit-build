@@ -79,13 +79,25 @@ circuit file you want to generate. To choose a phase, type its name at the end o
 
     $ circuit-build run --bioname /path/to/bioname --cluster-config /path/to/cluster.yaml phase-name
 
+For more detailed examples of phases see below. For more predefined phases see :ref:`ref-phases`.
 To get an absolute path to `circuit_build/snakemake/Snakefile` type:
 
 .. code-block:: bash
 
     $ circuit-build snakefile-path
 
-For more detailed examples see below. For more predefined phases see :ref:`ref-phases`.
+To use custom modules for `circuit_build/snakemake/Snakefile` you can specify them via `-m` option.
+This option is multiple. It means you can use it multiple times to specify multiple custom modules.
+
+.. code-block:: bash
+
+    $ circuit-build run -m custom_module1:module_name1:module/path -m custom_module2:module_name21,module_name22/0.1 ...
+
+The syntax is <*custom module name*>:<*modules list*>:<*optional module path*>.
+*custom module name* - module name that is used as a key in ``MODULES`` variable of the default ``Snakefile``.
+*modules list* - list of actual modules to load separated by a comma.
+*optional module path* - module path where to search modules of *modules list*. It can be omitted
+then ``SPACK_MODULEPATH`` of the default ``Snakefile`` is used.
 
 
 Cell collection
