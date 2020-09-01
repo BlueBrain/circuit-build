@@ -57,7 +57,7 @@ def run(ctx, cluster_config: str, bioname: str, modules: list, snakefile: str = 
     args += _build_config_args()
 
     cmd = ['snakemake', *args, '--snakefile', snakefile, '--cluster-config', cluster_config]
-    return subprocess.run(cmd, check=True, capture_output=True)
+    return subprocess.run(cmd, check=True)
 
 
 @cli.command()

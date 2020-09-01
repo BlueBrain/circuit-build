@@ -1,9 +1,12 @@
 import shutil
+import subprocess
 import tempfile
+from functools import partial
 from pathlib import Path
 from subprocess import CalledProcessError
 
 import yaml
+from unittest.mock import patch
 from nose.tools import assert_raises
 
 from click.testing import CliRunner
@@ -49,6 +52,7 @@ def test_no_emodel():
         assert tmp_dir.joinpath('circuit.h5').stat().st_size > 100
 
 
+@patch('subprocess.run', partial(subprocess.run, capture_output=True))
 def test_custom_module():
     with tmp_cwd():
         args = SNAKEMAKE_ARGS + ['-m', 'jinja2:invalid_module1:invalid_module_path']
