@@ -1,11 +1,14 @@
+from contextlib import contextmanager
+import pkg_resources
 from pathlib import Path
 import os
 import tempfile
-from contextlib import contextmanager
+
+import circuit_build
 
 TEST_DIR = Path(__file__).resolve().parent
 TEST_DATA_DIR = TEST_DIR / 'proj66-tiny'
-SNAKE_FILE = TEST_DIR.parent / 'snakemake' / 'Snakefile'
+SNAKE_FILE = pkg_resources.resource_filename(circuit_build.__name__, 'snakemake/Snakefile')
 SNAKEMAKE_ARGS = ['--bioname', str(TEST_DATA_DIR), '-u', str(TEST_DATA_DIR / 'cluster.yaml')]
 
 

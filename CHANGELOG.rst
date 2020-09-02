@@ -1,6 +1,10 @@
 Changelog
 =========
 
+Version 3.1.1 (2020-09-02)
+--------------------------
+- Fix snakemake files packaging
+
 Version 3.1.0 (2020-08-21)
 --------------------------
 - Update documentation about the change from MVD3 to Sonata

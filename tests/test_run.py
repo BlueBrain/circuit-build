@@ -12,7 +12,7 @@ from nose.tools import assert_raises
 from click.testing import CliRunner
 from circuit_build.cli import run
 
-from utils import tmp_cwd, TEST_DIR, TEST_DATA_DIR, SNAKEMAKE_ARGS
+from utils import tmp_cwd, TEST_DIR, TEST_DATA_DIR, SNAKEMAKE_ARGS, SNAKE_FILE
 
 
 def test_functional_all():
@@ -62,3 +62,17 @@ def test_custom_module():
             runner.invoke(run, args + ['circuitconfig_nrn'], catch_exceptions=False)
         assert "Unable to locate a modulefile for 'invalid_module1'" in \
                err.exception.stderr.decode('utf-8')
+
+
+def test_snakemake_circuit_config():
+    """This test verifies that building can happen via `snakemake`,
+    and `CircuitConfig.j2` is accessible in this case."""
+    with tmp_cwd() as tmp_dir:
+        args = ['--jobs', '8', '-p', '--config', f'bioname={TEST_DATA_DIR}', '-u',
+                str(TEST_DATA_DIR / 'cluster.yaml')]
+        cmd = ['snakemake', '--snakefile', SNAKE_FILE] + args + ['CircuitConfig_base']
+        result = subprocess.run(cmd, check=True)
+
+        assert result.returncode == 0
+        tmp_dir = Path(tmp_dir)
+        assert tmp_dir.joinpath('CircuitConfig_base').stat().st_size > 100
