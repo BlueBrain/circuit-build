@@ -141,7 +141,7 @@ rule default:
         'start.target',
 
 
-def build_circuit_config(nrn_path):
+def build_circuit_config(nrn_path, cell_library_file='circuit.mvd3'):
     return bbp_env(
         'jinja2',
         ["jinja2 --strict",
@@ -152,6 +152,7 @@ def build_circuit_config(nrn_path):
             ("-D ME_COMBO_INFO_PATH=%s" % EMODEL_RELEASE_MECOMBO if EMODEL_RELEASE_MECOMBO else ""),
             "-D BIONAME={BIONAME}",
             "-D ATLAS={ATLAS}",
+            "-D CELL_LIBRARY_FILE=%s" % cell_library_file,
             ("-D PROJECTIONS='%s'" % ";".join(config['projectionizer'])
                 if 'projectionizer' in config else ""),
             template_path('CircuitConfig.j2'),
@@ -187,13 +188,16 @@ rule circuitconfig_functional:
         "Generate CircuitConfig for functional circuit"
 
     input:
-        NRN_FUNCTIONAL_DIR + '/edges.sonata'
+        NRN_FUNCTIONAL_DIR + '/edges.sonata',
+        'sonata/networks/nodes/All/nodes.h5'
 
     output:
         'CircuitConfig'
 
     shell:
-        build_circuit_config(nrn_path=NRN_FUNCTIONAL_DIR + '/edges.sonata')
+        build_circuit_config(
+            nrn_path=NRN_FUNCTIONAL_DIR + '/edges.sonata',
+            cell_library_file=os.path.abspath(os.path.join(CIRCUIT_DIR, 'sonata/networks/nodes/All/nodes.h5')))
 
 
 rule circuitconfig_structural:
@@ -844,7 +848,7 @@ rule circuitconfig_struct_sonata:
 rule functional:
     input:
         'CircuitConfig',
-        'circuit.h5',
+        'sonata/networks/nodes/All/nodes.h5',
         'start.target',
         NRN_FUNCTIONAL_DIR + '/edges.sonata',
 

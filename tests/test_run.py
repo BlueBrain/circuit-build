@@ -21,6 +21,9 @@ def test_functional_all():
         result = runner.invoke(run, SNAKEMAKE_ARGS + ['functional_all'], catch_exceptions=False)
         assert result.exit_code == 0
         tmp_dir = Path(tmp_dir)
+        nodes_file = (tmp_dir / 'sonata/networks/nodes/All/nodes.h5').resolve()
+        assert f'CellLibraryFile {nodes_file}' in (tmp_dir / 'CircuitConfig').open().read()
+        assert f'CellLibraryFile circuit.mvd3' in (tmp_dir / 'CircuitConfig_nrn').open().read()
         assert tmp_dir.joinpath('CircuitConfig').stat().st_size > 100
         assert tmp_dir.joinpath('CircuitConfig_nrn').stat().st_size > 100
         assert tmp_dir.joinpath('circuit.mvd3').stat().st_size > 100
@@ -76,3 +79,4 @@ def test_snakemake_circuit_config():
         assert result.returncode == 0
         tmp_dir = Path(tmp_dir)
         assert tmp_dir.joinpath('CircuitConfig_base').stat().st_size > 100
+        assert f'CellLibraryFile circuit.mvd3' in (tmp_dir / 'CircuitConfig_base').open().read()

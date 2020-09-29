@@ -9,7 +9,7 @@ Run Default
 {%- if ME_COMBO_INFO_PATH is defined %}
     MEComboInfoFile {{ ME_COMBO_INFO_PATH }}
 {%- endif %}
-    CellLibraryFile circuit.mvd3
+    CellLibraryFile {{ CELL_LIBRARY_FILE }}
     BioName {{ BIONAME }}
     Atlas {{ ATLAS }}
 }

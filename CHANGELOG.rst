@@ -1,6 +1,10 @@
 Changelog
 =========
 
+Version 3.1.3 (2021-01-15)
+--------------------------
+- Use Sonata nodes for CellLibraryFile of generated CircuitConfig files
+
 Version 3.1.2 (2020-10-02)
 --------------------------
 - Update parquet-converters module to 0.5.7
