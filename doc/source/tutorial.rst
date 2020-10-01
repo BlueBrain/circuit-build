@@ -222,7 +222,25 @@ each phase. Such file is required by `circuit-build run` command.
 
     $ snakemake --cluster-config cluster.yaml ...
 
-For instance, to specify Slurm allocation for `touchdetector` phase, YAML should contain an entry
+To specify a Slurm allocation for a phase, find the phase in the used `Snakefile`. For example,
+a phase 'touchdetector' in the default `Snakefile`:
+
+.. code-block::
+
+    rule touchdetector:
+    message:
+        "Detect touches between neurites"
+
+    ...
+
+    shell:
+        bbp_env(
+            ...
+            slurm_env='touchdetector'
+        )
+
+Find the used value for ``slurm_env`` argument. This value must be used in `cluster.yaml`. For
+'touchdetector' it is the same string 'touchdetector', so `cluster.yaml` should contain an entry
 like:
 
 .. code-block:: yaml
@@ -231,9 +249,9 @@ like:
         jobname: td
         salloc: '-A proj68 -p prod --constraint=cpu -n100 --time 1:00:00'
 
-`jobname` key is optional (if omitted, Slurm job will be given some default name).
-
-Sometimes it can be convenient to use multi-line string for `salloc` key:
+``jobname`` key is optional (if omitted, Slurm job will be given some default name). ``salloc``
+specifies the necessary contraints. Sometimes it can be convenient to use multi-line string for
+``salloc`` key:
 
 .. code-block:: yaml
 
