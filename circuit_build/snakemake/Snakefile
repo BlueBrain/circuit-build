@@ -46,7 +46,7 @@ def build_modules():
         'jinja2':
             (SPACK_MODULEPATH, ['archive/2020-02', 'python-dev/0.3']),
         'parquet-converters':
-            (SPACK_MODULEPATH, ['archive/2020-05', 'parquet-converters/0.5.5']),
+            (SPACK_MODULEPATH, ['archive/2020-09', 'parquet-converters/0.5.7']),
         'placement-algorithm':
             (SPACK_MODULEPATH, ['archive/2020-08', 'placement-algorithm/2.1.0']),
         'spykfunc':
