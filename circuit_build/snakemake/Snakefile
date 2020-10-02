@@ -40,7 +40,7 @@ NIX_MODULEPATH = '/nix/var/nix/profiles/per-user/modules/bb5-x86_64/modules-all/
 def build_modules():
     modules = {
         "brainbuilder":
-            (SPACK_MODULEPATH, ['unstable', 'brainbuilder/0.14.0']),
+            (SPACK_MODULEPATH, ['archive/2020-08', 'brainbuilder/0.14.0']),
         'flatindexer':
             (NIX_MODULEPATH, ['nix/hpc/flatindexer/1.8.12']),
         'jinja2':
@@ -48,7 +48,7 @@ def build_modules():
         'parquet-converters':
             (SPACK_MODULEPATH, ['archive/2020-05', 'parquet-converters/0.5.5']),
         'placement-algorithm':
-            (SPACK_MODULEPATH, ['unstable', 'placement-algorithm/2.1.0']),
+            (SPACK_MODULEPATH, ['archive/2020-08', 'placement-algorithm/2.1.0']),
         'spykfunc':
             (SPACK_MODULEPATH, ['archive/2020-06', 'spykfunc/0.15.6']),
         'synapsetool':
