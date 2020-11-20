@@ -58,7 +58,7 @@ def test_modules(subprocess_mock):
     assert args == [
         'snakemake', '--jobs', '8', '--printshellcmds',
         '--config', f'bioname={TEST_DATA_DIR}',
-        f"modules=('{custom_module1}', '{custom_module2}')",
+        f"modules={custom_module1},{custom_module2}",
         '--snakefile', SNAKE_FILE,
         '--cluster-config', str(TEST_DATA_DIR / 'cluster.yaml')]
 

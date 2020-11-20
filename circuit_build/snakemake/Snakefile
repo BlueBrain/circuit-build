@@ -58,6 +58,7 @@ def build_modules():
     }
     custom_modules = config.get('modules')
     if custom_modules:
+        custom_modules = custom_modules.split(',')
         for module in custom_modules:
             parts = module.split(':')
             assert 2 <= len(parts) <= 3, 'Invalid custom spack module description ' + module

@@ -41,7 +41,7 @@ def run(ctx, cluster_config: str, bioname: str, modules: list, snakefile: str = 
     def _build_config_args():
         config_args = ['--config', f'bioname={bioname}']
         if modules:
-            config_args += [f'modules={modules}']
+            config_args += [f'modules={",".join(modules)}']
         return config_args
 
     args = ctx.args
