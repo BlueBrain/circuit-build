@@ -4,6 +4,7 @@ Changelog
 Version 3.1.2 (2020-10-02)
 --------------------------
 - Update parquet-converters module to 0.5.7
+- Add DAG images to the documentation
 
 Version 3.1.1 (2020-09-02)
 --------------------------

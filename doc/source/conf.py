@@ -25,6 +25,7 @@ import circuit_build
 extensions = [
     'sphinx.ext.todo',
     'sphinx.ext.mathjax',
+    'sphinx.ext.graphviz',
 ]
 
 # General information about the project.
@@ -183,3 +184,6 @@ epub_copyright = u'2018, NSE team'
 
 # Allow duplicate toc entries.
 #epub_tocdup = True
+
+# -- GraphViz configuration ----------------------------------
+graphviz_output_format = 'svg'

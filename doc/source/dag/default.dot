@@ -1,0 +1,22 @@
+digraph snakemake_dag {
+    graph[bgcolor=white, margin=0];
+    node[shape=box, style=rounded, fontname=sans,                 fontsize=10, penwidth=2];
+    edge[penwidth=2, color=grey];
+	0[label = "default", color = "0.36 0.6 0.85", style="rounded"];
+	1[label = "circuitconfig_base", color = "0.59 0.6 0.85", style="rounded"];
+	2[label = "assign_emodels_per_type\next: h5", color = "0.08 0.6 0.85", style="rounded"];
+	3[label = "assign_morphologies", color = "0.65 0.6 0.85", style="rounded"];
+	4[label = "place_cells", color = "0.26 0.6 0.85", style="rounded"];
+	5[label = "init_cells", color = "0.51 0.6 0.85", style="rounded"];
+	6[label = "choose_morphologies", color = "0.53 0.6 0.85", style="rounded"];
+	7[label = "targetgen", color = "0.48 0.6 0.85", style="rounded"];
+	1 -> 0
+	2 -> 0
+	7 -> 0
+	3 -> 2
+	4 -> 3
+	6 -> 3
+	5 -> 4
+	4 -> 6
+	2 -> 7
+}            
