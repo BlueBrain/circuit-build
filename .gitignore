@@ -1,2 +1,7 @@
 doc/build
 .tox/
+.idea
+.snakemake
+*.egg-info
+*.pyc
+__pycache__

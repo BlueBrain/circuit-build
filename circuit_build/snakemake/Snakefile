@@ -58,7 +58,9 @@ def build_modules():
     }
     custom_modules = config.get('modules')
     if custom_modules:
-        custom_modules = custom_modules.split(',')
+        # Custom modules can be configured using one of:
+        # - configuration file MANIFEST.yaml -> list of strings from yaml
+        # - command line parameter --config -> list of strings from json for backward compatibility
         for module in custom_modules:
             parts = module.split(':')
             assert 2 <= len(parts) <= 3, 'Invalid custom spack module description ' + module

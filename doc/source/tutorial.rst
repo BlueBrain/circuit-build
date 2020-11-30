@@ -91,13 +91,22 @@ This option is multiple. It means you can use it multiple times to specify multi
 
 .. code-block:: bash
 
-    $ circuit-build run -m custom_module1:module_name1:module/path -m custom_module2:module_name21,module_name22/0.1 ...
+    $ circuit-build run -m custom_module1:module_name1:module_path -m custom_module2:module_name21,module_name22/0.1 ...
 
 The syntax is <*custom module name*>:<*modules list*>:<*optional module path*>.
-*custom module name* - module name that is used as a key in ``MODULES`` variable of the default ``Snakefile``.
-*modules list* - list of actual modules to load separated by a comma.
-*optional module path* - module path where to search modules of *modules list*. It can be omitted
-then ``SPACK_MODULEPATH`` of the default ``Snakefile`` is used.
+
+- *custom module name* - module name that is used as a key in ``MODULES`` variable of the default ``Snakefile``.
+- *modules list* - list of actual modules to load separated by a comma.
+- *optional module path* - module path where to search modules of *modules list*. It can be omitted
+  then ``SPACK_MODULEPATH`` of the default ``Snakefile`` is used.
+
+Alternatively, you can specify the custom modules inside ``MANIFEST.yaml`` as a list of strings using the same format.
+
+::
+
+    modules:
+      - custom_module1:module_name1:module_path
+      - custom_module2:module_name21,module_name22/0.1
 
 
 Cell collection

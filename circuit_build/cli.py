@@ -3,6 +3,7 @@ from pathlib import Path
 import subprocess
 import click
 import pkg_resources
+import json
 
 
 @click.group()
@@ -20,28 +21,45 @@ def _index(args, *opts):
 
 
 @cli.command(context_settings=dict(ignore_unknown_options=True, allow_extra_args=True))
-@click.option('-u', '--cluster-config', required=True, type=click.Path(exists=True, dir_okay=False))
-@click.option('--bioname', required=True, type=click.Path(exists=True, file_okay=False))
-@click.option('-m', '--module', 'modules', multiple=True, required=False)
-@click.option('-s', '--snakefile', required=False, type=click.Path(exists=True, dir_okay=False))
+@click.option(
+    '-u', '--cluster-config', required=True, type=click.Path(exists=True, dir_okay=False),
+    help='Path to cluster config.',
+)
+@click.option(
+    '--bioname', required=True, type=click.Path(exists=True, file_okay=False),
+    help='Path to `bioname` folder of a circuit.',
+)
+@click.option(
+    '-m', '--module', 'modules', multiple=True, required=False,
+    help='''
+Modules to be overwritten. Multiple configurations are allowed, and each one
+should be given in the format:\n
+    module_env:module_name/module_version[,module_name/module_version...][:module_path]\n
+Examples:\n
+    brainbuilder:archive/2020-08,brainbuilder/0.14.0\n
+    touchdetector:archive/2020-05,touchdetector/5.4.0,hpe-mpi\n
+    spykfunc:archive/2020-06,spykfunc/0.15.6:/gpfs/bbp.cscs.ch/ssd/apps/hpc/jenkins/modules/all
+    '''
+)
+@click.option(
+    '-s', '--snakefile', required=False, type=click.Path(exists=True, dir_okay=False),
+    default=pkg_resources.resource_filename(__name__, 'snakemake/Snakefile'), show_default=True,
+    help='Path to workflow definition in form of a snakefile.',
+)
 @click.pass_context
-def run(ctx, cluster_config: str, bioname: str, modules: list, snakefile: str = None):
+def run(ctx, cluster_config: str, bioname: str, modules: list, snakefile: str):
     """Run a circuit-build task.
 
     Any additional snakemake arguments or options can be passed at the end of this command's call.
-
-    Args:
-        ctx: context for collecting all unrecognized options and pass them further to snakemake
-        cluster_config: path to cluster config
-        bioname: path to 'bioname' folder of a circuit
-        modules: spack modules that are overwritten by a user
-        snakefile: path to the sonata circuit config file. By default
     """
 
     def _build_config_args():
         config_args = ['--config', f'bioname={bioname}']
         if modules:
-            config_args += [f'modules={",".join(modules)}']
+            # serialize the list of strings with json to be backward compatible with Snakemake:
+            # snakemake >= 5.28.0 loads config using yaml.BaseLoader,
+            # snakemake < 5.28.0 loads config using eval.
+            config_args += [f'modules={json.dumps(modules)}']
         return config_args
 
     args = ctx.args
