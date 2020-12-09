@@ -1,4 +1,5 @@
 import datetime
+import warnings
 
 CIRCUIT_DIR = '.'
 
@@ -6,6 +7,17 @@ BIONAME = os.path.realpath(os.path.expanduser(config.get('bioname', 'bioname')))
 
 def bioname_path(filename):
     return os.path.join(BIONAME, filename)
+
+def validate_node_population_name(name):
+    allowed_parts = {'ncx', 'neocortex', 'hippocampus', 'thalamus', 'mousify'}
+    allowed_types = {'neurons', 'astrocytes', 'projections'}
+    msg = 'node_population_name in MANIFEST.yaml must fit the pattern "<part>_<type>" where' \
+          f'<part> can take values: {allowed_parts}, <type> can take values: {allowed_types}.'
+    name = name.split('_')
+    if len(name) != 2:
+        warnings.warn(msg)
+    elif name[0] not in allowed_parts or name[1] not in allowed_types:
+        warnings.warn(msg)
 
 # Load MANIFEST.yaml into workflow config
 workflow.configfile(bioname_path('MANIFEST.yaml'))
@@ -16,6 +28,8 @@ MORPHDB = bioname_path("extNeuronDB.dat")
 ATLAS = config['common']['atlas']
 ATLAS_CACHE_DIR = ".atlas"
 
+NODE_POPULATION_NAME = config['common'].get('node_population_name', 'All')
+validate_node_population_name(NODE_POPULATION_NAME)
 MORPH_RELEASE = config['common']['morph_release']
 EMODEL_RELEASE = config['common'].get('emodel_release')
 EMODEL_RELEASE_MECOMBO = None
@@ -189,7 +203,7 @@ rule circuitconfig_functional:
 
     input:
         NRN_FUNCTIONAL_DIR + '/edges.sonata',
-        'sonata/networks/nodes/All/nodes.h5'
+        f'sonata/networks/nodes/{NODE_POPULATION_NAME}/nodes.h5'
 
     output:
         'CircuitConfig'
@@ -197,7 +211,7 @@ rule circuitconfig_functional:
     shell:
         build_circuit_config(
             nrn_path=NRN_FUNCTIONAL_DIR + '/edges.sonata',
-            cell_library_file=os.path.abspath(os.path.join(CIRCUIT_DIR, 'sonata/networks/nodes/All/nodes.h5')))
+            cell_library_file=os.path.abspath(os.path.join(CIRCUIT_DIR, f'sonata/networks/nodes/{NODE_POPULATION_NAME}/nodes.h5')))
 
 
 rule circuitconfig_structural:
@@ -225,7 +239,7 @@ rule init_cells:
         bbp_env(
             'brainbuilder',
             ['python -c "from voxcell import CellCollection;',
-                "cells = CellCollection('All');",
+                "cells = CellCollection('{NODE_POPULATION_NAME}');",
                 "cells.save('{output}');",
               '"'])
 
@@ -396,7 +410,7 @@ rule provide_me_info:
         'circuit.h5'
 
     output:
-        'sonata/networks/nodes/All/nodes.h5'
+        f'sonata/networks/nodes/{NODE_POPULATION_NAME}/nodes.h5'
 
     shell:
         bbp_env(
@@ -419,7 +433,7 @@ rule touchdetector:
         "Detect touches between neurites"
 
     input:
-        neurons = 'sonata/networks/nodes/All/nodes.h5',
+        neurons = f'sonata/networks/nodes/{NODE_POPULATION_NAME}/nodes.h5',
 
     output:
         touch(TOUCHES_DIR + '/_SUCCESS')
@@ -437,8 +451,8 @@ rule touchdetector:
                     "{TOUCHES_DIR}",
                 "--touchspace=" +
                     config.get('touchdetector', {}).get("touchspace", "axodendritic"),
-                "--from {input[neurons]} All",
-                "--to {input[neurons]} All",
+                "--from {input[neurons]} {NODE_POPULATION_NAME}",
+                "--to {input[neurons]} {NODE_POPULATION_NAME}",
                 "{BUILDER_RECIPE}",
                 "{MORPH_RELEASE}/h5v1",
             ],
@@ -511,8 +525,8 @@ def run_spykfunc(rule, nrn_dir):
             "--spark-property %s" % p
                 for p in config.get(rule, {}).get('spark_property', [])
         ] + [
-            "--from", os.path.abspath("{input[neurons]}"), "All",
-            "--to", os.path.abspath("{input[neurons]}"), "All",
+            "--from", os.path.abspath("{input[neurons]}"), NODE_POPULATION_NAME,
+            "--to", os.path.abspath("{input[neurons]}"), NODE_POPULATION_NAME,
             BUILDER_RECIPE,
             MORPH_RELEASE + '/h5v1/',
             "--parquet", os.path.abspath("{input[touches]}/*.parquet"),
@@ -529,7 +543,7 @@ rule spykfunc_s2s:
         "Convert touches into synapses (S2S)"
 
     input:
-        neurons = 'sonata/networks/nodes/All/nodes.h5',
+        neurons = f'sonata/networks/nodes/{NODE_POPULATION_NAME}/nodes.h5',
         touches = TOUCHES_DIR + '/parquet'
 
     output:
@@ -550,7 +564,7 @@ rule spykfunc_s2f:
         "Prune touches and convert them into synapses (S2F)"
 
     input:
-        neurons = 'sonata/networks/nodes/All/nodes.h5',
+        neurons = f'sonata/networks/nodes/{NODE_POPULATION_NAME}/nodes.h5',
         touches = TOUCHES_DIR + '/parquet'
 
     output:
@@ -608,7 +622,7 @@ rule node_sets:
         "Generate SONATA node sets"
 
     input:
-        'sonata/networks/nodes/All/nodes.h5'
+        f'sonata/networks/nodes/{NODE_POPULATION_NAME}/nodes.h5'
 
     output:
         'sonata/node_sets.json'
@@ -625,7 +639,7 @@ rule node_sets:
                 ("--allow-empty"
                     if get_targetgen_config('allow_empty', False) else ""),
                 "--population",
-                    "All",
+                    NODE_POPULATION_NAME,
                 "--atlas",
                     ATLAS,
                 "--atlas-cache",
@@ -711,7 +725,7 @@ rule parquet_to_sonata:
 
     input:
         parquet = 'connectome/{nrn_dir}/spykfunc/circuit.parquet/_SUCCESS',
-        cells = 'sonata/networks/nodes/All/nodes.h5'
+        cells = f'sonata/networks/nodes/{NODE_POPULATION_NAME}/nodes.h5'
 
     output:
         'sonata/networks/edges/{nrn_dir}/All/edges.h5'
@@ -722,8 +736,8 @@ rule parquet_to_sonata:
             [
                 "parquet2hdf5",
                 "--format SONATA",
-                "--from {input[cells]} All",
-                "--to {input[cells]} All",
+                "--from {input[cells]} {NODE_POPULATION_NAME}",
+                "--to {input[cells]} {NODE_POPULATION_NAME}",
                 "-o {output}",
                 "connectome/{wildcards.nrn_dir}/spykfunc/circuit.parquet/*.parquet",
             ],
@@ -811,7 +825,7 @@ def write_network_config(nrn_dir):
             "--nodes-dir",
                 "networks/nodes",
             "--nodes",
-                "All",
+                NODE_POPULATION_NAME,
             "--node-sets",
                 "node_sets.json",
             "--edges-dir",
@@ -848,7 +862,7 @@ rule circuitconfig_struct_sonata:
 rule functional:
     input:
         'CircuitConfig',
-        'sonata/networks/nodes/All/nodes.h5',
+        f'sonata/networks/nodes/{NODE_POPULATION_NAME}/nodes.h5',
         'start.target',
         NRN_FUNCTIONAL_DIR + '/edges.sonata',
 
@@ -863,7 +877,7 @@ rule functional_all:
 rule functional_sonata:
     input:
         'sonata/circuit_config.json',
-        'sonata/networks/nodes/All/nodes.h5',
+        f'sonata/networks/nodes/{NODE_POPULATION_NAME}/nodes.h5',
         'sonata/node_sets.json',
         'sonata/networks/edges/functional/All/edges.h5',
 
@@ -887,6 +901,6 @@ rule structural:
 rule structural_sonata:
     input:
         'sonata/struct_circuit_config.json',
-        'sonata/networks/nodes/All/nodes.h5',
+        f'sonata/networks/nodes/{NODE_POPULATION_NAME}/nodes.h5',
         'sonata/node_sets.json',
         'sonata/networks/edges/structural/All/edges.h5',

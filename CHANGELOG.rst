@@ -4,6 +4,8 @@ Changelog
 Version 3.1.3 (2021-01-15)
 --------------------------
 - Use Sonata nodes for CellLibraryFile of generated CircuitConfig files
+- add a new property 'node_population_name' to 'common' of MANIFEST.yaml to specify name of nodes
+  population to produce
 
 Version 3.1.2 (2020-10-02)
 --------------------------

@@ -54,6 +54,7 @@ It starts with `common` section:
         mask: 'left-hemisphere'
         morph_release: /gpfs/bbp.cscs.ch/project/proj59/entities/morphologies/2017.10.31
         emodel_release: /gpfs/bbp.cscs.ch/project/proj64/entities/emodels/2017.11.03
+        node_population_name: 'All'
 
 and follows with a separate section for each phase.
 
@@ -96,6 +97,12 @@ Please refer to :ref:`ref-phases` for each phase config description.
 
     * ``hoc`` folder with model HOC templates
     * ``mecombo_emodel.tsv`` file with *me_combo* parameters
+
+
+**node_population_name**
+    Name of Sonata nodes population to produce. Optional. Dy default 'All' is used. Additionally
+    this name will be used for the parent folder of the produced Sonata nodes file under
+    `sonata/networks/nodes/` folder.
 
 
 An example of full ``MANIFEST.yaml``:
