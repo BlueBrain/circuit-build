@@ -17,13 +17,15 @@ from utils import tmp_cwd, edit_yaml, TEST_DIR, TEST_DATA_DIR, SNAKEMAKE_ARGS, S
 
 
 def test_functional_all():
-    # don't test for a custom node population in a separate test because it is too long to execute
-    test_name = 'custom_population_name'
+    # don't test for a custom population names in a separate test because it will too long to execute
+    node_population_name = 'node_population_name'
+    edge_population_name = 'edge_population_name'
     with tmp_cwd() as tmp_dir, tempfile.TemporaryDirectory(dir=TEST_DIR) as data_copy_dir:
         data_copy_dir = Path(data_copy_dir) / TEST_DATA_DIR.name
         shutil.copytree(TEST_DATA_DIR, data_copy_dir)
         with edit_yaml(data_copy_dir / 'MANIFEST.yaml') as manifest:
-            manifest['common']['node_population_name'] = test_name
+            manifest['common']['node_population_name'] = node_population_name
+            manifest['common']['edge_population_name'] = edge_population_name
 
         args = ['--bioname', str(data_copy_dir), '-u', str(data_copy_dir / 'cluster.yaml')]
         runner = CliRunner()
@@ -39,18 +41,26 @@ def test_functional_all():
         assert tmp_dir.joinpath('start.target').stat().st_size > 100
         assert f'CellLibraryFile circuit.mvd3' in (tmp_dir / 'CircuitConfig_nrn').open().read()
 
-        nodes_file = (tmp_dir / f'sonata/networks/nodes/{test_name}/nodes.h5').resolve()
+        nodes_file = (tmp_dir / f'sonata/networks/nodes/{node_population_name}/nodes.h5').resolve()
         assert f'CellLibraryFile {nodes_file}' in (tmp_dir / 'CircuitConfig').open().read()
         assert nodes_file.stat().st_size > 100
         with h5py.File(nodes_file, 'r') as h5f:
-            assert f'/nodes/{test_name}' in h5f
-        with h5py.File(tmp_dir / 'sonata/networks/edges/functional/All/edges.h5', 'r') as h5f:
-            assert test_name == h5f['/edges/default/source_node_id'].attrs['node_population']
-            assert test_name == h5f['/edges/default/target_node_id'].attrs['node_population']
+            assert f'/nodes/{node_population_name}' in h5f
+
+        edges_file = (tmp_dir / f'sonata/networks/edges/functional/{edge_population_name}/edges.h5').resolve()
+        assert edges_file.stat().st_size > 100
+        with h5py.File(edges_file, 'r') as h5f:
+            assert f'/edges/{edge_population_name}' in h5f
+        with h5py.File('connectome/functional/edges.h5', 'r') as h5f:
+            assert f'/edges/{edge_population_name}' in h5f
+
+        with h5py.File(edges_file, 'r') as h5f:
+            assert node_population_name == h5f[f'/edges/{edge_population_name}/source_node_id'].attrs['node_population']
+            assert node_population_name == h5f[f'/edges/{edge_population_name}/target_node_id'].attrs['node_population']
         with tmp_dir.joinpath('sonata/circuit_config.json').open('r') as f:
             config = json.load(f)
-            assert config['networks']['nodes'][0]['nodes_file'] \
-                == f'$NETWORK_NODES_DIR/{test_name}/nodes.h5'
+            assert config['networks']['nodes'][0]['nodes_file'] == f'$NETWORK_NODES_DIR/{node_population_name}/nodes.h5'
+            assert config['networks']['edges'][0]['edges_file'] == f'$NETWORK_EDGES_DIR/{edge_population_name}/edges.h5'
 
 
 def test_no_emodel():

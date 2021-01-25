@@ -7,6 +7,9 @@ Version 3.1.3 (2021-01-15)
 - add a new property 'node_population_name' to 'common' of MANIFEST.yaml to specify name of nodes
   population to produce
 - Require bioname folder to be under git
+- add a new property 'edge_population_name' to 'common' of MANIFEST.yaml to specify name of edges
+  population to produce
+- rename 'edges.sonata' to 'edges.h5' in all rules of Snakefile
 
 Version 3.1.2 (2020-10-02)
 --------------------------
