@@ -8,11 +8,13 @@ The following parts should define a *reproducible* circuit release:
  * external `entities`, like morphology release or electrical model release
  * workflow definition, at the moment based on `Snakemake <http://snakemake.readthedocs.io/en/stable/index.html>`_
 
-Eventually `bioname` and `entities` would become `Nexus`-stored entities in a strict sense (i.e. validated against some schema, immutable, accessible by URL). At the moment though these are files stored at specified paths on GPFS.
+Eventually `bioname` and `entities` would become `Nexus`-stored entities in a strict sense (i.e.
+validated against some schema, immutable, accessible by URL). At the moment these are files
+stored at specified paths on GPFS. Since version 3.1.3 `bioname` **must be under GIT version
+control.**
 
-Let us describe the contents of `bioname` in more detail now.
-
-For a full example of `bioname` see also: :ref:`ref-faq-bioname`
+Let us describe the contents of `bioname` in more detail now. For a full example of `bioname` see
+also: :ref:`ref-faq-bioname`
 
 
 Bioname

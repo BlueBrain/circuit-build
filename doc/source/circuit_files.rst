@@ -11,19 +11,29 @@ A typical circuit release folder would look like:
 ::
 
     CircuitConfig
+    CircuitConfig_base
+    CircuitConfig_nrn
     circuit.h5 or circuit.mvd3
+    sonata/
+      networks/
+        nodes/
+          <nodes Sonata population name, by default 'All'>/
+            nodes.h5
+        edges/
+          functional/
+            <edges Sonata population name, by default 'All'>/
+              edges.h5
     connectome/
       functional/
+        edges.h5
         nrn.h5
-        nrn_efferent.h5
-        nrn_positions.h5
-        nrn_positions_efferent.h5
-        nrn_summary.h5
         start.target
         SYNAPSE_index.dat
         SYNAPSE_index.idx
         SYNAPSE_payload.dat
+        spykfunc
     start.target
+    morphologies.tsv
     SEGMENT_index.dat
     SEGMENT_index.idx
     SEGMENT_payload.dat
@@ -34,7 +44,9 @@ A typical circuit release folder would look like:
   We'd recommend to avoid modifying them manually unless REALLY required.
 
 **CircuitConfig**
-  `BlueConfig <https://bbpteam.epfl.ch/documentation/Circuit%20Documentation-0.0.1/blueconfig.html>`_ file defining "static" part of the circuit (path to cell / synapse collection, morphology release etc), e.g.:
+
+`BlueConfig`_ file defining "static" part of the circuit (path to cell / synapse collection,
+morphology release etc). An example:
 
   ::
 
@@ -50,16 +62,50 @@ A typical circuit release folder would look like:
       Atlas http://voxels.nexus.apps.bbp.epfl.ch/api/analytics/atlas/releases/77831ACA-6198-4AA0-82EF-D0475A4E0647
     }
 
+**CircuitConfig_base**
+
+Variation of `CircuitConfig` for a circuit without connectome.
+
+**CircuitConfig_nrn**
+
+Variation of `CircuitConfig` for a functional circuit.
 
 **circuit.h5** or **circuit.mvd3**
-  File with cell properties either in `SONATA <https://github.com/AllenInstitute/sonata/blob/master/docs/SONATA_DEVELOPER_GUIDE.md>`_
-  or `MVD3 <https://bbpteam.epfl.ch/documentation/Circuit%20Documentation-0.0.1/mvd3.html>`_ format.
 
-**nrn*.h5**
-  `NRN <https://bbpteam.epfl.ch/project/spaces/pages/viewpage.action?pageId=10919530>`_ files with synapse properties.
+File with cell properties either in `SONATA`_ or `MVD3`_ format. Such file file does not contain
+morpho-electrical cell properties.
+
+**nodes.h5** from sonata/
+
+File with cell properties in `SONATA`_ format including morpho-electrical data
+
+**edges.h5** from sonata/
+
+File with synapse properties in `SONATA`_ format
+
+**edges.h5** from connectome/
+
+It is a symlink to `edges.h5` from sonata/
+
+**nrn.h5** from connectome/
+
+File with synapse properties in `NRN`_ format
+
+**start.target** from connectome/
+
+A symlink to the same file the root folder
+
+**[SEGMENT]_[index|payload]** from connectome/
+
+Segment `spatial index`_
+
+**spykfunc** from connectome/
+
+Auxiliary folder for temporary system files
 
 **start.target**
-  Text file defining cell *targets* (i.e. named collections of cell GIDs), e.g.:
+
+Text file defining cell *targets* (i.e. named collections of cell GIDs), e.g.:
 
   ::
 
@@ -74,8 +120,12 @@ A typical circuit release folder would look like:
     }
 
 
-**[SEGMENT|SYNAPSE]_[index|payload]**
-  Segment / synapse `spatial index <https://bbpteam.epfl.ch/project/spaces/display/BBPDIAS/BBP-DIAS+Spatial+Indexing+of+Microcircuits>`_
+**morphologies.tsv**
+
+Auxiliary file for building cells properties file
+
+**[SYNAPSE]_[index|payload]**
+  Synapse `spatial index`_
 
 
 Experimental
@@ -104,3 +154,10 @@ For instance, one row from ``/cells`` table can look like:
 +-----+------------------+--------------------------------------+-------------------------------------+
 
 Please refer to :ref:`subcellular phase <ref-phase-subcellular>` for the description of ``/library`` content.
+
+
+.. _BlueConfig: https://bbpteam.epfl.ch/documentation/Circuit%20Documentation-0.0.1/blueconfig.html
+.. _SONATA: https://github.com/AllenInstitute/sonata/blob/master/docs/SONATA_DEVELOPER_GUIDE.md
+.. _MVD3: https://bbpteam.epfl.ch/documentation/Circuit%20Documentation-0.0.1/mvd3.html
+.. _NRN: https://bbpteam.epfl.ch/project/spaces/pages/viewpage.action?pageId=10919530
+.. _spatial index: https://bbpteam.epfl.ch/project/spaces/display/BBPDIAS/BBP-DIAS+Spatial+Indexing+of+Microcircuits
