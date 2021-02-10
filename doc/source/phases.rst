@@ -52,8 +52,12 @@ Parameters
 choose_morphologies
 -------------------
 
-Choose morphologies for cell positions using `placement_algorithm`_ ``choose-morphologies``.
+If the ``synthesis`` parameter in the ``common`` section is ``False``, choose morphologies for cell positions using `placement_algorithm`_ ``choose-morphologies``.
 This creates the ``morphologies.tsv`` described `here <https://bbpteam.epfl.ch/documentation/projects/placement-algorithm/latest/index.html#choose-morphologies>`_.
+
+If the ``synthesis`` parameter in the ``common`` section is ``True``, pick axons for each position using "placement hints" approach.
+In this case it creates the file ``axon-morphologies.tsv``.
+
 
 .. tip::
 
@@ -79,6 +83,19 @@ Parameters
 ~~~~~~~~~~
 
 .. jsonschema:: ../../circuit_build/snakemake/schemas/MANIFEST.yaml#/properties/assign_morphologies
+
+
+.. _ref-phase-synthesize-morphologies:
+
+synthesize_morphologies
+-----------------------
+
+Synthesize somas and dendritic trees; graft pre-chosen axons.
+
+Parameters
+~~~~~~~~~~
+
+.. jsonschema:: ../../circuit_build/snakemake/schemas/MANIFEST.yaml#/properties/synthesize_morphologies
 
 
 .. _ref-phase-assign-emodels:

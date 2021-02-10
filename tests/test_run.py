@@ -6,19 +6,19 @@ from pathlib import Path
 from subprocess import CalledProcessError
 
 import h5py
-
 import pytest
 from click.testing import CliRunner
-from circuit_build.cli import run
-
 from utils import (
     SNAKEFILE,
     SNAKEMAKE_ARGS,
     TEST_DATA_DIR,
+    TEST_DATA_DIR_SYNTH,
     TEST_DIR,
     edit_yaml,
     tmp_cwd,
 )
+
+from circuit_build.cli import run
 
 
 def test_functional_all():
@@ -56,6 +56,10 @@ def test_functional_all():
 
         edges_file = (tmp_dir / f'sonata/networks/edges/functional/{edge_population_name}/edges.h5').resolve()
         assert edges_file.stat().st_size > 100
+        # test output from choose_morphologies
+        assert Path("morphologies.tsv").stat().st_size > 100
+        # test output from synthesize_morphologies
+        assert Path("circuit.morphologies.h5").stat().st_size > 100
         with h5py.File(edges_file, 'r') as h5f:
             assert f'/edges/{edge_population_name}' in h5f
             assert node_population_name == h5f[f'/edges/{edge_population_name}/source_node_id'].attrs['node_population']
@@ -64,6 +68,30 @@ def test_functional_all():
             config = json.load(f)
             assert config['networks']['nodes'][0]['nodes_file'] == f'$NETWORK_NODES_DIR/{node_population_name}/nodes.h5'
             assert config['networks']['edges'][0]['edges_file'] == f'$NETWORK_EDGES_DIR/{edge_population_name}/edges.h5'
+
+
+def test_synthesize_morphologies():
+    node_population_name = 'node_population_name'
+    edge_population_name = 'edge_population_name'
+    with tempfile.TemporaryDirectory(dir=TEST_DIR) as data_copy_dir:
+        data_copy_dir = Path(data_copy_dir) / TEST_DATA_DIR_SYNTH.name
+        shutil.copytree(TEST_DATA_DIR_SYNTH, data_copy_dir)
+        with edit_yaml(data_copy_dir / 'MANIFEST.yaml') as manifest:
+            manifest['common']['node_population_name'] = node_population_name
+            manifest['common']['edge_population_name'] = edge_population_name
+
+        args = ['--bioname', str(data_copy_dir), '-u', str(data_copy_dir / 'cluster.yaml')]
+        runner = CliRunner()
+        result = runner.invoke(
+            run,
+            args + ['synthesize_morphologies'],
+            catch_exceptions=False,
+        )
+        assert result.exit_code == 0
+        # test output from choose_morphologies
+        assert Path("axon-morphologies.tsv").stat().st_size > 100
+        # test output from synthesize_morphologies
+        assert Path("circuit.morphologies.h5").stat().st_size > 100
 
 
 def test_no_emodel():

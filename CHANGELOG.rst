@@ -1,12 +1,12 @@
 Changelog
 =========
 
-Version 3.2.0 (2021-06-01)
+Version 3.2.0 (2021-06-14)
 --------------------------
-- move to SONATA only:
-  - nodes and edges only output in SONATA format, under the `sonata` directory
-  - the ``functional`` & ``structural`` rules create a CircuitConfig and start.target files, but with SONATA contents
-- the following rules were removed:
+- Move to SONATA only:
+    - nodes and edges only output in SONATA format, under the `sonata` directory
+    - the ``functional`` & ``structural`` rules create a CircuitConfig and start.target files, but with SONATA contents
+- The following rules were removed:
     - `functional_nrn`
     - `functional_sonata`
     - `structural_sonata`
@@ -21,6 +21,7 @@ Version 3.2.0 (2021-06-01)
 - Replace nose with pytest in unit tests.
 - Add jsonschema to validate MANIFEST.yaml and keep the documentation in sync.
 - Remove Projection section from CircuitConfig because the syntax is not up to date.
+- Added the ability to turn on synthesis.
 
 Version 3.1.4 (2021-05-05)
 --------------------------

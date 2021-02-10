@@ -62,6 +62,7 @@ It starts with a `common` section:
         emodel_release: /gpfs/bbp.cscs.ch/project/proj64/entities/emodels/2017.11.03
         node_population_name: 'All'
         edge_population_name: 'All'
+        synthesis: True
 
 
 .. note::

@@ -148,11 +148,11 @@ rule place_cells:
 
 rule choose_morphologies:
     message:
-        "Choose morphologies using 'placement hints' approach"
+        "Choose morphologies/axons using 'placement hints' approach"
     input:
         "circuit.somata.h5",
     output:
-        "morphologies.tsv",
+        ctx.if_synthesis("axon-morphologies.tsv", "morphologies.tsv"),
     log:
         ctx.log_path("choose_morphologies"),
     shell:
@@ -167,7 +167,7 @@ rule choose_morphologies:
                 "--atlas-cache",
                 ctx.ATLAS_CACHE_DIR,
                 "--morphdb",
-                ctx.MORPHDB,
+                ctx.if_synthesis(ctx.SYNTHESIZE_MORPHDB, ctx.MORPHDB),
                 "--rules",
                 ctx.bioname_path("placement_rules.xml"),
                 "--annotations",
@@ -178,7 +178,19 @@ rule choose_morphologies:
                 ctx.conf.get(["choose_morphologies", "seed"]),
                 "--output",
                 "{output}",
-            ],
+            ]
+            + ctx.if_synthesis(
+                [
+                    "--segment-type",
+                    "axon",
+                    ctx.format_if(
+                        "--scales {}",
+                        ctx.conf.get(["choose_morphologies", "scales"]),
+                        func=lambda x: " ".join(map(str, x)),
+                    ),
+                ],
+                [],
+            ),
             slurm_env="choose_morphologies",
         )
 
@@ -212,6 +224,74 @@ rule assign_morphologies:
                 "{output}",
             ],
             slurm_env="assign_morphologies",
+        )
+
+
+rule synthesize_morphologies:
+    message:
+        "Synthesize morphologies"
+    input:
+        cells="circuit.somata.h5",
+        morph="axon-morphologies.tsv",
+    output:
+        "circuit.morphologies.h5",
+    log:
+        ctx.log_path("synthesize_morphologies"),
+    shell:
+        ctx.bbp_env(
+            "region-grower",
+            [
+                "region-grower",
+                "synthesize-morphologies",
+                "--input-cells",
+                "{input[cells]}",
+                "--atlas",
+                ctx.ATLAS,
+                "--atlas-cache",
+                ctx.ATLAS_CACHE_DIR,
+                "--max-drop-ratio",
+                ctx.conf.get(["synthesize_morphologies", "max_drop_ratio"], default=0.0),
+                "--out-cells",
+                "{output}",
+                "--tmd-distributions",
+                ctx.bioname_path("tmd_distributions.json"),
+                "--tmd-parameters",
+                ctx.bioname_path("tmd_parameters.json"),
+                "--morph-axon",
+                "{input[morph]}",
+                "--base-morph-dir",
+                Path(ctx.MORPH_RELEASE, "h5v1"),
+                "--seed",
+                ctx.conf.get(["synthesize_morphologies", "seed"], default=0),
+                "--out-apical",
+                Path(ctx.SYNTHESIZE_MORPH_DIR, "apical.yaml"),
+                "--out-apical-nrn-sections",
+                Path(ctx.SYNTHESIZE_MORPH_DIR, "apical_nrn_isec.yaml"),
+                "--out-morph-dir",
+                ctx.SYNTHESIZE_MORPH_DIR,
+                "--max-files-per-dir",
+                ctx.conf.get(["synthesize_morphologies", "max_files_per_dir"], default=1024),
+                "--out-morph-ext h5",
+                "--out-morph-ext asc",
+                "--with-mpi",
+                ctx.format_if(
+                    "--scaling-jitter-std {}",
+                    ctx.conf.get(["synthesize_morphologies", "scaling_jitter_std"]),
+                ),
+                ctx.format_if(
+                    "--rotational-jitter-std {}",
+                    ctx.conf.get(["synthesize_morphologies", "rotational_jitter_std"]),
+                ),
+                ctx.format_if(
+                    "--out-debug-data {}",
+                    ctx.conf.get(["synthesize_morphologies", "out_debug_data"]),
+                ),
+                ctx.format_if(
+                    "--log-level {}",
+                    ctx.conf.get(["synthesize_morphologies", "log_level"]),
+                ),
+            ],
+            slurm_env="synthesize_morphologies",
         )
 
 
@@ -294,7 +374,7 @@ rule touchdetector:
                 "--to {input[neurons]}",
                 ctx.NODE_POPULATION_NAME,
                 ctx.BUILDER_RECIPE,
-                f"{ctx.MORPH_RELEASE}/h5v1",
+                ctx.if_synthesis(ctx.SYNTHESIZE_MORPH_DIR, ctx.MORPH_RELEASE + "/h5v1/"),
             ],
             slurm_env="touchdetector",
         )

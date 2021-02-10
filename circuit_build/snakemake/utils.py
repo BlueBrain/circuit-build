@@ -55,6 +55,10 @@ class Context:
         self.BUILDER_RECIPE = self.bioname_path("builderRecipeAllPathways.xml")
         self.MORPHDB = self.bioname_path("extNeuronDB.dat")
 
+        self.SYNTHESIZE = self.conf.get(["common", "synthesis"], default=False)
+        self.SYNTHESIZE_MORPH_DIR = "morphologies"
+        self.SYNTHESIZE_MORPHDB = self.bioname_path("neurondb-axon.dat")
+
         self.ATLAS = self.conf.get(["common", "atlas"])
         self.ATLAS_CACHE_DIR = ".atlas"
 
@@ -65,7 +69,7 @@ class Context:
             self.conf.get(["common", "edge_population_name"])
         )
         self.MORPH_RELEASE = self.conf.get(["common", "morph_release"])
-        self.EMODEL_RELEASE = self.conf.get(["common", "emodel_release"])
+        self.EMODEL_RELEASE = self.if_synthesis("", self.conf.get(["common", "emodel_release"]))
         self.EMODEL_RELEASE_MECOMBO = None
         self.EMODEL_RELEASE_HOC = None
         if self.EMODEL_RELEASE:
@@ -109,15 +113,15 @@ class Context:
                 ),
                 "placement-algorithm": (
                     self.SPACK_MODULEPATH,
-                    ["archive/2020-08", "placement-algorithm/2.1.0"],
+                    ["archive/2021-03", "placement-algorithm/2.1.2"],
+                ),
+                "region-grower": (
+                    self.SPACK_MODULEPATH,
+                    ["unstable", "py-region-grower/0.2.3"],
                 ),
                 "spykfunc": (
                     self.SPACK_MODULEPATH,
                     ["archive/2020-06", "spykfunc/0.15.6"],
-                ),
-                "synapsetool": (
-                    self.SPACK_MODULEPATH,
-                    ["archive/2020-05", "synapsetool/0.5.9"],
                 ),
                 "touchdetector": (
                     self.SPACK_MODULEPATH,
@@ -128,6 +132,9 @@ class Context:
 
     def bioname_path(self, filename):
         return str(Path(self.BIONAME, filename))
+
+    def if_synthesis(self, synth_value, no_synth_value):
+        return synth_value if self.SYNTHESIZE else no_synth_value
 
     @staticmethod
     def format_if(template, value, func=None):
@@ -300,7 +307,7 @@ class Context:
                 "jinja2 --strict",
                 f"-D CIRCUIT_PATH={os.path.abspath(self.CIRCUIT_DIR)}",
                 f"-D NRN_PATH={os.path.abspath(nrn_path)}",
-                f"-D MORPH_PATH={self.MORPH_RELEASE}",
+                f"-D MORPH_PATH={self.if_synthesis(self.SYNTHESIZE_MORPH_DIR, self.MORPH_RELEASE)}",
                 f"-D ME_TYPE_PATH={self.EMODEL_RELEASE_HOC or 'SPECIFY_ME'}",
                 self.format_if("-D ME_COMBO_INFO_PATH={}", self.EMODEL_RELEASE_MECOMBO),
                 f"-D BIONAME={self.BIONAME}",
@@ -401,7 +408,7 @@ class Context:
                 os.path.abspath("{input[neurons]}"),
                 self.NODE_POPULATION_NAME,
                 self.BUILDER_RECIPE,
-                self.MORPH_RELEASE + "/h5v1/",
+                self.if_synthesis(self.SYNTHESIZE_MORPH_DIR, self.MORPH_RELEASE + "/h5v1/"),
                 "--parquet",
                 os.path.abspath("{input[touches]}/*.parquet"),
             ],

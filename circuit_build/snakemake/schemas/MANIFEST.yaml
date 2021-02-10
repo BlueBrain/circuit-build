@@ -78,6 +78,29 @@ properties:
           `sonata/networks/edges/` folder.
         type: string
         example: 'neocortex_neurons__chemical_synapse'
+      synthesis:
+        description: |
+          If ``true``, create synthesized dendrites using `region-grower`'s `synthesize-morphologies` functionality.
+             This happens after placing axons in space based on the placement hints method.
+
+          .. note::
+
+             1. ``extNeuronDB.dat`` is no longer used.
+
+                Instead, one should provide ``neurondb-axon.dat`` file with a list of morphologies to be used as "axon donors" for synthesized dendritic trees.
+
+             2. Synthesis requires two additional files in ``bioname`` folder:
+
+                * ``tmd_distributions.json``
+                * ``tmd_parameters.json``
+
+             3. The special value ``FAST-HEMISPHERE`` can be used in place of dataset name when defining
+                :ref:`atlas_property <ref-phase-place-cells>` in ``place_cells`` configuration.
+
+                Unlike regular atlas-based property, no volumetric dataset would be queried;
+                cell property values would be chosen based on Z-coordinate: ``(z < 5700) ? "left" : "right")``.
+        type: boolean
+        default: false
 
   place_cells:
     type: object
@@ -176,6 +199,15 @@ properties:
           Pseudo-random generator seed.
         type: integer
         example: 0
+      scales:
+        description: |
+          | Scaling factors to try for each axon, used only for `synthesis`.
+          | Optional, if not provided axons would be checked "as is", with no scaling applied.
+        type: array
+        items:
+          type: number
+        uniqueItems: false
+        example: [0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3]
 
   assign_morphologies:
     type: object
@@ -188,6 +220,49 @@ properties:
         type: number
         default: 0.0
         example: 0.1
+
+  synthesize_morphologies:
+    type: object
+    additionalProperties: false
+    properties:
+      max_drop_ratio:
+        description: |
+          | Maximal ratio of positions that can be dropped for each mtype (due to failure to pick an axon).
+          | Optional, if not provided defaults to 0.0 (i.e., no position dropping allowed).
+        type: number
+        default: 0.0
+      max_files_per_dir:
+        description: |
+          | Maximal number of files per folder in hierarchical morphologies folder.
+          | Optional, if not provided defaults to 1024.
+        type: integer
+        default: 1024
+      scaling_jitter_std:
+        description: |
+          | Apply scaling jitter to all axon sections with the given std (float).
+          | Optional, if not provided the scaling jitter is not applied.
+        type: number
+      rotational_jitter_std:
+        description: |
+          | Apply rotational jitter to all axon sections with the given std (float).
+          | Optional, if not provided the rotational jitter is not applied.
+        type: number
+      out_debug_data:
+        description: |
+          | Export the debug data of each cell to this file.
+          | Optional, if not specified the debug data are not exported.
+        type: string
+      log_level:
+        description: |
+          | Logging level, any of ``debug``, ``info``, ``warning``, ``error``, ``critical``.
+          | Optional, if not specified defaults to ``info``.
+        enum: ['debug', 'info', 'warning', 'error', 'critical']
+        default: 'info'
+      seed:
+        description: |
+          Pseudo-random generator seed.
+        type: integer
+        default: 0
 
   assign_emodels:
     type: object
