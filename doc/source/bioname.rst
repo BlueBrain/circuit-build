@@ -39,14 +39,15 @@ Optionally, `bioname` can also contain YAML files with cell target definitions. 
 MANIFEST.yaml
 ~~~~~~~~~~~~~
 
-Main config defining:
+This is the main configuration for the circuit build defining:
+
 * atlas space
 * morphology release
 * electrical model release
 * S/W modules version
 * individual task parameters
 
-It starts with `common` section:
+It starts with a `common` section:
 
 .. code-block:: yaml
 
@@ -59,7 +60,7 @@ It starts with `common` section:
         node_population_name: 'All'
         edge_population_name: 'All'
 
-and follows with a separate section for each phase.
+and follows with separate sections for each phase.
 
 We'll provide a short description for each of the `common` values here.
 Please refer to :ref:`ref-phases` for each phase config description.
@@ -68,19 +69,21 @@ Please refer to :ref:`ref-phases` for each phase config description.
     Atlas URL in VoxelBrain or local folder path.
 
 **region**
-    Region to populate (to use only subset of the atlas).
+    Optional Parameter.
 
-    If provided, looks for corresponding region *acronym*.
+    Defines the Atlas Region to populate (must be a subset of the atlas).
 
-    Optional; if omitted region mask is not applied.
+    If omitted, the region mask is not applied.
 
 **mask**
-    Volumetric mask to populate (to use only subset of the atlas).
+    Optional Parameter.
 
-    | If provided, looks for corresponding dataset in the atlas (should be of ``(u)int8`` datatype).
+    Defines a volumetric mask to populate (must be a subset of the atlas).
+
+    | If provided, looks for the corresponding dataset in the atlas.
     | Could be used both with or without **region** (in the former case, two masks are intersected).
 
-    Optional; if omitted volumetric mask is not applied.
+    If omitted, the volumetric mask is not applied.
 
 **morph_release**
     Path to morphology release folder.
@@ -103,14 +106,18 @@ Please refer to :ref:`ref-phases` for each phase config description.
 
 
 **node_population_name**
-    Name of Sonata nodes population to produce. Optional. Dy default 'All' is used. Additionally
-    this name will be used for the parent folder of the produced Sonata nodes file under
+    Optional Parameter.
+
+    Name of Sonata nodes population to produce. By default 'All' is used. Additionally
+    this name will be used for the parent folder of the produced Sonata nodes files under the
     `sonata/networks/nodes/` folder.
 
 
 **edge_population_name**
-    Name of Sonata edges population to produce. Optional. Dy default 'All' is used. Additionally
-    this name will be used for the parent folder of the produced Sonata nodes file under
+    Optional Parameter.
+
+    Name of Sonata edges population to produce. By default 'All' is used. Additionally
+    this name will be used for the parent folder of the produced Sonata edge files under the
     `sonata/networks/edges/` folder.
 
 
