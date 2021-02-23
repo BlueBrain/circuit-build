@@ -106,18 +106,16 @@ Please refer to :ref:`ref-phases` for each phase config description.
 
 
 **node_population_name**
-    Optional Parameter.
-
-    Name of Sonata nodes population to produce. By default 'All' is used. Additionally
-    this name will be used for the parent folder of the produced Sonata nodes files under the
+    Name of Sonata nodes population to produce. It *should* follow the naming guidelines in the
+    `documentation <https://bbpteam.epfl.ch/documentation/projects/Circuit%20Documentation/latest/sonata_population.html#nodes>`_.
+    Additionally this name will be used for the parent folder of the produced Sonata nodes file under
     `sonata/networks/nodes/` folder.
 
 
 **edge_population_name**
-    Optional Parameter.
-
-    Name of Sonata edges population to produce. By default 'All' is used. Additionally
-    this name will be used for the parent folder of the produced Sonata edge files under the
+    Name of Sonata edges population to produce. It *should* follow the naming guidelines in the
+    `documentation. <https://bbpteam.epfl.ch/documentation/projects/Circuit%20Documentation/latest/sonata_population.html#edges>`_.
+    Additionally this name will be used for the parent folder of the produced Sonata nodes file under
     `sonata/networks/edges/` folder.
 
 

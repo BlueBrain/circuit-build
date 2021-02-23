@@ -21,25 +21,35 @@ def bioname_path(filename):
     return os.path.join(BIONAME, filename)
 
 def validate_node_population_name(name):
-    doc_url = 'https://bbpteam.epfl.ch/documentation/projects/Circuit%20Documentation/latest/sonata_population.html#nodes'
+    doc_url = 'https://bbpteam.epfl.ch/documentation/projects/circuit-build/latest/bioname.html#manifest-yaml'
     allowed_parts = {'ncx', 'neocortex', 'hippocampus', 'thalamus', 'mousify'}
     allowed_types = {'neurons', 'astrocytes', 'projections'}
-    msg = '"node_population_name" in MANIFEST.yaml must fit the pattern: "<part>_<type>",' \
+    msg = '"node_population_name" in MANIFEST.yaml must exist and should fit the pattern: "<part>_<type>",' \
           f'see {doc_url} for details'
-    name = name.split('_')
-    if len(name) != 2:
+
+    if name is None:
+        raise ValueError(msg)
+    name_parts = name.split('_')
+    if len(name_parts) != 2:
         warnings.warn(msg)
-    elif name[0] not in allowed_parts or name[1] not in allowed_types:
+    elif name_parts[0] not in allowed_parts or name_parts[1] not in allowed_types:
         warnings.warn(msg)
 
+    return name
+
 def validate_edge_population_name(name):
-    doc_url = 'https://bbpteam.epfl.ch/documentation/projects/Circuit%20Documentation/latest/sonata_population.html#edges'
+    doc_url = 'https://bbpteam.epfl.ch/documentation/projects/circuit-build/latest/bioname.html#manifest-yaml'
     allowed_connection = {'electrical', 'chemical_synapse', 'synapse_astrocyte', 'endfoot'}
-    msg = '"edge_population_name" in MANIFEST.yaml must fit the pattern: ' \
+    msg = '"edge_population_name" in MANIFEST.yaml must exist and should fit the pattern: ' \
           f'"<source_population>__<target_population>__<connection>", see {doc_url} for details'
-    name = name.split('__')
-    if (not 2 <= len(name) <= 3) or (name[-1] not in allowed_connection):
+
+    if name is None:
+        raise ValueError(msg)
+    name_parts = name.split('__')
+    if (len(name_parts) not in [2,3]) or (name_parts[-1] not in allowed_connection):
         warnings.warn(msg)
+
+    return name
 
 if get_git_info(BIONAME) is None:
     raise ValueError("bioname folder: %s must be under git (version control system)" % BIONAME)
@@ -55,10 +65,8 @@ MORPHDB = bioname_path("extNeuronDB.dat")
 ATLAS = config['common']['atlas']
 ATLAS_CACHE_DIR = ".atlas"
 
-NODE_POPULATION_NAME = config['common'].get('node_population_name', 'All')
-validate_node_population_name(NODE_POPULATION_NAME)
-EDGE_POPULATION_NAME = config['common'].get('edge_population_name', 'All')
-validate_edge_population_name(EDGE_POPULATION_NAME)
+NODE_POPULATION_NAME = validate_node_population_name(config['common'].get('node_population_name'))
+EDGE_POPULATION_NAME = validate_edge_population_name(config['common'].get('edge_population_name'))
 MORPH_RELEASE = config['common']['morph_release']
 EMODEL_RELEASE = config['common'].get('emodel_release')
 EMODEL_RELEASE_MECOMBO = None

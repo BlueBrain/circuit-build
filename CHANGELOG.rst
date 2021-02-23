@@ -1,6 +1,10 @@
 Changelog
 =========
 
+Version 3.1.4 (2021-02-23)
+--------------------------
+- 'node_population_name' and 'edge_population_name' are mandatory properties
+
 Version 3.1.3 (2021-01-15)
 --------------------------
 - Use Sonata nodes for CellLibraryFile of generated CircuitConfig files
