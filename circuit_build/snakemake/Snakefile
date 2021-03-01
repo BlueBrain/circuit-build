@@ -6,6 +6,12 @@ CIRCUIT_DIR = '.'
 
 BIONAME = os.path.realpath(os.path.expanduser(config.get('bioname', 'bioname')))
 
+
+def print_err(*args, **kwargs):
+    # print to stderr to avoid interferences with `snakemake --dag`
+    print(*args, **kwargs, file = sys.stderr)
+
+
 def get_git_info(file):
     try:
         info = subprocess.check_output("git describe; git diff; git diff --staged",
@@ -54,7 +60,7 @@ def validate_edge_population_name(name):
 if get_git_info(BIONAME) is None:
     raise ValueError("bioname folder: %s must be under git (version control system)" % BIONAME)
 else:
-    print('##################\nBioname git info:\n', get_git_info(BIONAME))
+    print_err('##################\nBioname git info:\n', get_git_info(BIONAME))
 
 # Load MANIFEST.yaml into workflow config
 workflow.configfile(bioname_path('MANIFEST.yaml'))
@@ -621,7 +627,7 @@ def get_targetgen_config(key, default_value=None):
     old = config.get('targetgen_mvd3', {})
     new = config.get('targetgen', {})
     if old and not new:
-         print('"targetgen_mvd3" should be replaced by "targetgen" in MANIFEST.yaml')
+         print_err('"targetgen_mvd3" should be replaced by "targetgen" in MANIFEST.yaml')
          new = old
     return new.get(key, default_value)
 
