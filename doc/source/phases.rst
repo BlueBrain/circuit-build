@@ -257,7 +257,7 @@ Prune touches and convert them into synapses (S2F) using the `Spark Functionaliz
 
     ::
 
-        -A <proj> -p prod --constraint=nvme -N<nodes> --exclusive --mem 0 --time <time>
+        -A <proj> -p prod --constraint=nvme -N <nodes> -c 36--exclusive --mem 0 --time <time>
 
 To provide additional arguments to ``sm_run``, put those to the :ref:`cluster config <ref-cluster-config>`.
 For instance, to disable HDFS mode:
