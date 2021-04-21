@@ -28,8 +28,11 @@ setup(
     install_requires=[
         'click>=7.0,<8',
         'pyyaml>=5.0',
-        'snakemake>=5.10.0,<7.0.0',
+        'snakemake>=5.10,<7.0',
     ],
+    extras_require={
+        "reports": ['snakemake[reports]'],
+    },
     packages=find_packages(),
     include_package_data=True,
     package_data={

@@ -67,6 +67,14 @@ use it as it takes care of all necessary preparations. If you choose to use `sna
 then get familiar with Slurm allocations in :ref:`ref-cluster-config` section. `--printshellcmds`
 flag ensures that subsequent spawned commands are dumped to the logs.  `--jobs 8` allows to launch
 up to `8` tasks in parallel.
+
+Since version 3.2.0, ``circuit-build`` provides two options useful for reporting:
+
+- ``--with-summary``: it will save a tab-separated summary in ``logs/<timestamp>/summary.tsv``
+  (it wraps the ``--detailed-summary`` option of Snakemake).
+- ``--with-report``: it will save a html report in ``logs/<timestamp>/report.html``
+  (it wraps the ``--report`` option of Snakemake).
+
 Further on we assume that you use `circuit-build run` command which is executed from the circuit's
 release folder root.
 

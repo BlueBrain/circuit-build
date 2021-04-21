@@ -2,18 +2,23 @@ import json
 import shutil
 import subprocess
 import tempfile
-from functools import partial
 from pathlib import Path
 from subprocess import CalledProcessError
 
 import h5py
-from unittest.mock import patch
-from nose.tools import assert_raises
 
+import pytest
 from click.testing import CliRunner
 from circuit_build.cli import run
 
-from utils import tmp_cwd, edit_yaml, TEST_DIR, TEST_DATA_DIR, SNAKEMAKE_ARGS, SNAKEFILE
+from utils import (
+    SNAKEFILE,
+    SNAKEMAKE_ARGS,
+    TEST_DATA_DIR,
+    TEST_DIR,
+    edit_yaml,
+    tmp_cwd,
+)
 
 
 def test_functional_all():
@@ -80,31 +85,37 @@ def test_no_emodel():
         assert tmp_dir.joinpath('circuit.h5').stat().st_size > 100
 
 
-# this patch is necessary to capture stderr into CliRunner output
-@patch('subprocess.run', partial(subprocess.run, capture_output=True))
-def test_custom_module():
+def test_custom_module(caplog, capfd):
     with tmp_cwd():
         args = SNAKEMAKE_ARGS + ['-m', 'jinja2:invalid_module1:invalid_module_path']
+        runner = CliRunner(mix_stderr=False)
 
-        runner = CliRunner()
-        with assert_raises(CalledProcessError) as err:
-            runner.invoke(run, args + ['circuitconfig_nrn'], catch_exceptions=False)
-        assert 'Unable to locate a modulefile for \'invalid_module1\'' in \
-               err.exception.stderr.decode('utf-8')
+        result = runner.invoke(run, args + ['circuitconfig_nrn'], catch_exceptions=False)
+
+        captured = capfd.readouterr()
+        assert result.exit_code == 1
+        assert isinstance(result.exception, SystemExit)
+        assert 'Snakemake process failed' in caplog.text
+        # the stderr of the subprocess is available in captured.err and not result.stderr
+        assert "Unable to locate a modulefile for 'invalid_module1'" in captured.err
 
 
-# this patch is necessary to capture stderr into CliRunner output
-@patch('subprocess.run', partial(subprocess.run, capture_output=True))
-def test_no_git_bioname():
+def test_no_git_bioname(caplog, capfd):
     """This test verifies that bioname is checked to be under git."""
     with tempfile.TemporaryDirectory() as data_copy_dir:
         data_copy_dir = Path(data_copy_dir) / TEST_DATA_DIR.name
         shutil.copytree(TEST_DATA_DIR, data_copy_dir)
         args = ['--bioname', str(data_copy_dir), '-u', str(data_copy_dir / 'cluster.yaml')]
-        runner = CliRunner()
-        with assert_raises(CalledProcessError) as err:
-            runner.invoke(run, args, catch_exceptions=False)
-        assert f'{str(data_copy_dir)} must be under git' in err.exception.stderr.decode('utf-8')
+        runner = CliRunner(mix_stderr=False)
+
+        result = runner.invoke(run, args, catch_exceptions=False)
+
+        captured = capfd.readouterr()
+        assert result.exit_code == 1
+        assert isinstance(result.exception, SystemExit)
+        assert 'Snakemake process failed' in caplog.text
+        # the stderr of the subprocess is available in captured.err and not result.stderr
+        assert f'{str(data_copy_dir)} must be under git' in captured.err
 
 
 def test_snakemake_circuit_config():
@@ -130,6 +141,8 @@ def test_snakemake_no_git_bioname():
         args = ['--jobs', '8', '-p', '--config', f'bioname={data_copy_dir}', '-u',
                 str(TEST_DATA_DIR / 'cluster.yaml')]
         cmd = ['snakemake', '--snakefile', SNAKEFILE] + args + ['CircuitConfig_base']
-        with assert_raises(CalledProcessError) as err:
-            subprocess.check_output(cmd, stderr=subprocess.STDOUT)
-        assert f'{str(data_copy_dir)} must be under git' in err.exception.output.decode('utf-8')
+
+        with pytest.raises(CalledProcessError) as exc_info:
+            subprocess.run(cmd, capture_output=True, text=True, check=True)
+        # the expected message is not contained in str(exception), but it's found in the stderr
+        assert f'{str(data_copy_dir)} must be under git' in exc_info.value.stderr

@@ -1,10 +1,16 @@
 Changelog
 =========
 
-Version 3.2.0 (2021-04-21)
+Version 3.2.0 (2021-05-05)
 --------------------------
-- 'node_population_name' and 'edge_population_name' are mandatory properties
-- improve logging [NSETM-1428]
+- Improve logging and split all the job logs in separate files. [NSETM-1428]
+- Add option ``--with-summary`` to save a summary of the workflow in ``logs/<timestamp>/summary.tsv``.
+- Add option ``--with-report`` to save a report of the workflow in ``logs/<timestamp>/report.html``.
+- Replace nose with pytest in unit tests.
+
+Version 3.1.4 (2021-05-05)
+--------------------------
+- ``node_population_name`` and ``edge_population_name`` are mandatory properties in ``MANIFEST.yaml``.
 
 Version 3.1.3 (2021-01-15)
 --------------------------

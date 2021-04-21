@@ -13,20 +13,18 @@ def print_err(*args, **kwargs):
 
 
 def check_git_info(path):
-    cmd = r"""
+    cmd = """
         set -e
-        echo -e "### Bioname info\n"
-        echo "path: $(readlink -f .)"
-        echo "date: $(date --iso-8601=seconds)"
+        echo "### Bioname info\n"
+        echo "path: $(realpath .)"
+        echo "date: $(date +'%Y-%m-%dT%H:%M:%S%z')"
         echo "user: $(whoami)"
         echo "host: $(hostname)"
         echo "circuit-build version: $(circuit-build --version)"
         echo "snakemake version: $(snakemake --version)"
-        echo -e "\n### git describe --always"
-        git describe --always
-        echo -e "\n### git diff"
+        echo "git tag: $(git describe --always)"
+        set -x
         git diff
-        echo -e "\n### git diff --staged"
         git diff --staged
         """
     cmd = redirect_to_file(cmd, filename=log_path("git_info"))
@@ -34,7 +32,7 @@ def check_git_info(path):
     try:
         subprocess.run(cmd, shell=True, check=True, cwd=cwd)
     except subprocess.CalledProcessError:
-        raise ValueError(f"bioname folder: {BIONAME} must be under git (version control system)")
+        raise RuntimeError(f"bioname folder: {BIONAME} must be under git (version control system)")
 
 
 def bioname_path(filename):
@@ -150,15 +148,15 @@ def escape_single_quotes(value):
 
 
 def log_path(name, _now=datetime.now()):
-    timestamp = _now.strftime("%Y%m%dT%H%M%S")
+    timestamp = config.get("timestamp", _now.strftime("%Y%m%dT%H%M%S"))
     path = os.path.abspath(os.path.join(LOGS_DIR, timestamp, f"{name}.log"))
     os.makedirs(os.path.dirname(path), exist_ok=True)
     return path
 
 
 def redirect_to_file(cmd, filename="{log}"):
-    if "TOX_ENV_NAME" in os.environ:
-        # redirect to stderr if running in jenkins CI
+    if os.getenv("LOG_ALL_TO_STDERR") == "true":
+        # redirect logs to stderr instead of files
         return f"( {cmd} ) 1>&2"
     else:
         # else redirect to file
