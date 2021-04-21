@@ -7,6 +7,7 @@ import json
 
 
 @click.group()
+@click.version_option()
 def cli():
     """The CLI entry point"""
 

@@ -28,7 +28,7 @@ setup(
     install_requires=[
         'click>=7.0,<8',
         'pyyaml>=5.0',
-        'snakemake>=5.10.0,<6.0.0',
+        'snakemake>=5.10.0,<7.0.0',
     ],
     packages=find_packages(),
     include_package_data=True,

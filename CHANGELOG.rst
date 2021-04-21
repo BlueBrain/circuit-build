@@ -1,9 +1,10 @@
 Changelog
 =========
 
-Version 3.1.4 (2021-02-23)
+Version 3.2.0 (2021-04-21)
 --------------------------
 - 'node_population_name' and 'edge_population_name' are mandatory properties
+- improve logging [NSETM-1428]
 
 Version 3.1.3 (2021-01-15)
 --------------------------

@@ -1,6 +1,6 @@
-import datetime
+from datetime import datetime
 import warnings
-from subprocess import CalledProcessError
+import subprocess
 
 CIRCUIT_DIR = '.'
 
@@ -9,19 +9,33 @@ BIONAME = os.path.realpath(os.path.expanduser(config.get('bioname', 'bioname')))
 
 def print_err(*args, **kwargs):
     # print to stderr to avoid interferences with `snakemake --dag`
-    print(*args, **kwargs, file = sys.stderr)
+    print(*args, **kwargs, file=sys.stderr)
 
 
-def get_git_info(file):
+def check_git_info(path):
+    cmd = r"""
+        set -e
+        echo -e "### Bioname info\n"
+        echo "path: $(readlink -f .)"
+        echo "date: $(date --iso-8601=seconds)"
+        echo "user: $(whoami)"
+        echo "host: $(hostname)"
+        echo "circuit-build version: $(circuit-build --version)"
+        echo "snakemake version: $(snakemake --version)"
+        echo -e "\n### git describe"
+        git describe
+        echo -e "\n### git diff"
+        git diff
+        echo -e "\n### git diff --staged"
+        git diff --staged
+        """
+    cmd = redirect_to_file(cmd, filename=log_path("git_info"))
+    cwd = path if os.path.isdir(path) else os.path.dirname(path)
     try:
-        info = subprocess.check_output("git describe; git diff; git diff --staged",
-                                       stderr=subprocess.STDOUT,
-                                       shell=True,
-                                       encoding='utf-8',
-                                       cwd=file if os.path.isdir(file) else os.path.dirname(file))
-    except CalledProcessError:
-        return None
-    return info
+        subprocess.run(cmd, shell=True, check=True, cwd=cwd)
+    except subprocess.CalledProcessError:
+        raise ValueError(f"bioname folder: {BIONAME} must be under git (version control system)")
+
 
 def bioname_path(filename):
     return os.path.join(BIONAME, filename)
@@ -57,10 +71,6 @@ def validate_edge_population_name(name):
 
     return name
 
-if get_git_info(BIONAME) is None:
-    raise ValueError("bioname folder: %s must be under git (version control system)" % BIONAME)
-else:
-    print_err('##################\nBioname git info:\n', get_git_info(BIONAME))
 
 # Load MANIFEST.yaml into workflow config
 workflow.configfile(bioname_path('MANIFEST.yaml'))
@@ -139,16 +149,27 @@ def escape_single_quotes(value):
     return value.replace("'", "'\\''")
 
 
-def log_path(name):
-    timestamp = datetime.datetime.now().strftime("%Y%m%dT%H%M%S")
-    return os.path.abspath(os.path.join(LOGS_DIR, "%s.%s.log" % (name, timestamp)))
+def log_path(name, _now=datetime.now()):
+    timestamp = _now.strftime("%Y%m%dT%H%M%S")
+    path = os.path.abspath(os.path.join(LOGS_DIR, timestamp, f"{name}.log"))
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    return path
+
+
+def redirect_to_file(cmd, filename="{log}"):
+    if "TOX_ENV_NAME" in os.environ:
+        # redirect to stderr if running in jenkins CI
+        return f"( {cmd} ) 1>&2"
+    else:
+        # else redirect to file
+        return f"( {cmd} ) >{filename} 2>&1"
 
 
 def template_path(name):
     return os.path.join(workflow.basedir, 'templates', name)
 
 
-def bbp_env(module_env, command, dump_log=False, slurm_env=None, skip_srun=False):
+def bbp_env(module_env, command, slurm_env=None, skip_srun=False):
     result = " ".join(map(str, command))
 
     if (slurm_env is not None) and cluster_config:
@@ -164,7 +185,7 @@ def bbp_env(module_env, command, dump_log=False, slurm_env=None, skip_srun=False
 
     if module_env is not None:
         modulepath, modules = MODULES[module_env]
-        result = "(" + " && ".join([
+        result = " && ".join([
             "export MODULEPATH=%s" % modulepath,
             ". /etc/profile.d/modules.sh",
             "module purge",
@@ -172,12 +193,9 @@ def bbp_env(module_env, command, dump_log=False, slurm_env=None, skip_srun=False
             "echo MODULEPATH=%s" % modulepath,
             "module list",
             result,
-        ]) + ")"
+        ])
 
-    if dump_log:
-        result += " 2>&1 | tee {log}"
-
-    return result
+    return redirect_to_file(result)
 
 
 def spatial_index_files(prefix):
@@ -189,6 +207,10 @@ def spatial_index_files(prefix):
             'payload.dat',
         ]
     ]
+
+
+# Check that bioname is under git control and log git info
+check_git_info(BIONAME)
 
 
 rule default:
@@ -225,6 +247,9 @@ rule circuitconfig_base:
     output:
         'CircuitConfig_base'
 
+    log:
+        log_path('circuitconfig_base')
+
     shell:
         build_circuit_config(nrn_path='.')
 
@@ -235,6 +260,9 @@ rule circuitconfig_nrn:
 
     output:
         'CircuitConfig_nrn'
+
+    log:
+        log_path('circuitconfig_nrn')
 
     shell:
         build_circuit_config(nrn_path=CONNECTOME_FUNCTIONAL_DIR)
@@ -250,6 +278,9 @@ rule circuitconfig_functional:
 
     output:
         'CircuitConfig'
+
+    log:
+        log_path('circuitconfig_functional')
 
     shell:
         build_circuit_config(
@@ -267,6 +298,9 @@ rule circuitconfig_structural:
     output:
         'CircuitConfig_struct'
 
+    log:
+        log_path('circuitconfig_structural')
+
     shell:
         build_circuit_config(nrn_path=CONNECTOME_STRUCTURAL_DIR + '/edges.h5')
 
@@ -278,13 +312,19 @@ rule init_cells:
     output:
         'circuit.empty.h5'
 
+    log:
+        log_path('init_cells')
+
     shell:
         bbp_env(
             'brainbuilder',
-            ['python -c "from voxcell import CellCollection;',
+            [
+                'python -c "from voxcell import CellCollection;',
                 "cells = CellCollection('{NODE_POPULATION_NAME}');",
                 "cells.save('{output}');",
-              '"'])
+                '"',
+            ],
+        )
 
 
 rule place_cells:
@@ -337,7 +377,6 @@ rule place_cells:
                 "--output",
                     "{output}",
             ],
-            dump_log=True,
             slurm_env='place_cells'
         )
 
@@ -378,7 +417,6 @@ rule choose_morphologies:
                 "--output",
                     "{output}",
             ],
-            dump_log=True,
             slurm_env='choose_morphologies'
         )
 
@@ -414,7 +452,6 @@ rule assign_morphologies:
                 "--out-cells-path",
                     "{output}",
             ],
-            dump_log=True
         )
 
 
@@ -427,6 +464,9 @@ rule assign_emodels_per_type:
 
     output:
         'circuit.{ext}'
+
+    log:
+        log_path('assign_emodels_per_type_{ext}')
 
     shell:
         bbp_env(
@@ -454,6 +494,9 @@ rule provide_me_info:
 
     output:
         f'sonata/networks/nodes/{NODE_POPULATION_NAME}/nodes.h5'
+
+    log:
+        log_path('provide_me_info')
 
     shell:
         bbp_env(
@@ -499,7 +542,6 @@ rule touchdetector:
                 "{BUILDER_RECIPE}",
                 "{MORPH_RELEASE}/h5v1",
             ],
-            dump_log=True,
             slurm_env='touchdetector'
         )
 
@@ -513,6 +555,9 @@ rule touch2parquet:
 
     output:
         directory(TOUCHES_DIR + '/parquet')
+
+    log:
+        log_path('touch2parquet')
 
     shell:
         "mkdir -p {output} && " + \
@@ -574,7 +619,6 @@ def run_spykfunc(rule, connectome_dir):
             MORPH_RELEASE + '/h5v1/',
             "--parquet", os.path.abspath("{input[touches]}/*.parquet"),
         ],
-        dump_log=True,
         slurm_env=rule,
         skip_srun=True
     )
@@ -642,6 +686,9 @@ rule targetgen:
     output:
         'start.target'
 
+    log:
+        log_path('targetgen')
+
     shell:
         bbp_env(
             'brainbuilder',
@@ -690,7 +737,6 @@ rule node_sets:
                 "--output {output}",
                 "{input}"
             ],
-            dump_log=True
         )
 
 
@@ -702,10 +748,13 @@ rule symlink_start_target:
         'start.target'
 
     output:
-        '{connectome_dir}/start.target',
+        'connectome/{connectome_dir}/start.target',
+
+    log:
+        log_path('symlink_start_target_{connectome_dir}')
 
     shell:
-        'cd {wildcards.connectome_dir} && ln -s ../../{input}'
+        redirect_to_file('cd connectome/{wildcards.connectome_dir} && ln -s ../../{input}')
 
 
 rule spatial_index_segment:
@@ -729,7 +778,6 @@ rule spatial_index_segment:
             [
              "SDKGenerator CircuitConfig_base segment All SEGMENT",
             ],
-            dump_log=True,
             slurm_env='spatial_index_segment'
         )
 
@@ -757,7 +805,6 @@ rule spatial_index_synapse:
              "cd {CONNECTOME_FUNCTIONAL_DIR} &&",
              "SDKGenerator ../../CircuitConfig_nrn synapse All SYNAPSE",
             ],
-            dump_log=True,
             slurm_env='spatial_index_synapse'
         )
 
@@ -773,6 +820,9 @@ rule parquet_to_sonata:
     output:
         'sonata/networks/edges/{connectome_dir}/' + EDGE_POPULATION_NAME + '/edges.h5'
 
+    log:
+        log_path('parquet_to_sonata_{connectome_dir}')
+
     shell:
         bbp_env(
             'parquet-converters',
@@ -785,7 +835,6 @@ rule parquet_to_sonata:
                 "-o {output}",
                 "connectome/{wildcards.connectome_dir}/spykfunc/circuit.parquet/*.parquet",
             ],
-            dump_log=True,
             slurm_env='parquet2syn2'
         )
 
@@ -799,6 +848,9 @@ rule sonata_to_nrn:
 
     output:
         'connectome/{connectome_dir}/nrn.h5'
+
+    log:
+        log_path('sonata_to_nrn_{connectome_dir}')
 
     shell:
         bbp_env(
@@ -821,9 +873,14 @@ rule symlink_sonata_edges:
     output:
         'connectome/{connectome_dir}/edges.h5'
 
+    log:
+        log_path('symlink_sonata_edges_{connectome_dir}')
+
     shell:
-        "cd connectome/{wildcards.connectome_dir}/ &&" \
-        "ln -s ../../sonata/networks/edges/{wildcards.connectome_dir}/" + EDGE_POPULATION_NAME + "/edges.h5 edges.h5"
+        redirect_to_file(
+            "cd connectome/{wildcards.connectome_dir}/ && "
+            "ln -s ../../sonata/networks/edges/{wildcards.connectome_dir}/" + EDGE_POPULATION_NAME + "/edges.h5 edges.h5"
+        )
 
 
 rule subcellular:
@@ -836,6 +893,9 @@ rule subcellular:
 
     output:
         'subcellular.h5'
+
+    log:
+        log_path('subcellular')
 
     shell:
         bbp_env(
@@ -875,7 +935,7 @@ def write_network_config(connectome_dir):
             "--edges",
                 EDGE_POPULATION_NAME,
             "-o {output}"
-        ]
+        ],
     )
 
 
@@ -885,6 +945,9 @@ rule circuitconfig_sonata:
 
     output:
         'sonata/circuit_config.json'
+
+    log:
+        log_path('circuitconfig_sonata')
 
     shell:
         write_network_config('functional')
@@ -896,6 +959,9 @@ rule circuitconfig_struct_sonata:
 
     output:
         'sonata/struct_circuit_config.json'
+
+    log:
+        log_path('circuitconfig_struct_sonata')
 
     shell:
         write_network_config('structural')
