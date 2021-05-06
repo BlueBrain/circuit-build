@@ -22,8 +22,8 @@ def check_git_info(path):
         echo "host: $(hostname)"
         echo "circuit-build version: $(circuit-build --version)"
         echo "snakemake version: $(snakemake --version)"
-        echo -e "\n### git describe"
-        git describe
+        echo -e "\n### git describe --always"
+        git describe --always
         echo -e "\n### git diff"
         git diff
         echo -e "\n### git diff --staged"
