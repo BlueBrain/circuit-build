@@ -184,9 +184,9 @@ def bbp_env(module_env, command, slurm_env=None, skip_srun=False):
     if module_env is not None:
         modulepath, modules = MODULES[module_env]
         result = " && ".join([
-            "export MODULEPATH=%s" % modulepath,
             ". /etc/profile.d/modules.sh",
             "module purge",
+            "export MODULEPATH=%s" % modulepath,
             "module load %s" % " ".join(modules),
             "echo MODULEPATH=%s" % modulepath,
             "module list",
@@ -317,6 +317,7 @@ rule init_cells:
         bbp_env(
             'brainbuilder',
             [
+                'echo -n "Using python: " && which python &&',
                 'python -c "from voxcell import CellCollection;',
                 "cells = CellCollection('{NODE_POPULATION_NAME}');",
                 "cells.save('{output}');",

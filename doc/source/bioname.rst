@@ -60,6 +60,11 @@ It starts with a `common` section:
         node_population_name: 'All'
         edge_population_name: 'All'
 
+
+.. note::
+
+    The `All` in the example does not follow the BBP naming convention; please read the `node_population_name` configuration description further down.
+
 and follows with separate sections for each phase.
 
 We'll provide a short description for each of the `common` values here.
