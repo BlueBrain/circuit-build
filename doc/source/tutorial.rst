@@ -146,17 +146,6 @@ involving connectome. There are also some intermediate partial Sonata files:
 These could be safely removed, should you not need them. We recommend to keep them however, at
 least until the circuit build is finalized to speed up potential rebuilds.
 
-.. raw:: html
-
-   <details>
-   <summary>DAG for the rule: default</summary>
-
-.. graphviz:: dag/default.dot
-
-.. raw:: html
-
-   </details>
-
 
 Connectome
 ~~~~~~~~~~
@@ -172,7 +161,7 @@ After the command above has completed, any analysis not involving spatial indice
 
 .. raw:: html
 
-   <details>
+   <details open>
    <summary>DAG for the rule: functional</summary>
 
 .. graphviz:: dag/functional.dot
@@ -196,31 +185,10 @@ Segment spatial index requires only cell collection, and thus can be built prior
 
 .. raw:: html
 
-   <details>
+   <details open>
    <summary>DAG for the rule: spatial_index_segment</summary>
 
 .. graphviz:: dag/spatial_index_segment.dot
-
-.. raw:: html
-
-   </details>
-
-
-To build *synapse* spatial index:
-
-.. code-block:: bash
-
-    $ circuit-build run --bioname /path/to/bioname --cluster-config /path/to/cluster.yaml spatial_index_synapse
-
-Synapse spatial index obviously requires connectome as well, and thus is executed after `functional`
-target is built.
-
-.. raw:: html
-
-   <details>
-   <summary>DAG for the rule: spatial_index_synapse</summary>
-
-.. graphviz:: dag/spatial_index_synapse.dot
 
 .. raw:: html
 
@@ -252,7 +220,7 @@ instead of:
 
 .. raw:: html
 
-   <details>
+   <details open>
    <summary>DAG for the rule: structural</summary>
 
 .. graphviz:: dag/structural.dot
@@ -273,33 +241,10 @@ To assign gene expressions and protein concentrations to the cells:
 
 .. raw:: html
 
-   <details>
+   <details open>
    <summary>DAG for the rule: subcellular</summary>
 
 .. graphviz:: dag/subcellular.dot
-
-.. raw:: html
-
-   </details>
-
-One command to build it all
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. code-block:: bash
-
-    $ circuit-build run --bioname /path/to/bioname --cluster-config /path/to/cluster.yaml -j 99 -k functional_all
-
-would launch all the tasks needed to generate files listed in :ref:`ref-circuit-files` section.
-
-Providing `-j <N>` allows to launch up to `<N>` tasks in parallel; `-k` flag instructs
-`Snakemake` to proceed with other jobs if some independent job has failed.
-
-.. raw:: html
-
-   <details>
-   <summary>DAG for the rule: functional_all</summary>
-
-.. graphviz:: dag/functional_all.dot
 
 .. raw:: html
 

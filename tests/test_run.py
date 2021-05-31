@@ -34,17 +34,19 @@ def test_functional_all():
 
         args = ['--bioname', str(data_copy_dir), '-u', str(data_copy_dir / 'cluster.yaml')]
         runner = CliRunner()
-        result = runner.invoke(run, args + ['functional_all', 'functional_sonata', 'functional_nrn'], catch_exceptions=False)
+        result = runner.invoke(
+            run,
+            args + ['functional', 'functional_sonata', 'spatial_index_segment'],
+            catch_exceptions=False,
+        )
         assert result.exit_code == 0
         tmp_dir = Path(tmp_dir)
 
         assert tmp_dir.joinpath('CircuitConfig').stat().st_size > 100
-        assert tmp_dir.joinpath('CircuitConfig_nrn').stat().st_size > 100
         assert tmp_dir.joinpath('circuit.mvd3').stat().st_size > 100
         assert tmp_dir.joinpath('sonata/node_sets.json').stat().st_size > 100
         assert tmp_dir.joinpath('sonata/circuit_config.json').stat().st_size > 100
         assert tmp_dir.joinpath('start.target').stat().st_size > 100
-        assert f'CellLibraryFile circuit.mvd3' in (tmp_dir / 'CircuitConfig_nrn').open().read()
 
         nodes_file = (tmp_dir / f'sonata/networks/nodes/{node_population_name}/nodes.h5').resolve()
         assert f'CellLibraryFile {nodes_file}' in (tmp_dir / 'CircuitConfig').open().read()
@@ -77,11 +79,9 @@ def test_no_emodel():
         args = ['--bioname', str(data_copy_dir), '-u', str(data_copy_dir / 'cluster.yaml')]
 
         runner = CliRunner()
-        result = runner.invoke(
-            run, args + ['assign_emodels', 'circuitconfig_nrn'], catch_exceptions=False)
+        result = runner.invoke(run, args + ['assign_emodels'], catch_exceptions=False)
         assert result.exit_code == 0
         tmp_dir = Path(tmp_dir)
-        assert tmp_dir.joinpath('CircuitConfig_nrn').stat().st_size > 100
         assert tmp_dir.joinpath('circuit.h5').stat().st_size > 100
 
 
@@ -90,7 +90,7 @@ def test_custom_module(caplog, capfd):
         args = SNAKEMAKE_ARGS + ['-m', 'jinja2:invalid_module1:invalid_module_path']
         runner = CliRunner(mix_stderr=False)
 
-        result = runner.invoke(run, args + ['circuitconfig_nrn'], catch_exceptions=False)
+        result = runner.invoke(run, args + ['circuitconfig_base'], catch_exceptions=False)
 
         captured = capfd.readouterr()
         assert result.exit_code == 1

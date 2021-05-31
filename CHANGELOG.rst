@@ -1,9 +1,12 @@
 Changelog
 =========
 
-Version 3.2.0 (2021-05-05)
+Version 3.2.0 (2021-06-01)
 --------------------------
-- Improve logging and split all the job logs in separate files. [NSETM-1428]
+- Require touchdetector/5.6.0. [NSETM-1384]
+- Remove rules incompatible with sonata edges/nodes.
+- Use nodes.h5 instead of circuit.mvd3 in circuitconfig_structural.
+- Split all the job logs in separate files. [NSETM-1428]
 - Add option ``--with-summary`` to save a summary of the workflow in ``logs/<timestamp>/summary.tsv``.
 - Add option ``--with-report`` to save a report of the workflow in ``logs/<timestamp>/report.html``.
 - Replace nose with pytest in unit tests.

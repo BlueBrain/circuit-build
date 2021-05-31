@@ -1,4 +1,5 @@
 from datetime import datetime
+from pathlib import Path
 import warnings
 import subprocess
 
@@ -24,8 +25,8 @@ def check_git_info(path):
         echo "snakemake version: $(snakemake --version)"
         echo "git tag: $(git describe --always)"
         set -x
-        git diff
-        git diff --staged
+        git --no-pager diff
+        git --no-pager diff --staged
         """
     cmd = redirect_to_file(cmd, filename=log_path("git_info"))
     cwd = path if os.path.isdir(path) else os.path.dirname(path)
@@ -93,6 +94,8 @@ if EMODEL_RELEASE:
 
 LOGS_DIR = "logs"
 
+NODESETS_FILE = "node_sets.json"
+
 TOUCHES_DIR = "connectome/touches"
 CONNECTOME_FUNCTIONAL_DIR = "connectome/functional"
 CONNECTOME_STRUCTURAL_DIR = "connectome/structural"
@@ -119,7 +122,7 @@ def build_modules():
         'synapsetool':
             (SPACK_MODULEPATH, ['archive/2020-05', 'synapsetool/0.5.9']),
         'touchdetector':
-            (SPACK_MODULEPATH, ['archive/2020-05', 'touchdetector/5.4.0', 'hpe-mpi']),
+            (SPACK_MODULEPATH, ['archive/2021-04', 'touchdetector/5.6.0', 'hpe-mpi']),
     }
     custom_modules = config.get('modules')
     if custom_modules:
@@ -212,13 +215,12 @@ check_git_info(BIONAME)
 
 
 rule default:
-    input:
-        'CircuitConfig_base',
-        'circuit.h5',
-        'start.target',
+    run:
+        logger.warning('Please specify the desired rule(s) from the following list:')
+        workflow.list_rules(only_targets=True)
 
 
-def build_circuit_config(nrn_path, cell_library_file='circuit.mvd3'):
+def build_circuit_config(nrn_path, cell_library_file):
     return bbp_env(
         'jinja2',
         ["jinja2 --strict",
@@ -239,6 +241,7 @@ def build_circuit_config(nrn_path, cell_library_file='circuit.mvd3'):
 
 
 rule circuitconfig_base:
+    # needed only by spatial_index_segment
     message:
         "Generate CircuitConfig w/o connectome"
 
@@ -249,21 +252,7 @@ rule circuitconfig_base:
         log_path('circuitconfig_base')
 
     shell:
-        build_circuit_config(nrn_path='.')
-
-
-rule circuitconfig_nrn:
-    message:
-        "Generate CircuitConfig for functional circuit (nrn.h5)"
-
-    output:
-        'CircuitConfig_nrn'
-
-    log:
-        log_path('circuitconfig_nrn')
-
-    shell:
-        build_circuit_config(nrn_path=CONNECTOME_FUNCTIONAL_DIR)
+        build_circuit_config(nrn_path='.', cell_library_file='circuit.mvd3')
 
 
 rule circuitconfig_functional:
@@ -283,15 +272,18 @@ rule circuitconfig_functional:
     shell:
         build_circuit_config(
             nrn_path=CONNECTOME_FUNCTIONAL_DIR + '/edges.h5',
-            cell_library_file=os.path.abspath(os.path.join(CIRCUIT_DIR, f'sonata/networks/nodes/{NODE_POPULATION_NAME}/nodes.h5')))
-
+            cell_library_file=Path(
+                CIRCUIT_DIR, f'sonata/networks/nodes/{NODE_POPULATION_NAME}/nodes.h5'
+            ).absolute(),
+        )
 
 rule circuitconfig_structural:
     message:
         "Generate CircuitConfig for structural circuit"
 
     input:
-        CONNECTOME_STRUCTURAL_DIR + '/edges.h5'
+        CONNECTOME_STRUCTURAL_DIR + '/edges.h5',
+        f'sonata/networks/nodes/{NODE_POPULATION_NAME}/nodes.h5',
 
     output:
         'CircuitConfig_struct'
@@ -300,7 +292,12 @@ rule circuitconfig_structural:
         log_path('circuitconfig_structural')
 
     shell:
-        build_circuit_config(nrn_path=CONNECTOME_STRUCTURAL_DIR + '/edges.h5')
+        build_circuit_config(
+            nrn_path=CONNECTOME_STRUCTURAL_DIR + '/edges.h5',
+            cell_library_file=Path(
+                CIRCUIT_DIR, f'sonata/networks/nodes/{NODE_POPULATION_NAME}/nodes.h5'
+            ).absolute(),
+        )
 
 
 rule init_cells:
@@ -714,7 +711,7 @@ rule node_sets:
         f'sonata/networks/nodes/{NODE_POPULATION_NAME}/nodes.h5'
 
     output:
-        'sonata/node_sets.json'
+        f"sonata/{NODESETS_FILE}"
 
     log:
         log_path('node_sets')
@@ -739,23 +736,6 @@ rule node_sets:
         )
 
 
-rule symlink_start_target:
-    message:
-        "Symlink start.target file from {wildcards.connectome_dir}"
-
-    input:
-        'start.target'
-
-    output:
-        'connectome/{connectome_dir}/start.target',
-
-    log:
-        log_path('symlink_start_target_{connectome_dir}')
-
-    shell:
-        redirect_to_file('cd connectome/{wildcards.connectome_dir} && ln -s ../../{input}')
-
-
 rule spatial_index_segment:
     message:
         "Generate segment spatial index"
@@ -778,33 +758,6 @@ rule spatial_index_segment:
              "SDKGenerator CircuitConfig_base segment All SEGMENT",
             ],
             slurm_env='spatial_index_segment'
-        )
-
-
-rule spatial_index_synapse:
-    message:
-        "Generate synapse spatial index"
-
-    input:
-        'CircuitConfig_nrn',
-        'circuit.mvd3',
-        CONNECTOME_FUNCTIONAL_DIR + '/nrn.h5',
-        CONNECTOME_FUNCTIONAL_DIR + '/start.target'
-
-    output:
-        spatial_index_files(CONNECTOME_FUNCTIONAL_DIR + '/SYNAPSE')
-
-    log:
-        log_path('spatial_index_synapse')
-
-    shell:
-        bbp_env(
-            'flatindexer',
-            [
-             "cd {CONNECTOME_FUNCTIONAL_DIR} &&",
-             "SDKGenerator ../../CircuitConfig_nrn synapse All SYNAPSE",
-            ],
-            slurm_env='spatial_index_synapse'
         )
 
 
@@ -835,30 +788,6 @@ rule parquet_to_sonata:
                 "connectome/{wildcards.connectome_dir}/spykfunc/circuit.parquet/*.parquet",
             ],
             slurm_env='parquet2syn2'
-        )
-
-
-rule sonata_to_nrn:
-    message:
-        "SONATA -> nrn.h5"
-
-    input:
-        'connectome/{connectome_dir}/edges.h5'
-
-    output:
-        'connectome/{connectome_dir}/nrn.h5'
-
-    log:
-        log_path('sonata_to_nrn_{connectome_dir}')
-
-    shell:
-        bbp_env(
-            'brainbuilder',
-            ["brainbuilder nrn from-sonata",
-                "--output connectome/{wildcards.connectome_dir}",
-                "{input}"
-            ],
-            slurm_env='syn2_to_nrn'
         )
 
 
@@ -928,7 +857,7 @@ def write_network_config(connectome_dir):
             "--nodes",
                 NODE_POPULATION_NAME,
             "--node-sets",
-                "node_sets.json",
+                NODESETS_FILE,
             "--edges-dir",
                 "networks/edges/%s" % connectome_dir,
             "--edges",
@@ -974,40 +903,25 @@ rule functional:
         CONNECTOME_FUNCTIONAL_DIR + '/edges.h5',
 
 
-rule functional_all:
-    input:
-        rules.functional.input,
-        rules.spatial_index_segment.output,
-        rules.spatial_index_synapse.output,
-
-
 rule functional_sonata:
     input:
         'sonata/circuit_config.json',
         f'sonata/networks/nodes/{NODE_POPULATION_NAME}/nodes.h5',
-        'sonata/node_sets.json',
+        f'sonata/{NODESETS_FILE}',
         f'sonata/networks/edges/functional/{EDGE_POPULATION_NAME}/edges.h5',
-
-
-rule functional_nrn:
-    input:
-        'CircuitConfig_nrn',
-        'circuit.mvd3',
-        CONNECTOME_FUNCTIONAL_DIR + '/nrn.h5',
-        CONNECTOME_FUNCTIONAL_DIR + '/start.target'
 
 
 rule structural:
     input:
         'CircuitConfig_struct',
-        'circuit.mvd3',
+        f'sonata/networks/nodes/{NODE_POPULATION_NAME}/nodes.h5',
         'start.target',
-          CONNECTOME_STRUCTURAL_DIR + '/edges.h5',
+        CONNECTOME_STRUCTURAL_DIR + '/edges.h5',
 
 
 rule structural_sonata:
     input:
         'sonata/struct_circuit_config.json',
         f'sonata/networks/nodes/{NODE_POPULATION_NAME}/nodes.h5',
-        'sonata/node_sets.json',
+        f'sonata/{NODESETS_FILE}',
         f'sonata/networks/edges/structural/{EDGE_POPULATION_NAME}/edges.h5',
