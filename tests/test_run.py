@@ -36,7 +36,7 @@ def test_functional_all():
         runner = CliRunner()
         result = runner.invoke(
             run,
-            args + ['functional', 'functional_sonata', 'spatial_index_segment'],
+            args + ['functional', 'spatial_index_segment'],
             catch_exceptions=False,
         )
         assert result.exit_code == 0
@@ -58,10 +58,6 @@ def test_functional_all():
         assert edges_file.stat().st_size > 100
         with h5py.File(edges_file, 'r') as h5f:
             assert f'/edges/{edge_population_name}' in h5f
-        with h5py.File('connectome/functional/edges.h5', 'r') as h5f:
-            assert f'/edges/{edge_population_name}' in h5f
-
-        with h5py.File(edges_file, 'r') as h5f:
             assert node_population_name == h5f[f'/edges/{edge_population_name}/source_node_id'].attrs['node_population']
             assert node_population_name == h5f[f'/edges/{edge_population_name}/target_node_id'].attrs['node_population']
         with tmp_dir.joinpath('sonata/circuit_config.json').open('r') as f:

@@ -31,7 +31,3 @@ spykfunc_s2s:
 spatial_index_segment:
   jobname: segment_index
   salloc: '-A proj44 -p prod_small --constraint=cpu --time 0:05:00'
-
-spatial_index_synapse:
-  jobname: synapse_index
-  salloc: '-A proj44 -p prod_small --constraint=cpu --time 0:05:00'

@@ -12,8 +12,6 @@ dag:
 	mkdir -p $(OUT_DIR)
 	$(SM) functional > $(OUT_DIR)/functional.dot
 	$(SM) structural > $(OUT_DIR)/structural.dot
-	$(SM) functional_sonata > $(OUT_DIR)/functional_sonata.dot
-	$(SM) structural_sonata > $(OUT_DIR)/structural_sonata.dot
 	$(SM) spatial_index_segment > $(OUT_DIR)/spatial_index_segment.dot
 	$(SM) subcellular > $(OUT_DIR)/subcellular.dot
 	$(SM) assign_emodels > $(OUT_DIR)/assign_emodels.dot

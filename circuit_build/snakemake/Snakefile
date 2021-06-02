@@ -260,8 +260,8 @@ rule circuitconfig_functional:
         "Generate CircuitConfig for functional circuit"
 
     input:
-        CONNECTOME_FUNCTIONAL_DIR + '/edges.h5',
-        f'sonata/networks/nodes/{NODE_POPULATION_NAME}/nodes.h5'
+        f'sonata/networks/edges/functional/{EDGE_POPULATION_NAME}/edges.h5',
+        f'sonata/networks/nodes/{NODE_POPULATION_NAME}/nodes.h5',
 
     output:
         'CircuitConfig'
@@ -271,7 +271,9 @@ rule circuitconfig_functional:
 
     shell:
         build_circuit_config(
-            nrn_path=CONNECTOME_FUNCTIONAL_DIR + '/edges.h5',
+            nrn_path=Path(
+                CIRCUIT_DIR, f'sonata/networks/edges/functional/{EDGE_POPULATION_NAME}/edges.h5'
+            ).absolute(),
             cell_library_file=Path(
                 CIRCUIT_DIR, f'sonata/networks/nodes/{NODE_POPULATION_NAME}/nodes.h5'
             ).absolute(),
@@ -282,7 +284,7 @@ rule circuitconfig_structural:
         "Generate CircuitConfig for structural circuit"
 
     input:
-        CONNECTOME_STRUCTURAL_DIR + '/edges.h5',
+        f'sonata/networks/edges/structural/{EDGE_POPULATION_NAME}/edges.h5',
         f'sonata/networks/nodes/{NODE_POPULATION_NAME}/nodes.h5',
 
     output:
@@ -293,7 +295,9 @@ rule circuitconfig_structural:
 
     shell:
         build_circuit_config(
-            nrn_path=CONNECTOME_STRUCTURAL_DIR + '/edges.h5',
+            nrn_path=Path(
+                CIRCUIT_DIR, f'sonata/networks/edges/structural/{EDGE_POPULATION_NAME}/edges.h5'
+            ).absolute(),
             cell_library_file=Path(
                 CIRCUIT_DIR, f'sonata/networks/nodes/{NODE_POPULATION_NAME}/nodes.h5'
             ).absolute(),
@@ -791,26 +795,6 @@ rule parquet_to_sonata:
         )
 
 
-rule symlink_sonata_edges:
-    message:
-        "Symlink {wildcards.connectome_dir} SONATA edges"
-
-    input:
-        'sonata/networks/edges/{connectome_dir}/' + EDGE_POPULATION_NAME + '/edges.h5'
-
-    output:
-        'connectome/{connectome_dir}/edges.h5'
-
-    log:
-        log_path('symlink_sonata_edges_{connectome_dir}')
-
-    shell:
-        redirect_to_file(
-            "cd connectome/{wildcards.connectome_dir}/ && "
-            "ln -s ../../sonata/networks/edges/{wildcards.connectome_dir}/" + EDGE_POPULATION_NAME + "/edges.h5 edges.h5"
-        )
-
-
 rule subcellular:
     message:
         "Assign gene expressions / protein concentrations to cells"
@@ -896,32 +880,22 @@ rule circuitconfig_struct_sonata:
 
 
 rule functional:
-    input:
-        'CircuitConfig',
-        f'sonata/networks/nodes/{NODE_POPULATION_NAME}/nodes.h5',
-        'start.target',
-        CONNECTOME_FUNCTIONAL_DIR + '/edges.h5',
-
-
-rule functional_sonata:
+    #Note: creating both BlueConfig & circuit_config.json until we're fully transitioned to SONATA
     input:
         'sonata/circuit_config.json',
         f'sonata/networks/nodes/{NODE_POPULATION_NAME}/nodes.h5',
         f'sonata/{NODESETS_FILE}',
         f'sonata/networks/edges/functional/{EDGE_POPULATION_NAME}/edges.h5',
+        # for backwards compatibility
+        'CircuitConfig',
+        'start.target',
 
 
 rule structural:
     input:
-        'CircuitConfig_struct',
-        f'sonata/networks/nodes/{NODE_POPULATION_NAME}/nodes.h5',
-        'start.target',
-        CONNECTOME_STRUCTURAL_DIR + '/edges.h5',
-
-
-rule structural_sonata:
-    input:
         'sonata/struct_circuit_config.json',
-        f'sonata/networks/nodes/{NODE_POPULATION_NAME}/nodes.h5',
         f'sonata/{NODESETS_FILE}',
+        f'sonata/networks/nodes/{NODE_POPULATION_NAME}/nodes.h5',
         f'sonata/networks/edges/structural/{EDGE_POPULATION_NAME}/edges.h5',
+        'CircuitConfig_struct',
+        'start.target',
