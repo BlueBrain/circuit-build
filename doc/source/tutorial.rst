@@ -1,11 +1,6 @@
 How to create a new circuit build
 =================================
 
-.. note::
-
-    Neocortex circuit building pipeline has diverged from the "master" one.
-    Please make sure to check :ref:`ref-neocortex` section after reading the main tutorial.
-
 Preparation
 -----------
 
@@ -29,6 +24,9 @@ Please refer to :ref:`ref-bioname` section for the list of the files that consti
     ``<proj>/entities/bionames/`` folder and symlink the corresponding one from circuit build folder.
 
 3. Get a circuit building pipeline:
+
+.. warning::
+    Please use the bb5 modules when possible.
 
 **Locally**
 

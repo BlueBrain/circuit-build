@@ -11,10 +11,9 @@ A typical circuit release folder would look like:
 ::
 
     CircuitConfig
-    CircuitConfig_base
-    CircuitConfig_nrn
-    circuit.h5 or circuit.mvd3
     sonata/
+      circuit_config.json
+      node_sets.json
       networks/
         nodes/
           <nodes Sonata population name, by default 'All'>/
@@ -23,20 +22,17 @@ A typical circuit release folder would look like:
           functional/
             <edges Sonata population name, by default 'All'>/
               edges.h5
-    connectome/
-      functional/
-        edges.h5
-        nrn.h5
-        start.target
-        SYNAPSE_index.dat
-        SYNAPSE_index.idx
-        SYNAPSE_payload.dat
-        spykfunc
     start.target
     morphologies.tsv
-    SEGMENT_index.dat
-    SEGMENT_index.idx
-    SEGMENT_payload.dat
+
+    # the ones below are side-effects of building
+    connectome/
+      functional/
+        spykfunc
+    circuit.empty.h5
+    circuit.h5
+    circuit.morphologies.h5
+    circuit.somata.h5
 
 .. note::
   All of these files are normally produced as a part of circuit build pipeline.
@@ -53,55 +49,32 @@ morphology release etc). An example:
     Run Default
     {
       CircuitPath /gpfs/bbp.cscs.ch/project/proj64/circuits/test3
-      nrnPath /gpfs/bbp.cscs.ch/project/proj64/circuits/test3/connectome/functional
+      nrnPath /gpfs/bbp.cscs.ch/project/proj64/circuits/test3/sonata/networks/edges/functional/neocortex_neurons__chemical_synapse/edges.h5
       MorphologyPath /gpfs/bbp.cscs.ch/project/proj59/entities/morphologies/2017.10.31
       METypePath /gpfs/bbp.cscs.ch/project/proj64/entities/emodels/2017.11.03/hoc
       MEComboInfoFile /gpfs/bbp.cscs.ch/project/proj64/entities/emodels/2017.11.03/mecombo_emodel.tsv
-      CellLibraryFile circuit.mvd3
+      CellLibraryFile /gpfs/bbp.cscs.ch/project/proj64/circuits/test3/sonata/networks/nodes/neocortex_neurons/nodes.h5
       BioName /gpfs/bbp.cscs.ch/project/proj64/circuits/test3/bioname/
       Atlas http://voxels.nexus.apps.bbp.epfl.ch/api/analytics/atlas/releases/77831ACA-6198-4AA0-82EF-D0475A4E0647
     }
 
-**CircuitConfig_base**
-
-Variation of `CircuitConfig` for a circuit without connectome.
-
-**CircuitConfig_nrn**
-
-Variation of `CircuitConfig` for a functional circuit.
-
-**circuit.h5** or **circuit.mvd3**
-
-File with cell properties either in `SONATA`_ or `MVD3`_ format. Such file file does not contain
-morpho-electrical cell properties.
-
-**nodes.h5** from sonata/
+**nodes.h5**
 
 File with cell properties in `SONATA`_ format including morpho-electrical data
 
-**edges.h5** from sonata/
+**edges.h5**
 
 File with synapse properties in `SONATA`_ format
 
-**edges.h5** from connectome/
+**circuit_config.json**
 
-It is a symlink to `edges.h5` from sonata/
+The `SONATA`_ file describing the location of the circuit files.
+Roughly equivalent to the CircuitConfig file.
 
-**nrn.h5** from connectome/
+**node_sets.json**
+Generated `Node Sets`_ for the `SONATA`_ circuit.
+Roughly equivalent to the start.targets file.
 
-File with synapse properties in `NRN`_ format
-
-**start.target** from connectome/
-
-A symlink to the same file the root folder
-
-**[SEGMENT]_[index|payload]** from connectome/
-
-Segment `spatial index`_
-
-**spykfunc** from connectome/
-
-Auxiliary folder for temporary system files
 
 **start.target**
 
@@ -119,13 +92,33 @@ Text file defining cell *targets* (i.e. named collections of cell GIDs), e.g.:
       a1 a2 a42
     }
 
+Auxiliary Data
+~~~~~~~~~~~~~~
+
+The following files exist, but they are intermediary results during build:
+
+**circuit.empty.h5**
+Empty nodes-like file with generated structure.
+Contains the population name.
+
+**circuit.somata.h5**
+Nodes-like file with the above, and soma positions set; includes me-type.
+
+**circuit.morphologies.h5**
+Nodes-like file with the above, and the names of the places morphologies.
+
+**circuit.h5**
+
+File with cell properties in `SONATA`_ format.
+Such file file does not contain morpho-electrical cell properties.
 
 **morphologies.tsv**
 
 Auxiliary file for building cells properties file
 
-**[SYNAPSE]_[index|payload]**
-  Synapse `spatial index`_
+**spykfunc** in connectome/
+
+Auxiliary folder for temporary system files
 
 
 Experimental
@@ -158,6 +151,4 @@ Please refer to :ref:`subcellular phase <ref-phase-subcellular>` for the descrip
 
 .. _BlueConfig: https://bbpteam.epfl.ch/documentation/Circuit%20Documentation-0.0.1/blueconfig.html
 .. _SONATA: https://github.com/AllenInstitute/sonata/blob/master/docs/SONATA_DEVELOPER_GUIDE.md
-.. _MVD3: https://bbpteam.epfl.ch/documentation/Circuit%20Documentation-0.0.1/mvd3.html
-.. _NRN: https://bbpteam.epfl.ch/project/spaces/pages/viewpage.action?pageId=10919530
-.. _spatial index: https://bbpteam.epfl.ch/project/spaces/display/BBPDIAS/BBP-DIAS+Spatial+Indexing+of+Microcircuits
+.. _Node Sets: https://bbpteam.epfl.ch/documentation/projects/Circuit%20Documentation/latest/sonata_nodeset.html

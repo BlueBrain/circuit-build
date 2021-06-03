@@ -468,6 +468,17 @@ Intermediate files
 Intermediate files will be created in a subcellular directory.
 These HDF5 files will be used to create the `subcellular.h5` final file.
 
+functional
+----------
+
+Create a `functional`-ized SONATA circuit, based on the ``builderRecipeAllPathways.xml`` file.
+This includes pruning the synapses, and parameterizing them.
+
+structural
+----------
+Create a `strucral`-ized SONATA circuit, based on the ``builderRecipeAllPathways.xml`` file.
+This includes all synapses that satisfy the rules in the recipe file.
+
 
 .. _BrainBuilder: https://bbpteam.epfl.ch/documentation/projects/brainbuilder
 .. _placement_algorithm: https://bbpteam.epfl.ch/documentation/projects/placement-algorithm

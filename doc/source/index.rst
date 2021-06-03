@@ -11,7 +11,6 @@ This documentation outline the Blue Brain Project circuit building pipeline.
    bioname
    atlas
    tutorial
-   neocortex
    phases
    faq
    changelog

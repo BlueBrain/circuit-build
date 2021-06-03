@@ -69,27 +69,15 @@ How can I see the full list of the phases and their status?
 
 .. code-block:: bash
 
-    sm --list
+    circuit-build run --bioname ../ --cluster-config ../cluster.yaml --list
 
 or
 
 .. code-block:: bash
 
-    sm --summary
+    circuit-build run --bioname ../ --cluster-config ../cluster.yaml --summary
 
 Please refer to `Snakemake <http://snakemake.readthedocs.io/en/stable/index.html>`_ documentation for more details.
-
-
-How can I see the exact commands run?
--------------------------------------
-
-Run `snakemake` with ``-p`` argument:
-
-.. code-block:: bash
-
-    sm -p place_cells
-
-In fact, for better traceability we recommend to specify this argument *always*.
 
 
 How can I re-build some file and all its dependencies?

@@ -3,8 +3,17 @@ Changelog
 
 Version 3.2.0 (2021-06-01)
 --------------------------
+- move to SONATA only:
+  - nodes and edges only output in SONATA format, under the `sonata` directory
+  - the ``functional`` & ``structural`` rules create a CircuitConfig and start.target files, but with SONATA contents
+- the following rules were removed:
+    - `functional_nrn`
+    - `functional_sonata`
+    - `structural_sonata`
+    - `circuitconfig_nrn`
+    - `sonata_to_nrn`
+    - `symlink_sonata_edges`
 - Require touchdetector/5.6.0. [NSETM-1384]
-- Remove rules incompatible with sonata edges/nodes.
 - Use nodes.h5 instead of circuit.mvd3 in circuitconfig_structural.
 - Split all the job logs in separate files. [NSETM-1428]
 - Add option ``--with-summary`` to save a summary of the workflow in ``logs/<timestamp>/summary.tsv``.
