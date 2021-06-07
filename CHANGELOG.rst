@@ -14,6 +14,7 @@ Version 3.2.0 (2021-06-14)
     - `sonata_to_nrn`
     - `symlink_sonata_edges`
 - Require touchdetector/5.6.0. [NSETM-1384]
+- Require spykfunc/0.16.1.
 - Use nodes.h5 instead of circuit.mvd3 in circuitconfig_structural.
 - Split all the job logs in separate files. [NSETM-1428]
 - Log more git information and the md5 checksum of bioname files.

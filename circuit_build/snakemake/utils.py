@@ -13,6 +13,21 @@ import snakemake
 
 logger = logging.getLogger(__name__)
 
+SPACK_MODULEPATH = "/gpfs/bbp.cscs.ch/ssd/apps/hpc/jenkins/modules/all"
+NIX_MODULEPATH = (
+    "/nix/var/nix/profiles/per-user/modules/bb5-x86_64/modules-all/release/share/modulefiles/"
+)
+MODULES = {
+    "brainbuilder": (SPACK_MODULEPATH, ["archive/2020-08", "brainbuilder/0.14.0"]),
+    "flatindexer": (NIX_MODULEPATH, ["nix/hpc/flatindexer/1.8.12"]),
+    "jinja2": (SPACK_MODULEPATH, ["archive/2020-02", "python-dev/0.3"]),
+    "parquet-converters": (SPACK_MODULEPATH, ["archive/2020-09", "parquet-converters/0.5.7"]),
+    "placement-algorithm": (SPACK_MODULEPATH, ["archive/2021-03", "placement-algorithm/2.1.2"]),
+    "region-grower": (SPACK_MODULEPATH, ["unstable", "py-region-grower/0.2.3"]),
+    "spykfunc": (SPACK_MODULEPATH, ["unstable", "spykfunc/0.16.1"]),
+    "touchdetector": (SPACK_MODULEPATH, ["archive/2021-06", "touchdetector/5.6.0"]),
+}
+
 
 class Config:
     def __init__(self, config):
@@ -89,46 +104,7 @@ class Context:
         self.TOUCHES_DIR = "connectome/touches"
         self.CONNECTOME_FUNCTIONAL_DIR = "connectome/functional"
         self.CONNECTOME_STRUCTURAL_DIR = "connectome/structural"
-
-        self.SPACK_MODULEPATH = "/gpfs/bbp.cscs.ch/ssd/apps/hpc/jenkins/modules/all"
-        self.NIX_MODULEPATH = "/nix/var/nix/profiles/per-user/modules/bb5-x86_64/modules-all/release/share/modulefiles/"
-
-        self.MODULES = self.build_modules(
-            {
-                "brainbuilder": (
-                    self.SPACK_MODULEPATH,
-                    ["archive/2020-08", "brainbuilder/0.14.0"],
-                ),
-                "flatindexer": (
-                    self.NIX_MODULEPATH,
-                    ["nix/hpc/flatindexer/1.8.12"],
-                ),
-                "jinja2": (
-                    self.SPACK_MODULEPATH,
-                    ["archive/2020-02", "python-dev/0.3"],
-                ),
-                "parquet-converters": (
-                    self.SPACK_MODULEPATH,
-                    ["archive/2020-09", "parquet-converters/0.5.7"],
-                ),
-                "placement-algorithm": (
-                    self.SPACK_MODULEPATH,
-                    ["archive/2021-03", "placement-algorithm/2.1.2"],
-                ),
-                "region-grower": (
-                    self.SPACK_MODULEPATH,
-                    ["unstable", "py-region-grower/0.2.3"],
-                ),
-                "spykfunc": (
-                    self.SPACK_MODULEPATH,
-                    ["archive/2020-06", "spykfunc/0.15.6"],
-                ),
-                "touchdetector": (
-                    self.SPACK_MODULEPATH,
-                    ["archive/2021-04", "touchdetector/5.6.0", "hpe-mpi"],
-                ),
-            }
-        )
+        self.MODULES = self.build_modules(MODULES)
 
     def bioname_path(self, filename):
         return str(Path(self.BIONAME, filename))
@@ -256,7 +232,7 @@ class Context:
                     module_path = parts[2]
                     modules[module_name] = (module_path, module_list)
                 else:
-                    modules[module_name] = (self.SPACK_MODULEPATH, module_list)
+                    modules[module_name] = (SPACK_MODULEPATH, module_list)
         return modules
 
     def bbp_env(self, module_env, command, slurm_env=None, skip_srun=False):

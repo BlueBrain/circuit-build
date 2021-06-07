@@ -73,7 +73,7 @@ def test_functional_all():
 def test_synthesize_morphologies():
     node_population_name = 'node_population_name'
     edge_population_name = 'edge_population_name'
-    with tempfile.TemporaryDirectory(dir=TEST_DIR) as data_copy_dir:
+    with tmp_cwd(), tempfile.TemporaryDirectory(dir=TEST_DIR) as data_copy_dir:
         data_copy_dir = Path(data_copy_dir) / TEST_DATA_DIR_SYNTH.name
         shutil.copytree(TEST_DATA_DIR_SYNTH, data_copy_dir)
         with edit_yaml(data_copy_dir / 'MANIFEST.yaml') as manifest:
@@ -126,7 +126,7 @@ def test_custom_module(caplog, capfd):
 
 def test_no_git_bioname(caplog, capfd):
     """This test verifies that bioname is checked to be under git."""
-    with tempfile.TemporaryDirectory() as data_copy_dir:
+    with tmp_cwd(), tempfile.TemporaryDirectory() as data_copy_dir:
         data_copy_dir = Path(data_copy_dir) / TEST_DATA_DIR.name
         shutil.copytree(TEST_DATA_DIR, data_copy_dir)
         args = ['--bioname', str(data_copy_dir), '-u', str(data_copy_dir / 'cluster.yaml')]
@@ -159,7 +159,7 @@ def test_snakemake_circuit_config():
 
 def test_snakemake_no_git_bioname():
     """This test verifies that bioname is checked to be under git when called via `snakemake`."""
-    with tempfile.TemporaryDirectory() as data_copy_dir:
+    with tmp_cwd(), tempfile.TemporaryDirectory() as data_copy_dir:
         data_copy_dir = Path(data_copy_dir) / TEST_DATA_DIR.name
         shutil.copytree(TEST_DATA_DIR, data_copy_dir)
         args = ['--jobs', '8', '-p', '--config', f'bioname={data_copy_dir}', '-u',

@@ -1,9 +1,9 @@
 __default__:
-  salloc: '-A proj44 -p prod_small --time 0:05:00'
+  salloc: '-A ${{SALLOC_ACCOUNT:-proj30}} -p prod_small --time 0:05:00'
 
 choose_morphologies:
   salloc: >-
-    -A proj44
+    -A ${{SALLOC_ACCOUNT:-proj30}}
     -p prod_small
     -C cpu
     -n2
@@ -12,7 +12,7 @@ choose_morphologies:
 synthesize_morphologies:
   jobname: synthesize_morphologies
   salloc: >-
-    -A proj44
+    -A ${{SALLOC_ACCOUNT:-proj30}}
     -p prod_small
     -C cpu
     -n8
@@ -37,7 +37,7 @@ synthesize_morphologies:
 touchdetector:
   jobname: td
   salloc: >-
-    -A proj44
+    -A ${{SALLOC_ACCOUNT:-proj30}}
     -p prod_small
     -C cpu
     -n2
@@ -46,13 +46,13 @@ touchdetector:
 # running on 'prod' since '-C nvme' is not available on 'prod_small'
 spykfunc_s2f:
   jobname: s2f
-  salloc: '-A proj44 -p prod -c 36 -C nvme --exclusive --mem 0 --time 0:15:00'
+  salloc: '-A ${{SALLOC_ACCOUNT:-proj30}} -p prod -c 36 -C nvme --exclusive --mem 0 --time 0:15:00'
 
 # running on 'prod' since '-C nvme' is not available on 'prod_small'
 spykfunc_s2s:
   jobname: s2s
-  salloc: '-A proj44 -p prod -c 36 -C nvme --exclusive --mem 0 --time 0:15:00'
+  salloc: '-A ${{SALLOC_ACCOUNT:-proj30}} -p prod -c 36 -C nvme --exclusive --mem 0 --time 0:15:00'
 
 spatial_index_segment:
   jobname: segment_index
-  salloc: '-A proj44 -p prod_small --constraint=cpu --time 0:05:00'
+  salloc: '-A ${{SALLOC_ACCOUNT:-proj30}} -p prod_small --constraint=cpu --time 0:05:00'

@@ -632,14 +632,11 @@ So, for the recipe, after I exclude the 1 CRC cell, the 2 excitatory cells, and 
 
 		<class id="I1" gsyn="0.650988570667" gsynSD="0.349427688667" nrrp="1.0" dtc="10.4" dtcSD="6.2" u="0.16" uSD="0.10" d="45" dSD="21" f="376" fSD="253"/>
 		<class id="I2" gsyn="0.650988570667" gsynSD="0.349427688667" nrrp="1.0" dtc="8.30" dtcSD="2.2" u="0.25" uSD="0.13" d="706" dSD="405" f="021" fSD="9"/>
-		<class id="I3" gsyn="0.650988570667" gsynSD="0.349427688667" nrrp="1.0" dtc="6.40" dtcSD="1.7" u="0.32" uSD="0.14" d="144" dSD="80" f="062" fSD="31"/>
 
 		<class id="I1_PT" gsyn="0.583975041333" gsynSD="0.392507814667" nrrp="1.0" dtc="10.4" dtcSD="6.2" u="0.16" uSD="0.10" d="45" dSD="21" f="376" fSD="253"/>
 		<class id="I2_PT" gsyn="0.583975041333" gsynSD="0.392507814667" nrrp="1.0" dtc="8.30" dtcSD="2.2" u="0.25" uSD="0.13" d="706" dSD="405" f="021" fSD="9"/>
 		<class id="I3_PT" gsyn="0.583975041333" gsynSD="0.392507814667" nrrp="1.0" dtc="6.40" dtcSD="1.7" u="0.32" uSD="0.14" d="144" dSD="80" f="062" fSD="31"/>
 
-		<class id="I1_DT" gsyn="0.713215419333" gsynSD="0.301560882" nrrp="1.0" dtc="10.4" dtcSD="6.2" u="0.16" uSD="0.10" d="45" dSD="21" f="376" fSD="253"/>
-		<class id="I3_DT" gsyn="0.713215419333" gsynSD="0.301560882" nrrp="1.0" dtc="6.40" dtcSD="1.7" u="0.32" uSD="0.14" d="144" dSD="80" f="062" fSD="31"/>
 		<class id="I2_DT" gsyn="0.713215419333" gsynSD="0.301560882" nrrp="1.0" dtc="8.30" dtcSD="2.2" u="0.25" uSD="0.13" d="706" dSD="405" f="021" fSD="9"/>
 
 <!-- I2-like *MC->*PC specific pathway parameters from Silberberg & Markram, 2007 SR -->
