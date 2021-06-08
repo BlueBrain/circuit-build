@@ -27,11 +27,13 @@ def test_ok(run_mock, datetime_mock, open_mock, mkdir_mock):
     assert result.exit_code == 0
     args = run_mock.call_args_list[0][0][0]
     assert args == [
-        'snakemake', '--jobs', '8', '--printshellcmds',
-        '--config', f'bioname={TEST_DATA_DIR}',
-        f'timestamp={expected_timestamp}',
+        'snakemake',
         '--snakefile', SNAKEFILE,
         '--cluster-config', str(TEST_DATA_DIR / 'cluster.yaml'),
+        '--config',
+        f'bioname={TEST_DATA_DIR}',
+        f'timestamp={expected_timestamp}',
+        '--jobs', '8', '--printshellcmds',
     ]
 
 
@@ -53,19 +55,23 @@ def test_ok_with_summary(run_mock, datetime_mock, open_mock, mkdir_mock):
     assert result.exit_code == 0
     args = run_mock.call_args_list[0][0][0]
     assert args == [
-        'snakemake', '--jobs', '8', '--printshellcmds',
-        '--config', f'bioname={TEST_DATA_DIR}',
-        f'timestamp={expected_timestamp}',
+        'snakemake',
         '--snakefile', SNAKEFILE,
         '--cluster-config', str(TEST_DATA_DIR / 'cluster.yaml'),
+        '--config',
+        f'bioname={TEST_DATA_DIR}',
+        f'timestamp={expected_timestamp}',
+        '--jobs', '8', '--printshellcmds',
     ]
     args = run_mock.call_args_list[1][0][0]
     assert args == [
-        'snakemake', '--jobs', '8', '--printshellcmds',
-        '--config', f'bioname={TEST_DATA_DIR}',
-        f'timestamp={expected_timestamp}',
+        'snakemake',
         '--snakefile', SNAKEFILE,
         '--cluster-config', str(TEST_DATA_DIR / 'cluster.yaml'),
+        '--config',
+        f'bioname={TEST_DATA_DIR}',
+        f'timestamp={expected_timestamp}',
+        '--jobs', '8', '--printshellcmds',
         '--detailed-summary',
     ]
 
@@ -88,19 +94,23 @@ def test_ok_with_report(run_mock, datetime_mock, open_mock, mkdir_mock):
     assert result.exit_code == 0
     args = run_mock.call_args_list[0][0][0]
     assert args == [
-        'snakemake', '--jobs', '8', '--printshellcmds',
-        '--config', f'bioname={TEST_DATA_DIR}',
-        f'timestamp={expected_timestamp}',
+        'snakemake',
         '--snakefile', SNAKEFILE,
         '--cluster-config', str(TEST_DATA_DIR / 'cluster.yaml'),
+        '--config',
+        f'bioname={TEST_DATA_DIR}',
+        f'timestamp={expected_timestamp}',
+        '--jobs', '8', '--printshellcmds',
     ]
     args = run_mock.call_args_list[1][0][0]
     assert args == [
-        'snakemake', '--jobs', '8', '--printshellcmds',
-        '--config', f'bioname={TEST_DATA_DIR}',
-        f'timestamp={expected_timestamp}',
+        'snakemake',
         '--snakefile', SNAKEFILE,
         '--cluster-config', str(TEST_DATA_DIR / 'cluster.yaml'),
+        '--config',
+        f'bioname={TEST_DATA_DIR}',
+        f'timestamp={expected_timestamp}',
+        '--jobs', '8', '--printshellcmds',
         '--report', f'logs/{expected_timestamp}/report.html',
     ]
 
@@ -131,11 +141,14 @@ def test_printshellcmds_is_not_set(run_mock, datetime_mock, open_mock, mkdir_moc
     assert result.exit_code == 0
     args = run_mock.call_args_list[0][0][0]
     assert args == [
-        'snakemake', '--jobs', '8', '--printshellcmds',
-        '--config', f'bioname={TEST_DATA_DIR}',
-        f'timestamp={expected_timestamp}',
+        'snakemake',
         '--snakefile', SNAKEFILE,
-        '--cluster-config', str(TEST_DATA_DIR / 'cluster.yaml')]
+        '--cluster-config', str(TEST_DATA_DIR / 'cluster.yaml'),
+        '--config',
+        f'bioname={TEST_DATA_DIR}',
+        f'timestamp={expected_timestamp}',
+        '--jobs', '8', '--printshellcmds',
+    ]
 
 
 @patch('circuit_build.cli.Path.mkdir')
@@ -161,12 +174,14 @@ def test_modules(run_mock, datetime_mock, open_mock, mkdir_mock):
     assert result.exit_code == 0
     args = run_mock.call_args_list[0][0][0]
     assert args == [
-        'snakemake', '--jobs', '8', '--printshellcmds',
-        '--config', f'bioname={TEST_DATA_DIR}',
-        f'timestamp={expected_timestamp}',
-        f'modules=["{custom_module1}", "{custom_module2}"]',
+        'snakemake',
         '--snakefile', SNAKEFILE,
         '--cluster-config', str(TEST_DATA_DIR / 'cluster.yaml'),
+        '--config',
+        f'bioname={TEST_DATA_DIR}',
+        f'timestamp={expected_timestamp}',
+        f'modules=["{custom_module1}","{custom_module2}"]',
+        '--jobs', '8', '--printshellcmds',
     ]
 
 

@@ -80,20 +80,32 @@ or
 Please refer to `Snakemake <http://snakemake.readthedocs.io/en/stable/index.html>`_ documentation for more details.
 
 
-How can I re-build some file and all its dependencies?
-------------------------------------------------------
+How can I rebuild the generated files and all their dependencies?
+-----------------------------------------------------------------
+
+You can delete all the generated output files with:
 
 .. code-block:: bash
 
-    sm -R start.target
+    circuit-build run --bioname ../ --cluster-config ../cluster.yaml --delete-all-output
 
-Please note that you can use file names as well as phase names for defining build targets:
+Before deleting the output files, you can see which files would be deleted if you add the option
+``--dry-run`` to the previous command.
+
+After deleting the files you'll have a clean environment, and you can run again ``circuit-build``
+with the desired options.
+
+You can also use the option ``-R`` or ``--forcerun`` with snakemake to rebuild only one
+or more specific files, without rebuilding all the dependencies.
+If you need to use this option with ``circuit-build`` then you can use this command:
 
 .. code-block:: bash
 
-    sm -R targetgen
+    circuit-build run --bioname ../ --cluster-config ../cluster.yaml -R <target> -p <target>
 
-thus will have the same effect.
+Note that the target must be specified for both the rule to be re-executed, and the target rule.
+The parameter ``-p`` added before the target rule is a trick to separate it from the previous target.
+Alternatively, you can replace ``-p`` with a double ``-- --``.
 
 Please refer to `Snakemake <http://snakemake.readthedocs.io/en/stable/index.html>`_ documentation for more details, and other options (run *upto* particular phase, etc).
 

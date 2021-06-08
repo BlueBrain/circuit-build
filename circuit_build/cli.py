@@ -1,13 +1,13 @@
 """Cli module"""
+import json
 import logging
+import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
-import subprocess
+
 import click
 import pkg_resources
-import json
-
 
 L = logging.getLogger()
 
@@ -22,22 +22,24 @@ def _index(args, *opts):
 
 
 def _build_args(args, bioname, modules, timestamp):
-    if _index(args, '--printshellcmds', '-p') is None:
-        args = ['--printshellcmds'] + args
-    if _index(args, '--cores', '--jobs', '-j') is None:
-        args = ['--jobs', '8'] + args
     # force the timestamp to the same value in different executions of snakemake
-    args = args + ['--config', f'bioname={bioname}', f'timestamp={timestamp}']
+    extra_args = ['--config', f'bioname={bioname}', f'timestamp={timestamp}']
     if modules:
         # serialize the list of strings with json to be backward compatible with Snakemake:
         # snakemake >= 5.28.0 loads config using yaml.BaseLoader,
         # snakemake < 5.28.0 loads config using eval.
-        args += [f'modules={json.dumps(modules)}']
-    return args
+        extra_args += [f'modules={json.dumps(modules, separators=(",", ":"))}']
+    if _index(args, '--cores', '--jobs', '-j') is None:
+        extra_args += ['--jobs', '8']
+    if _index(args, '--printshellcmds', '-p') is None:
+        extra_args += ['--printshellcmds']
+    # prepend the extra args to args
+    return extra_args + args
 
 
 def _run_snakemake_process(cmd, errorcode=1):
     """Run the main snakemake process."""
+    L.info("Command: %s", " ".join(cmd))
     result = subprocess.run(cmd)
     if result.returncode != 0:
         L.error("Snakemake process failed")
@@ -48,6 +50,7 @@ def _run_snakemake_process(cmd, errorcode=1):
 def _run_summary_process(cmd, filepath: Path, errorcode=2):
     """Save the summary to file."""
     cmd = cmd + ['--detailed-summary']
+    L.info("Command: %s", " ".join(cmd))
     filepath.parent.mkdir(parents=True, exist_ok=True)
     with filepath.open('w') as fd:
         result = subprocess.run(cmd, stdout=fd)
@@ -60,6 +63,7 @@ def _run_summary_process(cmd, filepath: Path, errorcode=2):
 def _run_report_process(cmd, filepath: Path, errorcode=4):
     """Save the report to file."""
     cmd = cmd + ['--report', str(filepath)]
+    L.info("Command: %s", " ".join(cmd))
     filepath.parent.mkdir(parents=True, exist_ok=True)
     result = subprocess.run(cmd)
     if result.returncode != 0:
@@ -133,7 +137,7 @@ def run(
     timestamp = f"{datetime.now():%Y%m%dT%H%M%S}"
     args = _build_args(args, bioname, modules, timestamp)
 
-    cmd = ['snakemake', *args, '--snakefile', snakefile, '--cluster-config', cluster_config]
+    cmd = ['snakemake', '--snakefile', snakefile, '--cluster-config', cluster_config, *args]
     exit_code = _run_snakemake_process(cmd)
     if with_summary:
         # snakemake with the --summary/--detailed-summary option does not execute the workflow
