@@ -13,13 +13,3 @@ Run Default
     BioName {{ BIONAME }}
     Atlas {{ ATLAS }}
 }
-{%- if PROJECTIONS is defined %}
-{%- for name in PROJECTIONS.split(';') %}
-
-Projection {{ name }}
-{
-    Path {{ CIRCUIT_PATH }}/proj_{{ name }}
-    Source proj_{{ name }}_Source
-}
-{%- endfor %}
-{%- endif %}

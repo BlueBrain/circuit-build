@@ -32,9 +32,12 @@ In particular, the following files should be placed there:
 * ``extNeuronDB.dat``
 * ``placement_rules.xml``
 * ``builder[Connectivity]RecipeAllPathways.xml``
+* ``mini_frequencies.tsv`` (when `place_cells`: mini_frequencies is used)
 
-Optionally, `bioname` can also contain YAML files with cell target definitions. If used, these should be referenced from :ref:`ref-phase-targetgen` section in ``MANIFEST.yaml``.
+Optionally, `bioname` can also contain YAML files with cell target definitions.
+If used, these should be referenced from :ref:`ref-phase-targetgen` section in ``MANIFEST.yaml``.
 
+.. _ref-manifest-yaml:
 
 MANIFEST.yaml
 ~~~~~~~~~~~~~
@@ -67,64 +70,14 @@ It starts with a `common` section:
 
 and follows with separate sections for each phase.
 
-We'll provide a short description for each of the `common` values here.
-Please refer to :ref:`ref-phases` for each phase config description.
+| We'll provide a short description for each of the `common` values here.
+| Please refer to :ref:`ref-phases` for each phase config description.
 
-**atlas**
-    Atlas URL in VoxelBrain or local folder path.
-
-**region**
-    Optional Parameter.
-
-    Defines the Atlas Region to populate (must be a subset of the atlas).
-
-    If omitted, the region mask is not applied.
-
-**mask**
-    Optional Parameter.
-
-    Defines a volumetric mask to populate (must be a subset of the atlas).
-
-    | If provided, looks for the corresponding dataset in the atlas.
-    | Could be used both with or without **region** (in the former case, two masks are intersected).
-
-    If omitted, the volumetric mask is not applied.
-
-**morph_release**
-    Path to morphology release folder.
-    It should contain:
-
-    * ``h5v1`` folder with morphologies in H5v1 format
-    * ``ascii`` folder with morphologies in ASC format
-    * ``annotations.json`` file with compacted annotations used for placement, created with `compact-annotations` in the `placement-algorithm` module
-
-.. tip::
-
-  Since `morph_release` entity is not properly formalized yet, different tools might have different opinion how ``h5v1`` folder should be named. To be on a safe side, we recommend providing also ``h5`` and ``v1`` *aliases* in addition to ``h5v1``.
+.. jsonschema:: ../../circuit_build/snakemake/schemas/MANIFEST.yaml#/properties/common
 
 
-**emodel_release**
-    Path to emodel release folder. It should contain:
-
-    * ``hoc`` folder with model HOC templates
-    * ``mecombo_emodel.tsv`` file with *me_combo* parameters
-
-
-**node_population_name**
-    Name of Sonata nodes population to produce. It *should* follow the naming guidelines in the
-    `documentation <https://bbpteam.epfl.ch/documentation/projects/Circuit%20Documentation/latest/sonata_population.html#nodes>`_.
-    Additionally this name will be used for the parent folder of the produced Sonata nodes file under
-    `sonata/networks/nodes/` folder.
-
-
-**edge_population_name**
-    Name of Sonata edges population to produce. It *should* follow the naming guidelines in the
-    `documentation. <https://bbpteam.epfl.ch/documentation/projects/Circuit%20Documentation/latest/sonata_population.html#edges>`_.
-    Additionally this name will be used for the parent folder of the produced Sonata nodes file under
-    `sonata/networks/edges/` folder.
-
-
-An example of full ``MANIFEST.yaml``:
+You can download the complete :download:`schema <../../circuit_build/snakemake/schemas/MANIFEST.yaml>`
+used for validation, and you can see below an example of full ``MANIFEST.yaml``:
 
 .. literalinclude:: ../../tests/proj66-tiny/MANIFEST.yaml
    :language: yaml

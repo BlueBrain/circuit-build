@@ -1,10 +1,8 @@
 from pathlib import Path
 
-from utils import Config, Context
+from utils import Context
 
-conf = Config(config=config)
-ctx = Context(conf=conf, workflow=workflow, cluster_config=cluster_config)
-
+ctx = Context(workflow=workflow, config=config, cluster_config=cluster_config)
 ctx.check_git_info(ctx.BIONAME)
 
 
@@ -115,32 +113,32 @@ rule place_cells:
                 "--atlas-cache",
                 ctx.ATLAS_CACHE_DIR,
                 f"--mini-frequencies {ctx.bioname_path('mini_frequencies.tsv')}"
-                if conf.get(["place_cells", "mini_frequencies"], default=False)
+                if ctx.conf.get(["place_cells", "mini_frequencies"], default=False)
                 else "",
-                ctx.format_if("--region {}", conf.get(["common", "region"])),
-                ctx.format_if("--mask {}", conf.get(["common", "mask"])),
+                ctx.format_if("--region {}", ctx.conf.get(["common", "region"])),
+                ctx.format_if("--mask {}", ctx.conf.get(["common", "mask"])),
                 "--soma-placement",
-                conf.get(["place_cells", "soma_placement"]),
+                ctx.conf.get(["place_cells", "soma_placement"]),
                 "--density-factor",
-                conf.get(["place_cells", "density_factor"], default=1.0),
+                ctx.conf.get(["place_cells", "density_factor"], default=1.0),
             ]
             + [
                 f"--atlas-property {k} {v}"
-                for k, v in conf.get(
+                for k, v in ctx.conf.get(
                     ["place_cells", "atlas_property"], default={"region": "~brain_regions"}
                 ).items()
             ]
             + [
                 "--append-hemisphere"
-                if conf.get(["place_cells", "append_hemisphere"], default=False)
+                if ctx.conf.get(["place_cells", "append_hemisphere"], default=False)
                 else "",
                 ctx.format_if(
                     "--sort-by {}",
-                    value=conf.get(["place_cells", "sort_by"]),
+                    value=ctx.conf.get(["place_cells", "sort_by"]),
                     func=lambda x: ",".join(x),
                 ),
                 "--seed",
-                conf.get(["place_cells", "seed"]),
+                ctx.conf.get(["place_cells", "seed"]),
                 "--output",
                 "{output}",
             ],
@@ -175,9 +173,9 @@ rule choose_morphologies:
                 "--annotations",
                 Path(ctx.MORPH_RELEASE, "annotations.json"),
                 "--alpha",
-                conf.get(["choose_morphologies", "alpha"]),
+                ctx.conf.get(["choose_morphologies", "alpha"]),
                 "--seed",
-                conf.get(["choose_morphologies", "seed"]),
+                ctx.conf.get(["choose_morphologies", "seed"]),
                 "--output",
                 "{output}",
             ],
@@ -209,7 +207,7 @@ rule assign_morphologies:
                 "--atlas-cache",
                 ctx.ATLAS_CACHE_DIR,
                 "--max-drop-ratio",
-                conf.get(["assign_morphologies", "max_drop_ratio"], default=0.0),
+                ctx.conf.get(["assign_morphologies", "max_drop_ratio"], default=0.0),
                 "--out-cells-path",
                 "{output}",
             ],
@@ -237,7 +235,7 @@ rule assign_emodels_per_type:
                 ctx.MORPHDB,
                 "--output {output}",
                 "--seed",
-                conf.get(["assign_emodels", "seed"], default=0),
+                ctx.conf.get(["assign_emodels", "seed"], default=0),
                 "{input}",
             ],
             slurm_env="assign_emodels",
@@ -290,7 +288,7 @@ rule touchdetector:
                 "--output",
                 ctx.TOUCHES_DIR,
                 "--touchspace",
-                conf.get(["touchdetector", "touchspace"], default="axodendritic"),
+                ctx.conf.get(["touchdetector", "touchspace"], default="axodendritic"),
                 "--from {input[neurons]}",
                 ctx.NODE_POPULATION_NAME,
                 "--to {input[neurons]}",

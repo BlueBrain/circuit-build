@@ -19,6 +19,8 @@ Version 3.2.0 (2021-06-01)
 - Add option ``--with-summary`` to save a summary of the workflow in ``logs/<timestamp>/summary.tsv``.
 - Add option ``--with-report`` to save a report of the workflow in ``logs/<timestamp>/report.html``.
 - Replace nose with pytest in unit tests.
+- Add jsonschema to validate MANIFEST.yaml and keep the documentation in sync.
+- Remove Projection section from CircuitConfig because the syntax is not up to date.
 
 Version 3.1.4 (2021-05-05)
 --------------------------

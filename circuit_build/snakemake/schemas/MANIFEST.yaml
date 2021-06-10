@@ -1,0 +1,424 @@
+%YAML 1.1
+---
+$schema: 'http://json-schema.org/draft-07/schema#'
+$id: 'https://bbp.epfl.ch/schemas/common/circuit-build/v1/manifest.json'
+type: object
+additionalProperties: false
+required:
+  - common
+properties:
+  common:
+    type: object
+    additionalProperties: false
+    required:
+      - atlas
+      - morph_release
+      - node_population_name
+      - edge_population_name
+    properties:
+      atlas:
+        description: |
+          Atlas URL in VoxelBrain or local folder path.
+        type: string
+        example: '/gpfs/bbp.cscs.ch/project/proj66/entities/dev/atlas/O1-152'
+      region:
+        description: |
+          Defines the Atlas Region to populate (must be a subset of the atlas).
+
+          If omitted, the region mask is not applied.
+        type: string
+        example: 'mc2_Column'
+      mask:
+        description: |
+          Defines a volumetric mask to populate (must be a subset of the atlas).
+
+          If provided, looks for the corresponding dataset in the atlas.
+          Could be used both with or without **region** (in the former case, two masks are intersected).
+
+          If omitted, the volumetric mask is not applied.
+        type: string
+        example: '[mask]mc2'
+      morph_release:
+        description: |
+          Path to morphology release folder.
+          It should contain:
+
+          * ``h5v1`` folder with morphologies in H5v1 format
+          * ``ascii`` folder with morphologies in ASC format
+          * ``annotations.json`` file with compacted annotations used for placement, created with `compact-annotations` in the `placement-algorithm` module
+
+          .. tip::
+
+            Since `morph_release` entity is not properly formalized yet, different tools might have
+            different opinion how ``h5v1`` folder should be named. To be on a safe side, we recommend providing
+            also ``h5`` and ``v1`` *aliases* in addition to ``h5v1``.
+        type: string
+        example: '/gpfs/bbp.cscs.ch/project/proj66/entities/morphologies/2018.02.16'
+      emodel_release:
+        description: |
+          Path to emodel release folder. It should contain:
+
+          * ``hoc`` folder with model HOC templates
+          * ``mecombo_emodel.tsv`` file with *me_combo* parameters
+        type: string
+        example: '/gpfs/bbp.cscs.ch/project/proj66/entities/emodels/2018.02.26.dev0'
+      node_population_name:
+        description: |
+          Name of Sonata nodes population to produce. It *should* follow the naming guidelines in the
+          `documentation <https://bbpteam.epfl.ch/documentation/projects/Circuit%20Documentation/latest/sonata_population.html#nodes>`_.
+          Additionally this name will be used for the parent folder of the produced Sonata nodes file under
+          `sonata/networks/nodes/` folder.
+        type: string
+        example: 'neocortex_neurons'
+      edge_population_name:
+        description: |
+          Name of Sonata edges population to produce. It *should* follow the naming guidelines in the
+          `documentation. <https://bbpteam.epfl.ch/documentation/projects/Circuit%20Documentation/latest/sonata_population.html#edges>`_.
+          Additionally this name will be used for the parent folder of the produced Sonata nodes file under
+          `sonata/networks/edges/` folder.
+        type: string
+        example: 'neocortex_neurons__chemical_synapse'
+
+  place_cells:
+    type: object
+    additionalProperties: false
+    required:
+      - soma_placement
+    properties:
+      soma_placement:
+        description: |
+          Soma placement method used by `BrainBuilder`.
+
+          Could be either *basic* for uniform random placement; or *poisson_disc* for `Poisson disc sampling
+          <https://bbpteam.epfl.ch/project/spaces/display/BBPNSE/On+sampling+methods+to+generate+cell+positions>`_.
+        type: string
+        example: 'basic'
+      density_factor:
+        description: |
+          Multiply all mtype densities specified in the cell composition recipe by the given factor.
+
+          Optional; if omitted, mtype densities are used as-is.
+        type: number
+        default: 1.0
+      atlas_property:
+        description: |
+          Properties to assign based on auxiliary volumetric datasets.
+
+          More specifically, it is a mapping like:
+
+          ::
+
+              place_cells:
+                  ...
+                  atlas_property:
+                      hypercolumn: 'column'
+                      region: '~brain_regions'
+
+          where key is the property name to use in *Cells* (``hypercolumn``, ``region`` in the example above), and value is the name of volumetric dataset to query (``column``, ``brain_regions``).
+          The corresponding atlas dataset would be queried at cell positions, and the result values would go to *Cells*.
+          If dataset name is prefixed with ``~``, values from the dataset would be interpreted as region IDs and re-mapped to region acronyms using atlas ``hierarchy.json``.
+
+          This mechanism provides flexibility in choosing how to assign ``region`` property in *Cells*.
+          For instance, when building a model of Neocortex, one can opt for assigning ``region`` without layers (i.e., ``SSp-ll`` instead of ``SSp-ll[1-6]``.
+          It also allows to embed additional properties like cell position in brain region-specific coordinate system; or column ID for artificial mosaic circuits.
+
+          .. warning::
+
+              | Please note that it's mandatory to define ``region`` property.
+              | For backwards compatibility, if **atlas_property** section is missing from ``MANIFEST.yaml``, it will default to ``{'region': '~brain_regions'}``.
+        type: object
+        default: {'region': '~brain_regions'}
+      append_hemisphere:
+        description: |
+          Neocortex-specific flag.
+
+          | If set to ``True``, ``hemisphere`` values would be appended to ``region`` (i.e., ``SSp-ll@left`` instead of ``SSp-ll``).
+          | ``region`` and ``hemisphere`` should be specified using **atlas_property** mechanism.
+        type: boolean
+        default: false
+      sort_by:
+        description: |
+          Sort *Cells* by properties values.
+
+          | A list of properties is anticipated (e.g., ``['region', 'mtype']``).
+          | If omitted, cells are not sorted in any particular order
+        type: array
+        items:
+          type: string
+        uniqueItems: true
+        example: ['region', 'mtype']
+      mini_frequencies:
+        description: |
+          | If ``True``, the mini frequencies file ``mini_frequencies.tsv`` inside bioname is used.
+          | Optional, if omitted defaults to ``False``.
+        type: boolean
+        example: true
+      seed:
+        description: |
+          Pseudo-random generator seed.
+        type: integer
+        default: 0
+
+  choose_morphologies:
+    type: object
+    additionalProperties: false
+    required:
+      - alpha
+      - seed
+    properties:
+      alpha:
+        description: |
+          Use `score ** alpha` as morphology choice probability.
+        type: number
+        example: 3.0
+      seed:
+        description: |
+          Pseudo-random generator seed.
+        type: integer
+        example: 0
+
+  assign_morphologies:
+    type: object
+    additionalProperties: false
+    properties:
+      max_drop_ratio:
+        description: |
+          | Maximal ratio of positions that can be dropped for each mtype (due to failure to pick an morphology).
+          | Optional, if not provided defaults to 0.0 (i.e., no position dropping allowed).
+        type: number
+        default: 0.0
+        example: 0.1
+
+  assign_emodels:
+    type: object
+    additionalProperties: false
+    properties:
+      seed:
+        description: |
+          Pseudo-random generator seed.
+        type: integer
+        default: 0
+
+  targetgen:
+    type: object
+    additionalProperties: false
+    properties:
+      targets:
+        description: |
+          :ref:`Target definitions <ref-bioname-targets>` file to use for generating ``start.target``.
+
+          Should be located in ``bioname`` folder.
+        type: string
+        example: 'targets.yaml'
+      allow_empty:
+        description: |
+          Allow query-based targets to resolve empty GID set.
+        type: boolean
+        default: false
+
+  touchdetector:
+    type: object
+    additionalProperties: false
+    properties:
+      touchspace:
+        description: |
+          Override the touch space.
+        type: string
+        default: 'axodendritic'
+
+  spykfunc_s2f:
+    type: object
+    additionalProperties: false
+    properties:
+      filters:
+        description: |
+          Run a list of custom filters. If specified, the following filters must be included:
+          - ``BoutonDistance``
+          - ``TouchRules``
+          - ``ReduceAndCut``
+          - ``SynapseProperties``
+        type: array
+        items:
+          type: string
+        uniqueItems: true
+        default: []
+
+  spykfunc_s2s:
+    type: object
+    additionalProperties: false
+    properties:
+      filters:
+        description: |
+          Run a list of custom filters. If specified, the following filters must be included:
+          - ``BoutonDistance``
+          - ``SynapseProperties``
+        type: array
+        items:
+          type: string
+        uniqueItems: true
+        default: []
+
+  subcellular:
+    type: object
+    additionalProperties: false
+    required:
+      - transcriptome
+      - mtype_taxonomy
+      - cell_proteins
+      - synapse_proteins
+      - seed
+    properties:
+      transcriptome:
+        description: |
+          A Nexus *transcriptomeexperiment* instance with a CSV attachment file containing all the data
+              related to gene expressions. The attachment file is formatted as follow.
+
+              The first 10 rows should be ``tissue``, ``group #``, ``total mRNA mol``, ``well``, ``sex``,
+              ``age``, ``diameter``, ``cell_id``, ``level1class``, ``level2class`` for each cells.
+              Each column of this first table should be the corresponding values for all cells.
+
+              The rows from 12 to the end should contain the corresponding gene expressions for each cells.
+
+              The exact formatting must be:
+
+              +----------+------------------+-------------------+-------------------+
+              |          | tissue           |   sscortex        |  sscortex         |
+              +----------+------------------+-------------------+-------------------+
+              |          |  group #         |   1               |  4                |
+              +----------+------------------+-------------------+-------------------+
+              |          |  total mRNA mol  |   21580           |  7267             |
+              +----------+------------------+-------------------+-------------------+
+              |          |  well            |   11              |  89               |
+              +----------+------------------+-------------------+-------------------+
+              |          |  sex             |   1               |  -1               |
+              +----------+------------------+-------------------+-------------------+
+              |          |  age             |   21              |  23               |
+              +----------+------------------+-------------------+-------------------+
+              |          |  diameter        |   0               |  10.8             |
+              +----------+------------------+-------------------+-------------------+
+              |          |  cell_id         |   1772071015_C02  |  1772071041_A12   |
+              +----------+------------------+-------------------+-------------------+
+              |          |  level1class     |   interneurons    |  oligodendrocytes |
+              +----------+------------------+-------------------+-------------------+
+              |          |  level2class     |   Int10           |  Oligo5           |
+              +----------+------------------+-------------------+-------------------+
+              |          |                  |                   |                   |
+              +----------+------------------+-------------------+-------------------+
+              | Tspan12  |        1         |        0          |         0         |
+              +----------+------------------+-------------------+-------------------+
+              | Tshz1    |        1         |        3          |         1         |
+              +----------+------------------+-------------------+-------------------+
+              | Fnbp1l   |        1         |        3          |         1         |
+              +----------+------------------+-------------------+-------------------+
+              | Adamts15 |        1         |        1          |         0         |
+              +----------+------------------+-------------------+-------------------+
+
+          See:
+          https://bbp-nexus.epfl.ch/staging/explorer/ngv/synprot/transcriptomeexperiment/v0.1.0/550179e8-496a-44e7-be74-0fc2cc8f3c52
+          for a complete example.
+        type: string
+      mtype_taxonomy:
+        description: |
+          A *mtypetaxonomy* Nexus instance with a tsv attachment file containing the mapping mtypes
+          to their morph class (Interneuron / Pyramidal) and synapse class (Excitatory / Inhibitory).
+
+          For instance:
+
+          +-----------+-----------+-----------+
+          |  mtype    |   mClass  |   sClass  |
+          +===========+===========+===========+
+          |  L23_NGC  |   INT     |    INH    |
+          +-----------+-----------+-----------+
+          |  L23_SBC  |   INT     |    INH    |
+          +-----------+-----------+-----------+
+          |  L2_IPC   |   PYR     |    EXC    |
+          +-----------+-----------+-----------+
+
+          See:
+          https://bbp-nexus.epfl.ch/staging/explorer/ngv/synprot/mtypetaxonomy/v0.1.0/f5c1beac-3245-48e6-8336-c2189a1c37be
+          for a complete example.
+        type: string
+      cell_proteins:
+        description: |
+          A *cellproteinconcexperiment* Nexus instance with a tsv attachment file containing the
+          concentration of each gene in each organelle.
+
+          Columns correspond to the different organelle and rows to the different genes. The values
+          are the concentrations in [nM] (nanomoles / litre) of each gene in each organelle as
+          a floating point.
+
+          As of today, the mandatory columns to provide are:
+
+          - Lead gene name
+          - Canonical lead protein ID
+          - Majority protein IDs
+          - Protein names
+          - Median cellular concentration [nM]
+          - Median Cytosol concentration [nM]
+          - Median nuclear concentration [nM]
+          - Median ER concentration [nM]
+          - Median Endosome concentration [nM]
+          - Median Golgi apparatus concentration [nM]
+          - Median Lysosome concentration [nM]
+          - Median Mitochondrion concentration [nM]
+          - Median Peroxisome concentration [nM]
+          - Median Plasma membrane concentration [nM]
+          - Median Cytosol concentration [nM].1
+
+          See:
+          https://bbp-nexus.epfl.ch/staging/explorer/ngv/synprot/cellproteinconcexperiment/v0.1.5/fcb284f3-6143-46a6-a34a-3cd8ea7277ba
+          for a complete example.
+        type: string
+      synapse_proteins:
+        description: |
+          A *synapticproteinconcexperiment* Nexus instance with a tsv attachment file containing the
+          concentration of each gene inside the different kind of synapses.
+
+          The attachment file must contain at least four columns:
+
+          - gene names Linerson
+          - PSD excitatory, #/um^2
+          - PSD inhibitory, #/um^2
+          - Presynaptic terminals, nM
+
+          Rows correspond to the gene name and concentrations.
+
+          Example:
+
+          +-----------------------+---------------------------+--------------------------+-----------------------------+
+          |  gene names Linerson  |   PSD excitatory, #/um^2  |  PSD inhibitory, #/um^2  | Presynaptic terminals, nM   |
+          +=======================+===========================+==========================+=============================+
+          |        Camk2a         |            24570          |             0            |               71950         |
+          +-----------------------+---------------------------+--------------------------+-----------------------------+
+          |        Camk2b         |             5730          |             0            |               17150         |
+          +-----------------------+---------------------------+--------------------------+-----------------------------+
+        type: string
+      seed:
+        description: |
+          Pseudo-random generator seed.
+        type: integer
+
+  modules:
+    description: |
+      Modules to be overwritten; multiple configurations are allowed.
+    type: array
+    items:
+      type: string
+      pattern: '^([a-zA-Z0-9_-]+):([a-zA-Z0-9/._-]+)(,[a-zA-Z0-9/._-]+)*(:[^:]+)?$'
+    uniqueItems: true
+    example:
+      - brainbuilder:archive/2020-08,brainbuilder/0.14.0
+      - touchdetector:archive/2020-05,touchdetector/5.4.0,hpe-mpi
+      - spykfunc:archive/2020-06,spykfunc/0.15.6:/gpfs/bbp.cscs.ch/ssd/apps/hpc/jenkins/modules/all
+
+  bioname:
+    description: |
+      Path to `bioname` folder of a circuit, usually specified from the command line.
+    type: string
+    default: 'bioname'
+
+  timestamp:
+    description: |
+      Enforce the timestamp used for the log path, only for internal use.
+    type: string
+    example: '20210615T123456'

@@ -26,6 +26,7 @@ extensions = [
     'sphinx.ext.todo',
     'sphinx.ext.mathjax',
     'sphinx.ext.graphviz',
+    'sphinx-jsonschema',
 ]
 
 # General information about the project.

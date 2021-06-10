@@ -24,11 +24,12 @@ setup(
         'console_scripts': ['circuit-build=circuit_build.cli:cli']},
     license="BBP-internal-confidential",
     # see `basepython` in tox.ini for explanation on the version.
-    python_requires='>=3.7',
+    python_requires='>=3.8',
     install_requires=[
         'click>=7.0,<8',
         'pyyaml>=5.0',
         'snakemake>=5.10,<7.0',
+        'jsonschema>=3.2.0,<4.0',
     ],
     extras_require={
         "reports": ['snakemake[reports]'],
@@ -42,6 +43,6 @@ setup(
         'Development Status :: 2 - Pre-Alpha',
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.8',
     ],
 )

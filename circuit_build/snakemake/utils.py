@@ -4,6 +4,12 @@ import subprocess
 import warnings
 from datetime import datetime
 from pathlib import Path
+from typing import Dict
+
+import jsonschema
+import yaml
+
+import snakemake
 
 logger = logging.getLogger(__name__)
 
@@ -34,16 +40,18 @@ class Config:
 
 
 class Context:
-    def __init__(self, *, conf: Config, workflow, cluster_config):
-        self.conf = conf
+    def __init__(self, *, workflow: snakemake.Workflow, config: Dict, cluster_config: Dict):
         self.workflow = workflow
+        self.conf = Config(config=config)
         self.cluster_config = cluster_config
         self.BIONAME = str(Path(self.conf.get("bioname", default="bioname")).expanduser().resolve())
+
         # Load MANIFEST.yaml into workflow config
         self.workflow.configfile(self.bioname_path("MANIFEST.yaml"))
-        # Global variables
-        self.CIRCUIT_DIR = "."
+        # Validate the merged configuration
+        self.validate_config(config)
 
+        self.CIRCUIT_DIR = "."
         self.BUILDER_RECIPE = self.bioname_path("builderRecipeAllPathways.xml")
         self.MORPHDB = self.bioname_path("extNeuronDB.dat")
 
@@ -172,6 +180,10 @@ class Context:
         except subprocess.CalledProcessError:
             raise RuntimeError(f"bioname folder: {path} must be under git (version control system)")
 
+    def validate_config(self, config):
+        with Path(self.workflow.basedir, "schemas/MANIFEST.yaml").open() as schema_fd:
+            jsonschema.validate(instance=config, schema=yaml.safe_load(schema_fd))
+
     @staticmethod
     def validate_node_population_name(name):
         doc_url = "https://bbpteam.epfl.ch/documentation/projects/circuit-build/latest/bioname.html#manifest-yaml"
@@ -294,11 +306,6 @@ class Context:
                 f"-D BIONAME={self.BIONAME}",
                 f"-D ATLAS={self.ATLAS}",
                 f"-D CELL_LIBRARY_FILE={cell_library_file}",
-                self.format_if(
-                    "-D PROJECTIONS='{}'",
-                    value=self.conf.get("projectionizer"),
-                    func=lambda x: ";".join(x),
-                ),
                 self.template_path("CircuitConfig.j2"),
                 "> {output}",
             ],
