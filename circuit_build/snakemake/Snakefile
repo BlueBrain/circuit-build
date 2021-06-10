@@ -1,305 +1,71 @@
-from datetime import datetime
 from pathlib import Path
-import warnings
-import subprocess
 
-CIRCUIT_DIR = '.'
+from utils import Config, Context
 
-BIONAME = os.path.realpath(os.path.expanduser(config.get('bioname', 'bioname')))
+conf = Config(config=config)
+ctx = Context(conf=conf, workflow=workflow, cluster_config=cluster_config)
 
-
-def print_err(*args, **kwargs):
-    # print to stderr to avoid interferences with `snakemake --dag`
-    print(*args, **kwargs, file=sys.stderr)
-
-
-def check_git_info(path):
-    cmd = """
-        set -e
-        echo "### Bioname info\n"
-        echo "path: $(realpath .)"
-        echo "date: $(date +'%Y-%m-%dT%H:%M:%S%z')"
-        echo "user: $(whoami)"
-        echo "host: $(hostname)"
-        echo "circuit-build version: $(circuit-build --version)"
-        echo "snakemake version: $(snakemake --version)"
-        echo "git tag: $(git describe --always)"
-        set -x
-        git --no-pager diff
-        git --no-pager diff --staged
-        """
-    cmd = redirect_to_file(cmd, filename=log_path("git_info"))
-    cwd = path if os.path.isdir(path) else os.path.dirname(path)
-    try:
-        subprocess.run(cmd, shell=True, check=True, cwd=cwd)
-    except subprocess.CalledProcessError:
-        raise RuntimeError(f"bioname folder: {BIONAME} must be under git (version control system)")
-
-
-def bioname_path(filename):
-    return os.path.join(BIONAME, filename)
-
-def validate_node_population_name(name):
-    doc_url = 'https://bbpteam.epfl.ch/documentation/projects/circuit-build/latest/bioname.html#manifest-yaml'
-    allowed_parts = {'ncx', 'neocortex', 'hippocampus', 'thalamus', 'mousify'}
-    allowed_types = {'neurons', 'astrocytes', 'projections'}
-    msg = '"node_population_name" in MANIFEST.yaml must exist and should fit the pattern: "<part>_<type>",' \
-          f'see {doc_url} for details'
-
-    if name is None:
-        raise ValueError(msg)
-    name_parts = name.split('_')
-    if len(name_parts) != 2:
-        warnings.warn(msg)
-    elif name_parts[0] not in allowed_parts or name_parts[1] not in allowed_types:
-        warnings.warn(msg)
-
-    return name
-
-def validate_edge_population_name(name):
-    doc_url = 'https://bbpteam.epfl.ch/documentation/projects/circuit-build/latest/bioname.html#manifest-yaml'
-    allowed_connection = {'electrical', 'chemical_synapse', 'synapse_astrocyte', 'endfoot'}
-    msg = '"edge_population_name" in MANIFEST.yaml must exist and should fit the pattern: ' \
-          f'"<source_population>__<target_population>__<connection>", see {doc_url} for details'
-
-    if name is None:
-        raise ValueError(msg)
-    name_parts = name.split('__')
-    if (len(name_parts) not in [2,3]) or (name_parts[-1] not in allowed_connection):
-        warnings.warn(msg)
-
-    return name
-
-
-# Load MANIFEST.yaml into workflow config
-workflow.configfile(bioname_path('MANIFEST.yaml'))
-
-BUILDER_RECIPE = bioname_path("builderRecipeAllPathways.xml")
-MORPHDB = bioname_path("extNeuronDB.dat")
-
-ATLAS = config['common']['atlas']
-ATLAS_CACHE_DIR = ".atlas"
-
-NODE_POPULATION_NAME = validate_node_population_name(config['common'].get('node_population_name'))
-EDGE_POPULATION_NAME = validate_edge_population_name(config['common'].get('edge_population_name'))
-MORPH_RELEASE = config['common']['morph_release']
-EMODEL_RELEASE = config['common'].get('emodel_release')
-EMODEL_RELEASE_MECOMBO = None
-EMODEL_RELEASE_HOC = None
-if EMODEL_RELEASE:
-    EMODEL_RELEASE_MECOMBO = os.path.join(EMODEL_RELEASE, "mecombo_emodel.tsv")
-    EMODEL_RELEASE_HOC = os.path.join(EMODEL_RELEASE, "hoc")
-    if not os.path.exists(EMODEL_RELEASE_MECOMBO) or not os.path.exists(EMODEL_RELEASE_HOC):
-        raise ValueError("%s must contain 'mecombo_emodel.tsv' file and 'hoc' folder" % EMODEL_RELEASE)
-
-LOGS_DIR = "logs"
-
-NODESETS_FILE = "node_sets.json"
-
-TOUCHES_DIR = "connectome/touches"
-CONNECTOME_FUNCTIONAL_DIR = "connectome/functional"
-CONNECTOME_STRUCTURAL_DIR = "connectome/structural"
-
-
-SPACK_MODULEPATH = "/gpfs/bbp.cscs.ch/ssd/apps/hpc/jenkins/modules/all"
-NIX_MODULEPATH = '/nix/var/nix/profiles/per-user/modules/bb5-x86_64/modules-all/release/share/modulefiles/'
-
-
-def build_modules():
-    modules = {
-        "brainbuilder":
-            (SPACK_MODULEPATH, ['archive/2020-08', 'brainbuilder/0.14.0']),
-        'flatindexer':
-            (NIX_MODULEPATH, ['nix/hpc/flatindexer/1.8.12']),
-        'jinja2':
-            (SPACK_MODULEPATH, ['archive/2020-02', 'python-dev/0.3']),
-        'parquet-converters':
-            (SPACK_MODULEPATH, ['archive/2020-09', 'parquet-converters/0.5.7']),
-        'placement-algorithm':
-            (SPACK_MODULEPATH, ['archive/2020-08', 'placement-algorithm/2.1.0']),
-        'spykfunc':
-            (SPACK_MODULEPATH, ['archive/2020-06', 'spykfunc/0.15.6']),
-        'synapsetool':
-            (SPACK_MODULEPATH, ['archive/2020-05', 'synapsetool/0.5.9']),
-        'touchdetector':
-            (SPACK_MODULEPATH, ['archive/2021-04', 'touchdetector/5.6.0', 'hpe-mpi']),
-    }
-    custom_modules = config.get('modules')
-    if custom_modules:
-        # Custom modules can be configured using one of:
-        # - configuration file MANIFEST.yaml -> list of strings from yaml
-        # - command line parameter --config -> list of strings from json for backward compatibility
-        for module in custom_modules:
-            parts = module.split(':')
-            assert 2 <= len(parts) <= 3, 'Invalid custom spack module description ' + module
-            module_name = parts[0]
-            assert module_name in modules, 'Unknown spack module: ' + module_name + ', known modules are: ' + ','.join(modules.keys())
-            module_list = parts[1].split(',')
-            if len(parts) == 3:
-                module_path = parts[2]
-                modules[module_name] = (module_path, module_list)
-            else:
-                modules[module_name] = (SPACK_MODULEPATH, module_list)
-    return modules
-
-
-MODULES = build_modules()
-
-
-def escape_single_quotes(value):
-    return value.replace("'", "'\\''")
-
-
-def log_path(name, _now=datetime.now()):
-    timestamp = config.get("timestamp", _now.strftime("%Y%m%dT%H%M%S"))
-    path = os.path.abspath(os.path.join(LOGS_DIR, timestamp, f"{name}.log"))
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-    return path
-
-
-def redirect_to_file(cmd, filename="{log}"):
-    if os.getenv("LOG_ALL_TO_STDERR") == "true":
-        # redirect logs to stderr instead of files
-        return f"( {cmd} ) 1>&2"
-    else:
-        # else redirect to file
-        return f"( {cmd} ) >{filename} 2>&1"
-
-
-def template_path(name):
-    return os.path.join(workflow.basedir, 'templates', name)
-
-
-def bbp_env(module_env, command, slurm_env=None, skip_srun=False):
-    result = " ".join(map(str, command))
-
-    if (slurm_env is not None) and cluster_config:
-        if slurm_env not in cluster_config:
-            slurm_env = '__default__'
-        slurm_config = cluster_config[slurm_env]
-        result = "salloc -J {jobname} {alloc} {srun} sh -c '{cmd}'".format(
-            jobname=slurm_config.get('jobname', 'cbuild'),
-            alloc=slurm_config['salloc'],
-            srun=('' if skip_srun else 'srun'),
-            cmd=escape_single_quotes(result)
-        )
-
-    if module_env is not None:
-        modulepath, modules = MODULES[module_env]
-        result = " && ".join([
-            ". /etc/profile.d/modules.sh",
-            "module purge",
-            "export MODULEPATH=%s" % modulepath,
-            "module load %s" % " ".join(modules),
-            "echo MODULEPATH=%s" % modulepath,
-            "module list",
-            result,
-        ])
-
-    return redirect_to_file(result)
-
-
-def spatial_index_files(prefix):
-    return [
-        "%s_%s" % (prefix, filename)
-        for filename in [
-            'index.dat',
-            'index.idx',
-            'payload.dat',
-        ]
-    ]
-
-
-# Check that bioname is under git control and log git info
-check_git_info(BIONAME)
+ctx.check_git_info(ctx.BIONAME)
 
 
 rule default:
     run:
-        logger.warning('Please specify the desired rule(s) from the following list:')
+        logger.warning("Please specify the desired rule(s) from the following list:")
         workflow.list_rules(only_targets=True)
-
-
-def build_circuit_config(nrn_path, cell_library_file):
-    return bbp_env(
-        'jinja2',
-        ["jinja2 --strict",
-            "-D CIRCUIT_PATH=%s" % os.path.abspath(CIRCUIT_DIR),
-            "-D NRN_PATH=%s" % os.path.abspath(nrn_path),
-            "-D MORPH_PATH={MORPH_RELEASE}",
-            "-D ME_TYPE_PATH=%s" % (EMODEL_RELEASE_HOC if EMODEL_RELEASE_HOC else "SPECIFY_ME"),
-            ("-D ME_COMBO_INFO_PATH=%s" % EMODEL_RELEASE_MECOMBO if EMODEL_RELEASE_MECOMBO else ""),
-            "-D BIONAME={BIONAME}",
-            "-D ATLAS={ATLAS}",
-            "-D CELL_LIBRARY_FILE=%s" % cell_library_file,
-            ("-D PROJECTIONS='%s'" % ";".join(config['projectionizer'])
-                if 'projectionizer' in config else ""),
-            template_path('CircuitConfig.j2'),
-            "> {output}",
-        ]
-    )
 
 
 rule circuitconfig_base:
     # needed only by spatial_index_segment
     message:
         "Generate CircuitConfig w/o connectome"
-
     output:
-        'CircuitConfig_base'
-
+        "CircuitConfig_base",
     log:
-        log_path('circuitconfig_base')
-
+        ctx.log_path("circuitconfig_base"),
     shell:
-        build_circuit_config(nrn_path='.', cell_library_file='circuit.mvd3')
+        ctx.build_circuit_config(nrn_path=".", cell_library_file="circuit.mvd3")
 
 
 rule circuitconfig_functional:
     message:
         "Generate CircuitConfig for functional circuit"
-
     input:
-        f'sonata/networks/edges/functional/{EDGE_POPULATION_NAME}/edges.h5',
-        f'sonata/networks/nodes/{NODE_POPULATION_NAME}/nodes.h5',
-
+        f"sonata/networks/edges/functional/{ctx.EDGE_POPULATION_NAME}/edges.h5",
+        f"sonata/networks/nodes/{ctx.NODE_POPULATION_NAME}/nodes.h5",
     output:
-        'CircuitConfig'
-
+        "CircuitConfig",
     log:
-        log_path('circuitconfig_functional')
-
+        ctx.log_path("circuitconfig_functional"),
     shell:
-        build_circuit_config(
+        ctx.build_circuit_config(
             nrn_path=Path(
-                CIRCUIT_DIR, f'sonata/networks/edges/functional/{EDGE_POPULATION_NAME}/edges.h5'
+                ctx.CIRCUIT_DIR,
+                f"sonata/networks/edges/functional/{ctx.EDGE_POPULATION_NAME}/edges.h5",
             ).absolute(),
             cell_library_file=Path(
-                CIRCUIT_DIR, f'sonata/networks/nodes/{NODE_POPULATION_NAME}/nodes.h5'
+                ctx.CIRCUIT_DIR, f"sonata/networks/nodes/{ctx.NODE_POPULATION_NAME}/nodes.h5"
             ).absolute(),
         )
+
 
 rule circuitconfig_structural:
     message:
         "Generate CircuitConfig for structural circuit"
-
     input:
-        f'sonata/networks/edges/structural/{EDGE_POPULATION_NAME}/edges.h5',
-        f'sonata/networks/nodes/{NODE_POPULATION_NAME}/nodes.h5',
-
+        f"sonata/networks/edges/structural/{ctx.EDGE_POPULATION_NAME}/edges.h5",
+        f"sonata/networks/nodes/{ctx.NODE_POPULATION_NAME}/nodes.h5",
     output:
-        'CircuitConfig_struct'
-
+        "CircuitConfig_struct",
     log:
-        log_path('circuitconfig_structural')
-
+        ctx.log_path("circuitconfig_structural"),
     shell:
-        build_circuit_config(
+        ctx.build_circuit_config(
             nrn_path=Path(
-                CIRCUIT_DIR, f'sonata/networks/edges/structural/{EDGE_POPULATION_NAME}/edges.h5'
+                ctx.CIRCUIT_DIR,
+                f"sonata/networks/edges/structural/{ctx.EDGE_POPULATION_NAME}/edges.h5",
             ).absolute(),
             cell_library_file=Path(
-                CIRCUIT_DIR, f'sonata/networks/nodes/{NODE_POPULATION_NAME}/nodes.h5'
+                ctx.CIRCUIT_DIR, f"sonata/networks/nodes/{ctx.NODE_POPULATION_NAME}/nodes.h5"
             ).absolute(),
         )
 
@@ -307,20 +73,17 @@ rule circuitconfig_structural:
 rule init_cells:
     message:
         "Create an empty cell collection with a correct population name. This collection will be populated further."
-
     output:
-        'circuit.empty.h5'
-
+        "circuit.empty.h5",
     log:
-        log_path('init_cells')
-
+        ctx.log_path("init_cells"),
     shell:
-        bbp_env(
-            'brainbuilder',
+        ctx.bbp_env(
+            "brainbuilder",
             [
                 'echo -n "Using python: " && which python &&',
                 'python -c "from voxcell import CellCollection;',
-                "cells = CellCollection('{NODE_POPULATION_NAME}');",
+                f"cells = CellCollection('{ctx.NODE_POPULATION_NAME}');",
                 "cells.save('{output}');",
                 '"',
             ],
@@ -330,412 +93,315 @@ rule init_cells:
 rule place_cells:
     message:
         "Generate cell positions; assign me-types"
-
     input:
-        'circuit.empty.h5'
-
+        "circuit.empty.h5",
     output:
-        'circuit.somata.h5'
-
+        "circuit.somata.h5",
     log:
-        log_path('place_cells')
-
+        ctx.log_path("place_cells"),
     shell:
-        bbp_env(
-            'brainbuilder',
-            ["brainbuilder cells place",
+        ctx.bbp_env(
+            "brainbuilder",
+            [
+                "brainbuilder cells place",
                 "--input",
-                    "{input}",
+                "{input}",
                 "--composition",
-                    bioname_path("cell_composition.yaml"),
+                ctx.bioname_path("cell_composition.yaml"),
                 "--mtype-taxonomy",
-                    bioname_path("mtype_taxonomy.tsv"),
+                ctx.bioname_path("mtype_taxonomy.tsv"),
                 "--atlas",
-                    ATLAS,
+                ctx.ATLAS,
                 "--atlas-cache",
-                    ATLAS_CACHE_DIR,
-                ("--mini-frequencies " + bioname_path("mini_frequencies.tsv")
-                    if config["place_cells"].get("mini_frequencies", False) else ""),
-                ("--region " + config['common']['region']
-                    if 'region' in config['common'] else ""),
-                ("--mask " + config['common']['mask']
-                    if 'mask' in config['common'] else ""),
+                ctx.ATLAS_CACHE_DIR,
+                f"--mini-frequencies {ctx.bioname_path('mini_frequencies.tsv')}"
+                if conf.get(["place_cells", "mini_frequencies"], default=False)
+                else "",
+                ctx.format_if("--region {}", conf.get(["common", "region"])),
+                ctx.format_if("--mask {}", conf.get(["common", "mask"])),
                 "--soma-placement",
-                    config['place_cells']['soma_placement'],
+                conf.get(["place_cells", "soma_placement"]),
                 "--density-factor",
-                    config['place_cells'].get('density_factor', 1.0),
-            ] + [
-                "--atlas-property %s %s" % item
-                for item in config['place_cells'].get('atlas_property', {'region': '~brain_regions'}).items()
-            ] + [
-                ("--append-hemisphere"
-                    if config['place_cells'].get('append_hemisphere', False) else ""),
-                ("--sort-by " + ",".join(config['place_cells']['sort_by'])
-                    if 'sort_by' in config['place_cells'] else ""),
+                conf.get(["place_cells", "density_factor"], default=1.0),
+            ]
+            + [
+                f"--atlas-property {k} {v}"
+                for k, v in conf.get(
+                    ["place_cells", "atlas_property"], default={"region": "~brain_regions"}
+                ).items()
+            ]
+            + [
+                "--append-hemisphere"
+                if conf.get(["place_cells", "append_hemisphere"], default=False)
+                else "",
+                ctx.format_if(
+                    "--sort-by {}",
+                    value=conf.get(["place_cells", "sort_by"]),
+                    func=lambda x: ",".join(x),
+                ),
                 "--seed",
-                    config['place_cells']['seed'],
+                conf.get(["place_cells", "seed"]),
                 "--output",
-                    "{output}",
+                "{output}",
             ],
-            slurm_env='place_cells'
+            slurm_env="place_cells",
         )
 
 
 rule choose_morphologies:
     message:
         "Choose morphologies using 'placement hints' approach"
-
     input:
-        'circuit.somata.h5'
-
+        "circuit.somata.h5",
     output:
-        'morphologies.tsv'
-
+        "morphologies.tsv",
     log:
-        log_path('choose_morphologies')
-
+        ctx.log_path("choose_morphologies"),
     shell:
-         bbp_env(
-            'placement-algorithm',
-            ["choose-morphologies",
+        ctx.bbp_env(
+            "placement-algorithm",
+            [
+                "choose-morphologies",
                 "--cells-path",
-                    "{input}",
+                "{input}",
                 "--atlas",
-                    ATLAS,
+                ctx.ATLAS,
                 "--atlas-cache",
-                    ATLAS_CACHE_DIR,
+                ctx.ATLAS_CACHE_DIR,
                 "--morphdb",
-                    MORPHDB,
+                ctx.MORPHDB,
                 "--rules",
-                    bioname_path("placement_rules.xml"),
+                ctx.bioname_path("placement_rules.xml"),
                 "--annotations",
-                    os.path.join(MORPH_RELEASE, "annotations.json"),
+                Path(ctx.MORPH_RELEASE, "annotations.json"),
                 "--alpha",
-                    config['choose_morphologies']['alpha'],
+                conf.get(["choose_morphologies", "alpha"]),
                 "--seed",
-                    config['choose_morphologies']['seed'],
+                conf.get(["choose_morphologies", "seed"]),
                 "--output",
-                    "{output}",
+                "{output}",
             ],
-            slurm_env='choose_morphologies'
+            slurm_env="choose_morphologies",
         )
 
 
 rule assign_morphologies:
     message:
         "Assign morphologies"
-
     input:
-        cells = 'circuit.somata.h5',
-        morph = 'morphologies.tsv'
-
+        cells="circuit.somata.h5",
+        morph="morphologies.tsv",
     output:
-        'circuit.morphologies.h5'
-
+        "circuit.morphologies.h5",
     log:
-        log_path('assign_morphologies')
-
+        ctx.log_path("assign_morphologies"),
     shell:
-         bbp_env(
-            'placement-algorithm',
-            ["assign-morphologies",
+        ctx.bbp_env(
+            "placement-algorithm",
+            [
+                "assign-morphologies",
                 "--cells-path",
-                    "{input[cells]}",
+                "{input[cells]}",
                 "--morph",
-                    "{input[morph]}",
+                "{input[morph]}",
                 "--atlas",
-                    ATLAS,
+                ctx.ATLAS,
                 "--atlas-cache",
-                    ATLAS_CACHE_DIR,
+                ctx.ATLAS_CACHE_DIR,
                 "--max-drop-ratio",
-                    config['assign_morphologies'].get('max_drop_ratio', 0.0),
+                conf.get(["assign_morphologies", "max_drop_ratio"], default=0.0),
                 "--out-cells-path",
-                    "{output}",
+                "{output}",
             ],
+            slurm_env="assign_morphologies",
         )
 
 
 rule assign_emodels_per_type:
     message:
         "Assign electrical models"
-
     input:
-        'circuit.morphologies.h5'
-
+        "circuit.morphologies.h5",
     output:
-        'circuit.{ext}'
-
+        "circuit.{ext}",
     log:
-        log_path('assign_emodels_per_type_{ext}')
-
+        ctx.log_path("assign_emodels_per_type_{ext}"),
+    wildcard_constraints:
+        ext="h5|mvd3",
     shell:
-        bbp_env(
-            'brainbuilder',
-            ["brainbuilder cells assign-emodels",
-                "--morphdb {MORPHDB}",
+        ctx.bbp_env(
+            "brainbuilder",
+            [
+                "brainbuilder cells assign-emodels",
+                "--morphdb",
+                ctx.MORPHDB,
                 "--output {output}",
-                "{input}"
+                "--seed",
+                conf.get(["assign_emodels", "seed"], default=0),
+                "{input}",
             ],
-            slurm_env='assign_emodels'
+            slurm_env="assign_emodels",
         )
 
 
 rule assign_emodels:
     input:
-        expand(['circuit.{ext}'], ext=['h5', 'mvd3'])
+        expand(["circuit.{ext}"], ext=["h5", "mvd3"]),
 
 
 rule provide_me_info:
     message:
         "Provide MorphoElectrical info for SONATA Nodes"
-
     input:
-        'circuit.h5'
-
+        "circuit.h5",
     output:
-        f'sonata/networks/nodes/{NODE_POPULATION_NAME}/nodes.h5'
-
+        f"sonata/networks/nodes/{ctx.NODE_POPULATION_NAME}/nodes.h5",
     log:
-        log_path('provide_me_info')
-
+        ctx.log_path("provide_me_info"),
     shell:
-        bbp_env(
-            'brainbuilder',
-            ["brainbuilder sonata provide-me-info",
-                ("--mecombo-info %s" % EMODEL_RELEASE_MECOMBO
-                    if EMODEL_RELEASE_MECOMBO else ""),
-                "--model-type",
-                    "biophysical",
-                "--output",
-                    "{output}",
-                "{input}"
+        ctx.bbp_env(
+            "brainbuilder",
+            [
+                "brainbuilder sonata provide-me-info",
+                ctx.format_if("--mecombo-info {}", ctx.EMODEL_RELEASE_MECOMBO),
+                "--model-type biophysical",
+                "--output {output}",
+                "{input}",
             ],
-            slurm_env='sonata_provide_me_info'
+            slurm_env="sonata_provide_me_info",
         )
 
 
 rule touchdetector:
     message:
         "Detect touches between neurites"
-
     input:
-        neurons = f'sonata/networks/nodes/{NODE_POPULATION_NAME}/nodes.h5',
-
+        neurons=f"sonata/networks/nodes/{ctx.NODE_POPULATION_NAME}/nodes.h5",
     output:
-        touch(TOUCHES_DIR + '/_SUCCESS')
-
+        touch(ctx.TOUCHES_DIR + "/_SUCCESS"),
     log:
-        log_path('touchdetector')
-
+        ctx.log_path("touchdetector"),
     shell:
-        bbp_env(
-            'touchdetector',
+        ctx.bbp_env(
+            "touchdetector",
             [
                 "omplace",
                 "touchdetector",
                 "--output",
-                    "{TOUCHES_DIR}",
-                "--touchspace=" +
-                    config.get('touchdetector', {}).get("touchspace", "axodendritic"),
-                "--from {input[neurons]} {NODE_POPULATION_NAME}",
-                "--to {input[neurons]} {NODE_POPULATION_NAME}",
-                "{BUILDER_RECIPE}",
-                "{MORPH_RELEASE}/h5v1",
+                ctx.TOUCHES_DIR,
+                "--touchspace",
+                conf.get(["touchdetector", "touchspace"], default="axodendritic"),
+                "--from {input[neurons]}",
+                ctx.NODE_POPULATION_NAME,
+                "--to {input[neurons]}",
+                ctx.NODE_POPULATION_NAME,
+                ctx.BUILDER_RECIPE,
+                f"{ctx.MORPH_RELEASE}/h5v1",
             ],
-            slurm_env='touchdetector'
+            slurm_env="touchdetector",
         )
 
 
 rule touch2parquet:
     message:
         "Convert touches to Parquet format"
-
     input:
-        TOUCHES_DIR + '/_SUCCESS'
-
+        ctx.TOUCHES_DIR + "/_SUCCESS",
     output:
-        directory(TOUCHES_DIR + '/parquet')
-
+        directory(ctx.TOUCHES_DIR + "/parquet"),
     log:
-        log_path('touch2parquet')
-
+        ctx.log_path("touch2parquet"),
     shell:
-        "mkdir -p {output} && " + \
-        bbp_env(
-            'parquet-converters',
-            ["cd {output}",
-             "&&",
-             "touch2parquet ../touchesData.*"
-            ],
-            slurm_env='touch2parquet'
+        "mkdir -p {output} && " + ctx.bbp_env(
+            "parquet-converters",
+            ["cd {output}", "&&", "touch2parquet ../touchesData.*"],
+            slurm_env="touch2parquet",
         )
-
-
-def run_spykfunc(rule, connectome_dir):
-    assert rule in ("spykfunc_s2s", "spykfunc_s2f", ), "Unknown rule calling run_spykfunc"
-
-    filters = config.get(rule, {}).get("filters", [])
-    assert " " not in filters, "Filters cannot have spaces"
-
-    if filters:
-        mode = "--filters %s" % ','.join(filters)
-
-        # https://bbpteam.epfl.ch/project/issues/browse/FUNCZ-208?focusedCommentId=89736&page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-89736
-        if rule == "spykfunc_s2s":
-            for filter_rule in ("BoutonDistance", "SynapseProperties", ):
-                assert filter_rule in filters, "s2s should have rule %s" % filter_rule
-        elif rule == "spykfunc_s2f":
-            for filter_rule in ("BoutonDistance",
-                                "TouchRules",
-                                "ReduceAndCut",
-                                "SynapseProperties",
-                                ):
-                assert filter_rule in filters, "s2f should have rule %s" % filter_rule
-    elif rule == "spykfunc_s2s":
-        mode = "--s2s"
-    elif rule == "spykfunc_s2f":
-        mode = "--s2f"
-
-    output_dir = os.path.join(connectome_dir, 'spykfunc')
-    cmd = bbp_env(
-        'spykfunc',
-        ["env",
-            "SPARK_USER=$(whoami)",
-         "sm_run",
-            cluster_config.get(rule, {}).get('sm_run', ""),
-            "-w %s" % os.path.join(output_dir, '.sm_run'),
-         "spykfunc",
-            mode,
-            "--output-order post",
-            "--output-dir %s" % output_dir,
-            "--spark-property spark.master=spark://$(srun sh -c '[ $SLURM_PROCID -eq 0 ] && hostname || true' | tail -n 1):7077",
-        ] + [
-            "--spark-property %s" % p
-                for p in config.get(rule, {}).get('spark_property', [])
-        ] + [
-            "--from", os.path.abspath("{input[neurons]}"), NODE_POPULATION_NAME,
-            "--to", os.path.abspath("{input[neurons]}"), NODE_POPULATION_NAME,
-            BUILDER_RECIPE,
-            MORPH_RELEASE + '/h5v1/',
-            "--parquet", os.path.abspath("{input[touches]}/*.parquet"),
-        ],
-        slurm_env=rule,
-        skip_srun=True
-    )
-    return cmd
 
 
 rule spykfunc_s2s:
     message:
         "Convert touches into synapses (S2S)"
-
     input:
-        neurons = f'sonata/networks/nodes/{NODE_POPULATION_NAME}/nodes.h5',
-        touches = TOUCHES_DIR + '/parquet'
-
+        neurons=f"sonata/networks/nodes/{ctx.NODE_POPULATION_NAME}/nodes.h5",
+        touches=ctx.TOUCHES_DIR + "/parquet",
     output:
-        CONNECTOME_STRUCTURAL_DIR + '/spykfunc/circuit.parquet/_SUCCESS'
-
+        ctx.CONNECTOME_STRUCTURAL_DIR + "/spykfunc/circuit.parquet/_SUCCESS",
     log:
-        log_path('spykfunc_s2s')
-
+        ctx.log_path("spykfunc_s2s"),
     shell:
-        run_spykfunc(
-            'spykfunc_s2s',
-            connectome_dir=CONNECTOME_STRUCTURAL_DIR
-        )
+        ctx.run_spykfunc("spykfunc_s2s", connectome_dir=ctx.CONNECTOME_STRUCTURAL_DIR)
 
 
 rule spykfunc_s2f:
     message:
         "Prune touches and convert them into synapses (S2F)"
-
     input:
-        neurons = f'sonata/networks/nodes/{NODE_POPULATION_NAME}/nodes.h5',
-        touches = TOUCHES_DIR + '/parquet'
-
+        neurons=f"sonata/networks/nodes/{ctx.NODE_POPULATION_NAME}/nodes.h5",
+        touches=ctx.TOUCHES_DIR + "/parquet",
     output:
-        CONNECTOME_FUNCTIONAL_DIR + '/spykfunc/circuit.parquet/_SUCCESS'
-
+        ctx.CONNECTOME_FUNCTIONAL_DIR + "/spykfunc/circuit.parquet/_SUCCESS",
     log:
-        log_path('spykfunc_s2f')
-
+        ctx.log_path("spykfunc_s2f"),
     shell:
-        run_spykfunc(
-            'spykfunc_s2f',
-            connectome_dir=CONNECTOME_FUNCTIONAL_DIR
-        )
-
-
-def get_targetgen_config(key, default_value=None):
-    old = config.get('targetgen_mvd3', {})
-    new = config.get('targetgen', {})
-    if old and not new:
-         print_err('"targetgen_mvd3" should be replaced by "targetgen" in MANIFEST.yaml')
-         new = old
-    return new.get(key, default_value)
+        ctx.run_spykfunc("spykfunc_s2f", connectome_dir=ctx.CONNECTOME_FUNCTIONAL_DIR)
 
 
 rule targetgen:
     message:
         "Generate start.target file"
-
     input:
-        'circuit.h5'
-
+        "circuit.h5",
     output:
-        'start.target'
-
+        "start.target",
     log:
-        log_path('targetgen')
-
+        ctx.log_path("targetgen"),
     shell:
-        bbp_env(
-            'brainbuilder',
-            ["brainbuilder targets from-input",
-                ("--targets %s" % bioname_path(get_targetgen_config('targets'))
-                    if get_targetgen_config('targets', False) else ""),
-                ("--allow-empty" if get_targetgen_config('allow_empty', False) else ""),
+        ctx.bbp_env(
+            "brainbuilder",
+            [
+                "brainbuilder targets from-input",
+                f"--targets {ctx.bioname_path(ctx.get_targetgen_config('targets'))}"
+                if ctx.get_targetgen_config("targets", False)
+                else "",
+                "--allow-empty" if ctx.get_targetgen_config("allow_empty", False) else "",
                 "--atlas",
-                    ATLAS,
+                ctx.ATLAS,
                 "--atlas-cache",
-                    ATLAS_CACHE_DIR,
+                ctx.ATLAS_CACHE_DIR,
                 "--output {output}",
-                "{input}"
+                "{input}",
             ],
-            slurm_env='targetgen_mvd3'
+            slurm_env="targetgen_mvd3",
         )
 
 
 rule node_sets:
     message:
         "Generate SONATA node sets"
-
     input:
-        f'sonata/networks/nodes/{NODE_POPULATION_NAME}/nodes.h5'
-
+        f"sonata/networks/nodes/{ctx.NODE_POPULATION_NAME}/nodes.h5",
     output:
-        f"sonata/{NODESETS_FILE}"
-
+        f"sonata/{ctx.NODESETS_FILE}",
     log:
-        log_path('node_sets')
-
+        ctx.log_path("node_sets"),
     shell:
-        bbp_env(
-            'brainbuilder',
-            ["brainbuilder targets node-sets",
-                ("--targets %s" % bioname_path(get_targetgen_config('targets'))
-                    if get_targetgen_config('targets', False) else ""),
-                ("--allow-empty"
-                    if get_targetgen_config('allow_empty', False) else ""),
+        ctx.bbp_env(
+            "brainbuilder",
+            [
+                "brainbuilder targets node-sets",
+                f"--targets {ctx.bioname_path(ctx.get_targetgen_config('targets'))}"
+                if ctx.get_targetgen_config("targets", False)
+                else "",
+                "--allow-empty" if ctx.get_targetgen_config("allow_empty", False) else "",
                 "--population",
-                    NODE_POPULATION_NAME,
+                ctx.NODE_POPULATION_NAME,
                 "--atlas",
-                    ATLAS,
+                ctx.ATLAS,
                 "--atlas-cache",
-                    ATLAS_CACHE_DIR,
+                ctx.ATLAS_CACHE_DIR,
                 "--output {output}",
-                "{input}"
+                "{input}",
             ],
         )
 
@@ -743,76 +409,68 @@ rule node_sets:
 rule spatial_index_segment:
     message:
         "Generate segment spatial index"
-
     input:
-        'CircuitConfig_base',
-        'circuit.mvd3',
-        'start.target'
-
+        "CircuitConfig_base",
+        "circuit.mvd3",
+        "start.target",
     output:
-        spatial_index_files('SEGMENT')
-
+        ctx.spatial_index_files("SEGMENT"),
     log:
-        log_path('spatial_index_segment')
-
+        ctx.log_path("spatial_index_segment"),
     shell:
-        bbp_env(
-            'flatindexer',
+        ctx.bbp_env(
+            "flatindexer",
             [
-             "SDKGenerator CircuitConfig_base segment All SEGMENT",
+                "SDKGenerator CircuitConfig_base segment All SEGMENT",
             ],
-            slurm_env='spatial_index_segment'
+            slurm_env="spatial_index_segment",
         )
 
 
 rule parquet_to_sonata:
     message:
         "Convert synapses from Parquet to SYN2 format"
-
     input:
-        parquet = 'connectome/{connectome_dir}/spykfunc/circuit.parquet/_SUCCESS',
-        cells = f'sonata/networks/nodes/{NODE_POPULATION_NAME}/nodes.h5'
-
+        parquet="connectome/{connectome_dir}/spykfunc/circuit.parquet/_SUCCESS",
+        cells=f"sonata/networks/nodes/{ctx.NODE_POPULATION_NAME}/nodes.h5",
     output:
-        'sonata/networks/edges/{connectome_dir}/' + EDGE_POPULATION_NAME + '/edges.h5'
-
+        "sonata/networks/edges/{connectome_dir}/" + ctx.EDGE_POPULATION_NAME + "/edges.h5",
     log:
-        log_path('parquet_to_sonata_{connectome_dir}')
-
+        ctx.log_path("parquet_to_sonata_{connectome_dir}"),
     shell:
-        bbp_env(
-            'parquet-converters',
+        ctx.bbp_env(
+            "parquet-converters",
             [
                 "parquet2hdf5",
                 "--format SONATA",
-                "--population " + EDGE_POPULATION_NAME,
-                "--from {input[cells]} {NODE_POPULATION_NAME}",
-                "--to {input[cells]} {NODE_POPULATION_NAME}",
+                "--population",
+                ctx.EDGE_POPULATION_NAME,
+                "--from {input[cells]}",
+                ctx.NODE_POPULATION_NAME,
+                "--to {input[cells]}",
+                ctx.NODE_POPULATION_NAME,
                 "-o {output}",
                 "connectome/{wildcards.connectome_dir}/spykfunc/circuit.parquet/*.parquet",
             ],
-            slurm_env='parquet2syn2'
+            slurm_env="parquet2syn2",
         )
 
 
 rule subcellular:
     message:
         "Assign gene expressions / protein concentrations to cells"
-
     input:
-        file = 'circuit.h5',
-        directory = 'subcellular'
-
+        file="circuit.h5",
+        directory="subcellular",
     output:
-        'subcellular.h5'
-
+        "subcellular.h5",
     log:
-        log_path('subcellular')
-
+        ctx.log_path("subcellular"),
     shell:
-        bbp_env(
-            'brainbuilder',
-            ["brainbuilder subcellular assign",
+        ctx.bbp_env(
+            "brainbuilder",
+            [
+                "brainbuilder subcellular assign",
                 "{input[file]}",
                 "--subcellular-dir {input[directory]}",
                 "--transcriptome {config[subcellular][transcriptome]}",
@@ -820,82 +478,51 @@ rule subcellular:
                 "--cell-proteins {config[subcellular][cell_proteins]}",
                 "--synapse-proteins {config[subcellular][synapse_proteins]}",
                 "--seed {config[subcellular][seed]}",
-                "--output {output}"
+                "--output {output}",
             ],
-            slurm_env='subcellular'
+            slurm_env="subcellular",
         )
-
-
-def write_network_config(connectome_dir):
-    return bbp_env(
-        'brainbuilder',
-        ["brainbuilder sonata network-config",
-            "--base-dir",
-                "'.'",
-            "--morph-dir",
-                "components/morphologies",
-            "--emodel-dir",
-                "components/biophysical_neuron_models",
-            "--nodes-dir",
-                "networks/nodes",
-            "--nodes",
-                NODE_POPULATION_NAME,
-            "--node-sets",
-                NODESETS_FILE,
-            "--edges-dir",
-                "networks/edges/%s" % connectome_dir,
-            "--edges",
-                EDGE_POPULATION_NAME,
-            "-o {output}"
-        ],
-    )
 
 
 rule circuitconfig_sonata:
     message:
         "Generate SONATA network config"
-
     output:
-        'sonata/circuit_config.json'
-
+        "sonata/circuit_config.json",
     log:
-        log_path('circuitconfig_sonata')
-
+        ctx.log_path("circuitconfig_sonata"),
     shell:
-        write_network_config('functional')
+        ctx.write_network_config("functional")
 
 
 rule circuitconfig_struct_sonata:
     message:
         "Generate SONATA network config (structural)"
-
     output:
-        'sonata/struct_circuit_config.json'
-
+        "sonata/struct_circuit_config.json",
     log:
-        log_path('circuitconfig_struct_sonata')
-
+        ctx.log_path("circuitconfig_struct_sonata"),
     shell:
-        write_network_config('structural')
+        ctx.write_network_config("structural")
 
 
 rule functional:
-    #Note: creating both BlueConfig & circuit_config.json until we're fully transitioned to SONATA
+    # Note: creating both BlueConfig & circuit_config.json until we're fully transitioned to SONATA
     input:
-        'sonata/circuit_config.json',
-        f'sonata/networks/nodes/{NODE_POPULATION_NAME}/nodes.h5',
-        f'sonata/{NODESETS_FILE}',
-        f'sonata/networks/edges/functional/{EDGE_POPULATION_NAME}/edges.h5',
+        "sonata/circuit_config.json",
+        f"sonata/networks/nodes/{ctx.NODE_POPULATION_NAME}/nodes.h5",
+        f"sonata/{ctx.NODESETS_FILE}",
+        f"sonata/networks/edges/functional/{ctx.EDGE_POPULATION_NAME}/edges.h5",
         # for backwards compatibility
-        'CircuitConfig',
-        'start.target',
+        "CircuitConfig",
+        "start.target",
 
 
 rule structural:
     input:
-        'sonata/struct_circuit_config.json',
-        f'sonata/{NODESETS_FILE}',
-        f'sonata/networks/nodes/{NODE_POPULATION_NAME}/nodes.h5',
-        f'sonata/networks/edges/structural/{EDGE_POPULATION_NAME}/edges.h5',
-        'CircuitConfig_struct',
-        'start.target',
+        "sonata/struct_circuit_config.json",
+        f"sonata/{ctx.NODESETS_FILE}",
+        f"sonata/networks/nodes/{ctx.NODE_POPULATION_NAME}/nodes.h5",
+        f"sonata/networks/edges/structural/{ctx.EDGE_POPULATION_NAME}/edges.h5",
+        "CircuitConfig_struct",
+        "start.target",
