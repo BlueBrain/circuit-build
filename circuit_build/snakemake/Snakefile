@@ -307,18 +307,22 @@ rule assign_emodels_per_type:
     wildcard_constraints:
         ext="h5|mvd3",
     shell:
-        ctx.bbp_env(
-            "brainbuilder",
-            [
-                "brainbuilder cells assign-emodels",
-                "--morphdb",
-                ctx.MORPHDB,
-                "--output {output}",
-                "--seed",
-                ctx.conf.get(["assign_emodels", "seed"], default=0),
-                "{input}",
-            ],
-            slurm_env="assign_emodels",
+        ctx.if_synthesis(
+            # FIXME: temporary workaround to skip assign_emodels in synthesis
+            "ln -sf {input} {output}",
+            ctx.bbp_env(
+                "brainbuilder",
+                [
+                    "brainbuilder cells assign-emodels",
+                    "--morphdb",
+                    ctx.MORPHDB,
+                    "--output {output}",
+                    "--seed",
+                    ctx.conf.get(["assign_emodels", "seed"], default=0),
+                    "{input}",
+                ],
+                slurm_env="assign_emodels",
+            ),
         )
 
 
@@ -354,25 +358,32 @@ rule touchdetector:
     message:
         "Detect touches between neurites"
     input:
+        **ctx.if_partition({"nodesets": f"sonata/{ctx.NODESETS_FILE}"}, {}),
         neurons=f"sonata/networks/nodes/{ctx.NODE_POPULATION_NAME}/nodes.h5",
     output:
-        touch(ctx.TOUCHES_DIR + "/_SUCCESS"),
+        success=touch(f"{ctx.TOUCHES_DIR}{ctx.partition_wildcard()}/_SUCCESS"),
     log:
-        ctx.log_path("touchdetector"),
+        ctx.log_path(f"touchdetector{ctx.partition_wildcard()}"),
+    params:
+        output_dir=lambda wildcards, output: Path(output.success).parent,
     shell:
         ctx.bbp_env(
             "touchdetector",
             [
                 "omplace",
                 "touchdetector",
-                "--output",
-                ctx.TOUCHES_DIR,
+                "--output {params.output_dir}",
                 "--touchspace",
                 ctx.conf.get(["touchdetector", "touchspace"], default="axodendritic"),
-                "--from {input[neurons]}",
-                ctx.NODE_POPULATION_NAME,
-                "--to {input[neurons]}",
-                ctx.NODE_POPULATION_NAME,
+                f"--from {{input[neurons]}} {ctx.NODE_POPULATION_NAME}",
+                f"--to {{input[neurons]}} {ctx.NODE_POPULATION_NAME}",
+                *ctx.if_partition(
+                    [
+                        "--from-nodeset {input.nodesets} {wildcards.partition}",
+                        "--to-nodeset {input.nodesets} {wildcards.partition}",
+                    ],
+                    [],
+                ),
                 ctx.BUILDER_RECIPE,
                 ctx.if_synthesis(ctx.SYNTHESIZE_MORPH_DIR, ctx.MORPH_RELEASE + "/h5v1/"),
             ],
@@ -382,17 +393,17 @@ rule touchdetector:
 
 rule touch2parquet:
     message:
-        "Convert touches to Parquet format"
+        "Convert TouchDetector output to Parquet synapse files"
     input:
-        ctx.TOUCHES_DIR + "/_SUCCESS",
+        f"{ctx.TOUCHES_DIR}{ctx.partition_wildcard()}/_SUCCESS",
     output:
-        directory(ctx.TOUCHES_DIR + "/parquet"),
+        parquet_dir=directory(f"{ctx.TOUCHES_DIR}{ctx.partition_wildcard()}/parquet"),
     log:
-        ctx.log_path("touch2parquet"),
+        ctx.log_path(f"touch2parquet{ctx.partition_wildcard()}"),
     shell:
-        "mkdir -p {output} && " + ctx.bbp_env(
+        "mkdir -p {output.parquet_dir} && " + ctx.bbp_env(
             "parquet-converters",
-            ["cd {output}", "&&", "touch2parquet ../touchesData.*"],
+            ["cd {output.parquet_dir}", "&&", "touch2parquet ../touchesData.*"],
             slurm_env="touch2parquet",
         )
 
@@ -401,28 +412,59 @@ rule spykfunc_s2s:
     message:
         "Convert touches into synapses (S2S)"
     input:
+        **ctx.if_partition({"nodesets": f"sonata/{ctx.NODESETS_FILE}"}, {}),
         neurons=f"sonata/networks/nodes/{ctx.NODE_POPULATION_NAME}/nodes.h5",
-        touches=ctx.TOUCHES_DIR + "/parquet",
+        touches=f"{ctx.TOUCHES_DIR}{ctx.partition_wildcard()}/parquet",
     output:
-        ctx.CONNECTOME_STRUCTURAL_DIR + "/spykfunc/circuit.parquet/_SUCCESS",
+        success=(
+            f"connectome/structural/spykfunc{ctx.partition_wildcard()}/circuit.parquet/_SUCCESS"
+        ),
     log:
-        ctx.log_path("spykfunc_s2s"),
+        ctx.log_path(f"spykfunc_s2s{ctx.partition_wildcard()}"),
+    params:
+        parquet_dirs=lambda wildcards, input: Path(input.touches, "*.parquet"),
+        output_dir=lambda wildcards, output: Path(output.success).parent.parent,
     shell:
-        ctx.run_spykfunc("spykfunc_s2s", connectome_dir=ctx.CONNECTOME_STRUCTURAL_DIR)
+        ctx.run_spykfunc("spykfunc_s2s")
 
 
 rule spykfunc_s2f:
     message:
         "Prune touches and convert them into synapses (S2F)"
     input:
+        **ctx.if_partition({"nodesets": f"sonata/{ctx.NODESETS_FILE}"}, {}),
         neurons=f"sonata/networks/nodes/{ctx.NODE_POPULATION_NAME}/nodes.h5",
-        touches=ctx.TOUCHES_DIR + "/parquet",
+        touches=f"{ctx.TOUCHES_DIR}{ctx.partition_wildcard()}/parquet",
     output:
-        ctx.CONNECTOME_FUNCTIONAL_DIR + "/spykfunc/circuit.parquet/_SUCCESS",
+        success=(
+            f"connectome/functional/spykfunc{ctx.partition_wildcard()}/circuit.parquet/_SUCCESS"
+        ),
     log:
-        ctx.log_path("spykfunc_s2f"),
+        ctx.log_path(f"spykfunc_s2f{ctx.partition_wildcard()}"),
+    params:
+        parquet_dirs=lambda wildcards, input: Path(input.touches, "*.parquet"),
+        output_dir=lambda wildcards, output: Path(output.success).parent.parent,
     shell:
-        ctx.run_spykfunc("spykfunc_s2f", connectome_dir=ctx.CONNECTOME_FUNCTIONAL_DIR)
+        ctx.run_spykfunc("spykfunc_s2f")
+
+
+rule spykfunc_merge:
+    message:
+        "Merge synapses from different nodesets."
+    input:
+        expand(
+            "connectome/{{connectome_dir}}/spykfunc_{partition}/circuit.parquet/_SUCCESS",
+            partition=ctx.PARTITION,
+        ),
+    output:
+        success="connectome/{connectome_dir}/spykfunc/circuit.parquet/_SUCCESS",
+    log:
+        ctx.log_path("spykfunc_merge_{connectome_dir}"),
+    params:
+        parquet_dirs=lambda wildcards, input: " ".join(str(Path(i).parent) for i in input),
+        output_dir=lambda wildcards, output: Path(output.success).parent.parent,
+    shell:
+        ctx.run_spykfunc("spykfunc_merge")
 
 
 rule targetgen:
@@ -507,10 +549,9 @@ rule spatial_index_segment:
 
 rule parquet_to_sonata:
     message:
-        "Convert synapses from Parquet to SYN2 format"
+        "Convert synapses from Parquet to SONATA format"
     input:
-        parquet="connectome/{connectome_dir}/spykfunc/circuit.parquet/_SUCCESS",
-        cells=f"sonata/networks/nodes/{ctx.NODE_POPULATION_NAME}/nodes.h5",
+        "connectome/{connectome_dir}/spykfunc/circuit.parquet/_SUCCESS",
     output:
         "sonata/networks/edges/{connectome_dir}/" + ctx.EDGE_POPULATION_NAME + "/edges.h5",
     log:
@@ -520,17 +561,11 @@ rule parquet_to_sonata:
             "parquet-converters",
             [
                 "parquet2hdf5",
-                "--format SONATA",
-                "--population",
-                ctx.EDGE_POPULATION_NAME,
-                "--from {input[cells]}",
-                ctx.NODE_POPULATION_NAME,
-                "--to {input[cells]}",
-                ctx.NODE_POPULATION_NAME,
-                "-o {output}",
                 "connectome/{wildcards.connectome_dir}/spykfunc/circuit.parquet/",
+                "{output}",
+                ctx.EDGE_POPULATION_NAME,
             ],
-            slurm_env="parquet2syn2",
+            slurm_env="parquet2sonata",
         )
 
 

@@ -24,7 +24,9 @@ Version 3.2.0 (2021-06-14)
 - Replace nose with pytest in unit tests.
 - Add jsonschema to validate MANIFEST.yaml and keep the documentation in sync.
 - Remove Projection section from CircuitConfig because the syntax is not up to date.
-- Added the ability to turn on synthesis.
+- Added ``synthesis`` option to turn on synthesis.
+- Added ``partition`` option to specify the nodesets to be touchdetected and functionalized separately,
+  needed for left/right hemispheres.
 
 Version 3.1.4 (2021-05-05)
 --------------------------

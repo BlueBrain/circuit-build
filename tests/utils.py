@@ -1,8 +1,10 @@
-from contextlib import contextmanager
-import pkg_resources
-from pathlib import Path
 import os
+import shutil
 import tempfile
+from contextlib import contextmanager
+from pathlib import Path
+
+import pkg_resources
 import yaml
 
 import circuit_build
@@ -16,13 +18,37 @@ SNAKEMAKE_ARGS = ['--bioname', str(TEST_DATA_DIR), '-u', str(TEST_DATA_DIR / 'cl
 
 @contextmanager
 def tmp_cwd():
+    """Context manager to create a temporary directory and temporarily change the cwd."""
     original_cwd = os.getcwd()
-    with tempfile.TemporaryDirectory(dir=TEST_DIR) as tmpdirname:
+    with tmp_mkdir() as name:
         try:
-            os.chdir(tmpdirname)
-            yield tmpdirname
+            os.chdir(name)
+            yield name
         finally:
             os.chdir(original_cwd)
+
+
+@contextmanager
+def tmp_mkdir():
+    """Context manager to create and return a temporary directory.
+
+    Upon exiting the context, the directory and everything contained in it are removed,
+    depending on the value of the environment variable DELETE_TEST_TMP_DIR:
+        ALWAYS: always delete (default if the variable is not defined)
+        ON_SUCCESS: delete only on success (useful for inspection in case of errors)
+        NEVER: never delete (useful for full inspection)
+    """
+    error = False
+    when = os.getenv('DELETE_TEST_TMP_DIR', 'ALWAYS')
+    name = tempfile.mkdtemp(dir=TEST_DIR)
+    try:
+        yield name
+    except:
+        error = True
+        raise
+    finally:
+        if when == 'ALWAYS' or when == 'ON_SUCCESS' and not error:
+            shutil.rmtree(name, ignore_errors=True)
 
 
 @contextmanager

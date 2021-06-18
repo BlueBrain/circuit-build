@@ -18,14 +18,14 @@ NIX_MODULEPATH = (
     "/nix/var/nix/profiles/per-user/modules/bb5-x86_64/modules-all/release/share/modulefiles/"
 )
 MODULES = {
-    "brainbuilder": (SPACK_MODULEPATH, ["archive/2020-08", "brainbuilder/0.14.0"]),
+    "brainbuilder": (SPACK_MODULEPATH, ["archive/2021-07", "brainbuilder/0.16.1"]),
     "flatindexer": (NIX_MODULEPATH, ["nix/hpc/flatindexer/1.8.12"]),
-    "jinja2": (SPACK_MODULEPATH, ["archive/2020-02", "python-dev/0.3"]),
-    "parquet-converters": (SPACK_MODULEPATH, ["archive/2020-09", "parquet-converters/0.5.7"]),
-    "placement-algorithm": (SPACK_MODULEPATH, ["archive/2021-03", "placement-algorithm/2.1.2"]),
-    "region-grower": (SPACK_MODULEPATH, ["unstable", "py-region-grower/0.2.3"]),
-    "spykfunc": (SPACK_MODULEPATH, ["unstable", "spykfunc/0.16.1"]),
-    "touchdetector": (SPACK_MODULEPATH, ["archive/2021-06", "touchdetector/5.6.0"]),
+    "jinja2": (SPACK_MODULEPATH, ["archive/2021-07", "python-dev/0.4"]),
+    "parquet-converters": (SPACK_MODULEPATH, ["archive/2021-07", "parquet-converters/0.6.1"]),
+    "placement-algorithm": (SPACK_MODULEPATH, ["archive/2021-07", "placement-algorithm/2.1.2"]),
+    "region-grower": (SPACK_MODULEPATH, ["archive/2021-07", "py-region-grower/0.2.3"]),
+    "spykfunc": (SPACK_MODULEPATH, ["archive/2021-07", "spykfunc/0.16.99"]),
+    "touchdetector": (SPACK_MODULEPATH, ["archive/2021-07", "touchdetector/5.6.0"]),
 }
 
 
@@ -73,6 +73,7 @@ class Context:
         self.SYNTHESIZE = self.conf.get(["common", "synthesis"], default=False)
         self.SYNTHESIZE_MORPH_DIR = "morphologies"
         self.SYNTHESIZE_MORPHDB = self.bioname_path("neurondb-axon.dat")
+        self.PARTITION = self.if_synthesis(self.conf.get(["common", "partition"]), [])
 
         self.ATLAS = self.conf.get(["common", "atlas"])
         self.ATLAS_CACHE_DIR = ".atlas"
@@ -109,8 +110,14 @@ class Context:
     def bioname_path(self, filename):
         return str(Path(self.BIONAME, filename))
 
-    def if_synthesis(self, synth_value, no_synth_value):
-        return synth_value if self.SYNTHESIZE else no_synth_value
+    def if_synthesis(self, true_value, false_value):
+        return true_value if self.SYNTHESIZE else false_value
+
+    def if_partition(self, true_value, false_value):
+        return true_value if self.PARTITION else false_value
+
+    def partition_wildcard(self):
+        return self.if_partition("_{partition}", "")
 
     @staticmethod
     def format_if(template, value, func=None):
@@ -334,40 +341,50 @@ class Context:
             ],
         )
 
-    def run_spykfunc(self, rule, connectome_dir):
-        assert rule in (
-            "spykfunc_s2s",
-            "spykfunc_s2f",
-        ), "Unknown rule calling run_spykfunc"
+    def run_spykfunc(self, rule):
+        rules_conf = {
+            "spykfunc_s2s": {
+                "mode": "--s2s",
+                "filters": {"BoutonDistance", "SynapseProperties"},
+            },
+            "spykfunc_s2f": {
+                "mode": "--s2f",
+                "filters": {"BoutonDistance", "TouchRules", "ReduceAndCut", "SynapseProperties"},
+            },
+        }
+        if rule in rules_conf:
+            mode = rules_conf[rule]["mode"]
+            filters = self.conf.get([rule, "filters"], default=[])
+            if filters:
+                # https://bbpteam.epfl.ch/project/issues/browse/FUNCZ-208?focusedCommentId=89736&page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-89736
+                missing_filters = rules_conf[rule]["filters"].difference(filters)
+                if missing_filters:
+                    raise ValueError(f"{rule} should have filters {missing_filters}")
+                if any(" " in f for f in filters):
+                    raise ValueError("Filters cannot contain spaces")
+                mode = f"--filters {','.join(filters)}"
+            extra_args = [
+                mode,
+                "--output-order post",
+                f"--from {Path('{input.neurons}').absolute()} {self.NODE_POPULATION_NAME}",
+                f"--to {Path('{input.neurons}').absolute()} {self.NODE_POPULATION_NAME}",
+                "--recipe",
+                self.BUILDER_RECIPE,
+                "--morphologies",
+                self.if_synthesis(self.SYNTHESIZE_MORPH_DIR, self.MORPH_RELEASE + "/h5v1/"),
+            ] + self.if_partition(
+                [
+                    f"--from-nodeset {Path('{input.nodesets}').absolute()} {{wildcards.partition}}",
+                    f"--to-nodeset {Path('{input.nodesets}').absolute()} {{wildcards.partition}}",
+                ],
+                [],
+            )
+        elif rule == "spykfunc_merge":
+            extra_args = ["--merge"]
+        else:
+            raise ValueError(f"Unrecognized rule {rule!r} in run_spykfunc")
 
-        mode = None
-        filters = self.conf.get([rule, "filters"], default=[])
-        assert " " not in filters, "Filters cannot have spaces"
-
-        if filters:
-            mode = f"--filters {','.join(filters)}"
-
-            # https://bbpteam.epfl.ch/project/issues/browse/FUNCZ-208?focusedCommentId=89736&page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-89736
-            if rule == "spykfunc_s2s":
-                for filter_rule in (
-                    "BoutonDistance",
-                    "SynapseProperties",
-                ):
-                    assert filter_rule in filters, f"s2s should have rule {filter_rule}"
-            elif rule == "spykfunc_s2f":
-                for filter_rule in (
-                    "BoutonDistance",
-                    "TouchRules",
-                    "ReduceAndCut",
-                    "SynapseProperties",
-                ):
-                    assert filter_rule in filters, f"s2f should have rule {filter_rule}"
-        elif rule == "spykfunc_s2s":
-            mode = "--s2s"
-        elif rule == "spykfunc_s2f":
-            mode = "--s2f"
-
-        output_dir = os.path.join(connectome_dir, "spykfunc")
+        spark_properties = self.conf.get([rule, "spark_property"], default=[])
         cmd = self.bbp_env(
             "spykfunc",
             [
@@ -375,25 +392,12 @@ class Context:
                 "SPARK_USER=$(whoami)",
                 "sm_run",
                 self.cluster_config.get(rule, {}).get("sm_run", ""),
-                f"-w {os.path.join(output_dir, '.sm_run')}",
+                "-w {params.output_dir}/.sm_run",
                 "spykfunc",
-                mode,
-                "--output-order post",
-                f"--output-dir {output_dir}",
-                "--spark-property spark.master=spark://$(srun sh -c '[ $SLURM_PROCID -eq 0 ] && hostname || true' | tail -n 1):7077",
-            ]
-            + [f"--spark-property {p}" for p in self.conf.get([rule, "spark_property"], default=[])]
-            + [
-                "--from",
-                os.path.abspath("{input[neurons]}"),
-                self.NODE_POPULATION_NAME,
-                "--to",
-                os.path.abspath("{input[neurons]}"),
-                self.NODE_POPULATION_NAME,
-                self.BUILDER_RECIPE,
-                self.if_synthesis(self.SYNTHESIZE_MORPH_DIR, self.MORPH_RELEASE + "/h5v1/"),
-                "--parquet",
-                os.path.abspath("{input[touches]}/*.parquet"),
+                "--output-dir {params.output_dir}",
+                *[f"--spark-property {p}" for p in spark_properties],
+                *extra_args,
+                "{params.parquet_dirs}",
             ],
             slurm_env=rule,
             skip_srun=True,

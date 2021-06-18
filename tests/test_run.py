@@ -13,9 +13,9 @@ from utils import (
     SNAKEMAKE_ARGS,
     TEST_DATA_DIR,
     TEST_DATA_DIR_SYNTH,
-    TEST_DIR,
     edit_yaml,
     tmp_cwd,
+    tmp_mkdir,
 )
 
 from circuit_build.cli import run
@@ -25,7 +25,7 @@ def test_functional_all():
     # don't test for a custom population names in a separate test because it will too long to execute
     node_population_name = 'node_population_name'
     edge_population_name = 'edge_population_name'
-    with tmp_cwd() as tmp_dir, tempfile.TemporaryDirectory(dir=TEST_DIR) as data_copy_dir:
+    with tmp_cwd() as tmp_dir, tmp_mkdir() as data_copy_dir:
         data_copy_dir = Path(data_copy_dir) / TEST_DATA_DIR.name
         shutil.copytree(TEST_DATA_DIR, data_copy_dir)
         with edit_yaml(data_copy_dir / 'MANIFEST.yaml') as manifest:
@@ -70,10 +70,11 @@ def test_functional_all():
             assert config['networks']['edges'][0]['edges_file'] == f'$NETWORK_EDGES_DIR/{edge_population_name}/edges.h5'
 
 
-def test_synthesize_morphologies():
+def test_synthesis():
+    # TODO: consider to unify with test_functional_all after all the phases are complete
     node_population_name = 'node_population_name'
     edge_population_name = 'edge_population_name'
-    with tmp_cwd(), tempfile.TemporaryDirectory(dir=TEST_DIR) as data_copy_dir:
+    with tmp_cwd() as tmp_dir, tmp_mkdir() as data_copy_dir:
         data_copy_dir = Path(data_copy_dir) / TEST_DATA_DIR_SYNTH.name
         shutil.copytree(TEST_DATA_DIR_SYNTH, data_copy_dir)
         with edit_yaml(data_copy_dir / 'MANIFEST.yaml') as manifest:
@@ -84,18 +85,41 @@ def test_synthesize_morphologies():
         runner = CliRunner()
         result = runner.invoke(
             run,
-            args + ['synthesize_morphologies'],
+            args + ['functional'],
             catch_exceptions=False,
         )
         assert result.exit_code == 0
+        tmp_dir = Path(tmp_dir)
+
+        assert tmp_dir.joinpath('CircuitConfig').stat().st_size > 100
+        assert tmp_dir.joinpath('sonata/node_sets.json').stat().st_size > 100
+        assert tmp_dir.joinpath('sonata/circuit_config.json').stat().st_size > 100
+        assert tmp_dir.joinpath('start.target').stat().st_size > 100
+
+        nodes_file = (tmp_dir / f'sonata/networks/nodes/{node_population_name}/nodes.h5').resolve()
+        assert f'CellLibraryFile {nodes_file}' in (tmp_dir / 'CircuitConfig').open().read()
+        assert nodes_file.stat().st_size > 100
+        with h5py.File(nodes_file, 'r') as h5f:
+            assert f'/nodes/{node_population_name}' in h5f
+
+        edges_file = (tmp_dir / f'sonata/networks/edges/functional/{edge_population_name}/edges.h5').resolve()
+        assert edges_file.stat().st_size > 100
         # test output from choose_morphologies
         assert Path("axon-morphologies.tsv").stat().st_size > 100
         # test output from synthesize_morphologies
         assert Path("circuit.morphologies.h5").stat().st_size > 100
+        with h5py.File(edges_file, 'r') as h5f:
+            assert f'/edges/{edge_population_name}' in h5f
+            assert node_population_name == h5f[f'/edges/{edge_population_name}/source_node_id'].attrs['node_population']
+            assert node_population_name == h5f[f'/edges/{edge_population_name}/target_node_id'].attrs['node_population']
+        with tmp_dir.joinpath('sonata/circuit_config.json').open('r') as f:
+            config = json.load(f)
+            assert config['networks']['nodes'][0]['nodes_file'] == f'$NETWORK_NODES_DIR/{node_population_name}/nodes.h5'
+            assert config['networks']['edges'][0]['edges_file'] == f'$NETWORK_EDGES_DIR/{edge_population_name}/edges.h5'
 
 
 def test_no_emodel():
-    with tmp_cwd() as tmp_dir, tempfile.TemporaryDirectory(dir=TEST_DIR) as data_copy_dir:
+    with tmp_cwd() as tmp_dir, tmp_mkdir() as data_copy_dir:
         data_copy_dir = Path(data_copy_dir) / TEST_DATA_DIR.name
         shutil.copytree(TEST_DATA_DIR, data_copy_dir)
         with edit_yaml(data_copy_dir / 'MANIFEST.yaml') as manifest:

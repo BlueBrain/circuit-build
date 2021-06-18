@@ -253,7 +253,7 @@ spykfunc_s2s
 
 Analogous to ``spykfunc_s2f``, but does not prune touches.
 
-.. _ref-phase-parquet2syn2:
+.. _ref-phase-parquet2sonata:
 
 Parameters
 ~~~~~~~~~~
@@ -261,8 +261,8 @@ Parameters
 .. jsonschema:: ../../circuit_build/snakemake/schemas/MANIFEST.yaml#/properties/spykfunc_s2s
 
 
-parquet2syn2
-------------
+parquet2sonata
+--------------
 
 Convert the `Spykfunc`_ output to SYN2 format.
 

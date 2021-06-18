@@ -101,6 +101,19 @@ properties:
                 cell property values would be chosen based on Z-coordinate: ``(z < 5700) ? "left" : "right")``.
         type: boolean
         default: false
+      partition:
+        description: |
+          | Define the list of non-overlapping nodesets to touchdetect and functionalize separately.
+          | To process the right and left hemispheres, you should define two nodesets
+            in the target definitions file, and list their names here.
+          | This option has effect only when the ``synthesis`` parameter is ``True``.
+          | Optional, if not specified the full node population is processed.
+        type: array
+        items:
+          type: string
+        uniqueItems: true
+        default: []
+        example: ['left', 'right']
 
   place_cells:
     type: object
@@ -280,7 +293,7 @@ properties:
     properties:
       targets:
         description: |
-          :ref:`Target definitions <ref-bioname-targets>` file to use for generating ``start.target``.
+          :ref:`Target definitions <ref-bioname-targets>` file to use for generating ``start.target`` or ``node_sets.json``.
 
           Should be located in ``bioname`` folder.
         type: string

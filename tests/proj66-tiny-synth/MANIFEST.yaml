@@ -7,6 +7,7 @@ common:
   node_population_name: 'neocortex_neurons'
   edge_population_name: 'neocortex_neurons__chemical_synapse'
   synthesis: True
+  partition: ['left', 'right']
 
 place_cells:
   soma_placement: 'basic'

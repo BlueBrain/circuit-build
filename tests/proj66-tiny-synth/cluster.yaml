@@ -53,6 +53,11 @@ spykfunc_s2s:
   jobname: s2s
   salloc: '-A ${{SALLOC_ACCOUNT:-proj30}} -p prod -c 36 -C nvme --exclusive --mem 0 --time 0:15:00'
 
+# running on 'prod' since '-C nvme' is not available on 'prod_small'
+spykfunc_merge:
+  jobname: merge
+  salloc: '-A ${{SALLOC_ACCOUNT:-proj30}} -p prod -c 36 -C nvme --exclusive --mem 0 --time 0:15:00'
+
 spatial_index_segment:
   jobname: segment_index
   salloc: '-A ${{SALLOC_ACCOUNT:-proj30}} -p prod_small --constraint=cpu --time 0:05:00'
