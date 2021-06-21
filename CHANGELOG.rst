@@ -30,6 +30,8 @@ Version 3.2.0 (2021-06-14)
 - Use a jinja template to write Sonata config instead of brainbuilder CLI.
 - Use jinja to write templates directly without salloc.
 - Load templates and schemas from the correct location even in case of custom Snakefile.
+- Added ais_scaler computation for synthesis (equivalent of old ModelManagement)
+- Added current computation (holding and threshold) for synthesis
 
 Version 3.1.4 (2021-05-05)
 --------------------------

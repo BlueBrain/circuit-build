@@ -107,7 +107,9 @@ def test_synthesis():
         # test output from choose_morphologies
         assert Path("axon-morphologies.tsv").stat().st_size > 100
         # test output from synthesize_morphologies
-        assert Path("circuit.morphologies.h5").stat().st_size > 100
+        assert Path("circuit.synthesized_morphologies.h5").stat().st_size > 100
+        assert Path("circuit.ais_scales.h5").stat().st_size > 100
+
         with h5py.File(edges_file, 'r') as h5f:
             assert f'/edges/{edge_population_name}' in h5f
             assert node_population_name == h5f[f'/edges/{edge_population_name}/source_node_id'].attrs['node_population']

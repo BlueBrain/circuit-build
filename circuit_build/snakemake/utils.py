@@ -11,7 +11,7 @@ from typing import Dict
 import jsonschema
 import pkg_resources
 import yaml
-from jinja2 import Environment, PackageLoader, select_autoescape, StrictUndefined
+from jinja2 import Environment, PackageLoader, StrictUndefined, select_autoescape
 
 import snakemake
 
@@ -26,9 +26,18 @@ MODULES = {
     "flatindexer": (NIX_MODULEPATH, ["nix/hpc/flatindexer/1.8.12"]),
     "parquet-converters": (SPACK_MODULEPATH, ["archive/2021-07", "parquet-converters/0.6.1"]),
     "placement-algorithm": (SPACK_MODULEPATH, ["archive/2021-07", "placement-algorithm/2.1.2"]),
-    "region-grower": (SPACK_MODULEPATH, ["archive/2021-07", "py-region-grower/0.2.3"]),
     "spykfunc": (SPACK_MODULEPATH, ["archive/2021-07", "spykfunc/0.16.99"]),
     "touchdetector": (SPACK_MODULEPATH, ["archive/2021-07", "touchdetector/5.6.0"]),
+    "region-grower": (SPACK_MODULEPATH, ["archive/2021-08", "py-region-grower/0.2.3"]),
+    "bluepyemodel": (
+        SPACK_MODULEPATH,
+        [
+            "unstable",
+            "py-bluepyemodel/0.0.5",
+            "py-bglibpy/4.4.36",
+            "neurodamus-neocortex/1.4-3.3.2",
+        ],
+    ),
 }
 
 
@@ -82,6 +91,7 @@ class Context:
         self.CIRCUIT_DIR = "."
         self.BUILDER_RECIPE = self.bioname_path("builderRecipeAllPathways.xml")
         self.MORPHDB = self.bioname_path("extNeuronDB.dat")
+        self.SYNTHESIZE_PROTOCOL_CONFIG = self.bioname_path("protocol_config.yaml")
 
         self.SYNTHESIZE = self.conf.get(["common", "synthesis"], default=False)
         self.SYNTHESIZE_MORPH_DIR = "morphologies"
@@ -99,6 +109,9 @@ class Context:
         )
         self.MORPH_RELEASE = self.conf.get(["common", "morph_release"])
         self.EMODEL_RELEASE = self.if_synthesis("", self.conf.get(["common", "emodel_release"]))
+        self.SYNTHESIZE_EMODEL_RELEASE = self.if_synthesis(
+            self.conf.get(["common", "synthesize_emodel_release"]), ""
+        )
         self.EMODEL_RELEASE_MECOMBO = None
         self.EMODEL_RELEASE_HOC = None
         if self.EMODEL_RELEASE:
@@ -189,7 +202,7 @@ class Context:
             echo "snakemake version: $(snakemake --version)"
             echo "bioname path: $(realpath .)"
             MD5SUM=$(which md5sum 2>/dev/null || which md5 2>/dev/null)
-            [[ -n $MD5SUM ]] && $MD5SUM *
+            [[ -n $MD5SUM ]] && find . -maxdepth 1 -type f | xargs $MD5SUM
             echo "### Git info"
             set -x
             git remote get-url origin | sed 's#://[^/@]*@#://#' || true

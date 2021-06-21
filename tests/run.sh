@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash -l
 set -euo pipefail
 
 GIT_ROOT=$(git rev-parse --show-toplevel)
@@ -25,7 +25,6 @@ pushd $BUILD_DIR
 
 # Unset SLURM environment variables
 unset $(env | grep SLURM | cut -d= -f1 | xargs)
-
 snakemake -p -j8                                \
   --snakefile "$GIT_ROOT/snakemake/Snakefile"   \
   --config "bioname=$CIRCUIT_PATH"              \
