@@ -3,7 +3,7 @@ from pathlib import Path
 from utils import Context
 
 ctx = Context(workflow=workflow, config=config, cluster_config=cluster_config)
-ctx.check_git_info(ctx.BIONAME)
+ctx.check_git(ctx.BIONAME)
 
 
 rule default:

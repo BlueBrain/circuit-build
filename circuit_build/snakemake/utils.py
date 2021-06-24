@@ -164,26 +164,32 @@ class Context:
     def template_path(self, name):
         return os.path.join(self.workflow.basedir, "templates", name)
 
-    def check_git_info(self, path):
-        """Check that bioname is under git control and log git info."""
+    def check_git(self, path):
+        """Log some information and raise an exception if bioname is not under git control."""
         cmd = """
             set -e
-            echo "### Bioname info\n"
-            echo "path: $(realpath .)"
+            echo "### Environment info"
             echo "date: $(date +'%Y-%m-%dT%H:%M:%S%z')"
             echo "user: $(whoami)"
             echo "host: $(hostname)"
             echo "circuit-build version: $(circuit-build --version)"
             echo "snakemake version: $(snakemake --version)"
-            echo "git tag: $(git describe --always)"
+            echo "bioname path: $(realpath .)"
+            MD5SUM=$(which md5sum 2>/dev/null || which md5 2>/dev/null)
+            [[ -n $MD5SUM ]] && $MD5SUM *
+            echo "### Git info"
             set -x
+            git remote get-url origin || true
+            git rev-parse --abbrev-ref HEAD
+            git rev-parse HEAD
+            git describe --abbrev --dirty --always --tags
             git --no-pager diff
             git --no-pager diff --staged
             """
         cmd = self.redirect_to_file(cmd, filename=self.log_path("git_info"))
-        cwd = path if os.path.isdir(path) else os.path.dirname(path)
+        path = path if os.path.isdir(path) else os.path.dirname(path)
         try:
-            subprocess.run(cmd, shell=True, check=True, cwd=cwd)
+            subprocess.run(cmd, shell=True, check=True, cwd=path)
         except subprocess.CalledProcessError:
             raise RuntimeError(f"bioname folder: {path} must be under git (version control system)")
 

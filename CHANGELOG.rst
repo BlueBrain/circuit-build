@@ -16,6 +16,7 @@ Version 3.2.0 (2021-06-14)
 - Require touchdetector/5.6.0. [NSETM-1384]
 - Use nodes.h5 instead of circuit.mvd3 in circuitconfig_structural.
 - Split all the job logs in separate files. [NSETM-1428]
+- Log more git information and the md5 checksum of bioname files.
 - Add option ``--with-summary`` to save a summary of the workflow in ``logs/<timestamp>/summary.tsv``.
 - Add option ``--with-report`` to save a report of the workflow in ``logs/<timestamp>/report.html``.
 - Replace nose with pytest in unit tests.
