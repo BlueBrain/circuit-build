@@ -166,6 +166,7 @@ class Context:
 
     def check_git(self, path):
         """Log some information and raise an exception if bioname is not under git control."""
+        # note: temporary git remote credentials added by the CI are stripped away if present
         cmd = """
             set -e
             echo "### Environment info"
@@ -179,7 +180,7 @@ class Context:
             [[ -n $MD5SUM ]] && $MD5SUM *
             echo "### Git info"
             set -x
-            git remote get-url origin || true
+            git remote get-url origin | sed 's#://[^/@]*@#://#' || true
             git rev-parse --abbrev-ref HEAD
             git rev-parse HEAD
             git describe --abbrev --dirty --always --tags

@@ -109,6 +109,11 @@ Examples:\n
     help='Path to workflow definition in form of a snakefile.',
 )
 @click.option(
+    '-d', '--directory', required=False, type=click.Path(exists=False, file_okay=False),
+    help='Specify working directory (relative paths in the snakefile will use this as their origin).',
+    default='.', show_default=True,
+)
+@click.option(
     '--with-summary', is_flag=True, help='Save a summary in `logs/<timestamp>/summary.tsv`.'
 )
 @click.option(
@@ -121,6 +126,7 @@ def run(
     bioname: str,
     modules: list,
     snakefile: str,
+    directory: str,
     with_summary: bool,
     with_report: bool,
 ):
@@ -137,16 +143,25 @@ def run(
     timestamp = f"{datetime.now():%Y%m%dT%H%M%S}"
     args = _build_args(args, bioname, modules, timestamp)
 
-    cmd = ['snakemake', '--snakefile', snakefile, '--cluster-config', cluster_config, *args]
+    cmd = [
+        'snakemake',
+        '--snakefile',
+        snakefile,
+        '--cluster-config',
+        cluster_config,
+        '--directory',
+        directory,
+        *args,
+    ]
     exit_code = _run_snakemake_process(cmd)
     if with_summary:
         # snakemake with the --summary/--detailed-summary option does not execute the workflow
-        filepath = Path(f'logs/{timestamp}/summary.tsv')
+        filepath = Path(f'{directory}/logs/{timestamp}/summary.tsv')
         L.info("Creating report in %s", filepath)
         exit_code += _run_summary_process(cmd, filepath)
     if with_report:
         # snakemake with the --report option does not execute the workflow
-        filepath = Path(f'logs/{timestamp}/report.html')
+        filepath = Path(f'{directory}/logs/{timestamp}/report.html')
         L.info("Creating summary in %s", filepath)
         exit_code += _run_report_process(cmd, filepath)
 

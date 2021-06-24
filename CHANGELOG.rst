@@ -19,6 +19,7 @@ Version 3.2.0 (2021-06-14)
 - Log more git information and the md5 checksum of bioname files.
 - Add option ``--with-summary`` to save a summary of the workflow in ``logs/<timestamp>/summary.tsv``.
 - Add option ``--with-report`` to save a report of the workflow in ``logs/<timestamp>/report.html``.
+- Add option ``--directory`` used as base directory for summary and reports, and passed to Snakemake.
 - Replace nose with pytest in unit tests.
 - Add jsonschema to validate MANIFEST.yaml and keep the documentation in sync.
 - Remove Projection section from CircuitConfig because the syntax is not up to date.
