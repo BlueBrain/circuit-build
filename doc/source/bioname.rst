@@ -201,14 +201,27 @@ Further documentation of the recipe is available in `Circuit Documentation <http
 Target definitions (YAML)
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Custom targets to be added to the circuit. During circuit build, they are resolved into named GID sets stored in ``start.target``.
+Custom targets to be added to the circuit.
+During circuit build, they are resolved into named GID sets stored in ``start.target``.
 
-At the moment we support only query-based target definitions. These should be defined inside ``targets/query_based`` section as mappings with `BluePy-like <https://bbpteam.epfl.ch/documentation/bluepy-0.13.5/circuit.html#cells-get>`_ cell property filters.
+Two types of queries are supported:
+
+* query-based target definitions: using `BluePy-like <https://bbpteam.epfl.ch/documentation/projects/bluepy/latest/circuit.html#cells-get>`_ cell property filters
+* atlas based queries: a boolean voxel mask is used to define which cells are considered part of the target
 
 Example:
 
-.. literalinclude:: ../../tests/proj66-tiny/targets.yaml
-   :language: yaml
+.. code-block:: yaml
+
+  targets:
+    # BluePy-like queries a.k.a. "smart targets"
+    query_based:
+        mc2_Column: {'region': '@^mc2'}
+        Layer1: {'region': '@1$'}
+
+    # 0/1 masks registered in the atlas
+    atlas_based:
+        cylinder: '{S1HL-cylinder}'
 
 .. note::
   These query-based target definitions can be considered a stepping stone towards *node sets files* which would define cell subsets in the forthcoming `SONATA <https://github.com/AllenInstitute/sonata/blob/master/docs/SONATA_DEVELOPER_GUIDE.md>`_ circuit format.
