@@ -159,14 +159,15 @@ After the command above has completed, any analysis not involving spatial indice
 
 .. raw:: html
 
-   <details open>
-   <summary>DAG for the rule: functional</summary>
+    <details open>
+    <summary>Functional</summary>
 
-.. graphviz:: dag/functional.dot
+.. image:: ../build/graphs/functional_filegraph.svg
+    :target: _images/functional_filegraph.svg
 
 .. raw:: html
 
-   </details>
+    </details>
 
 
 Spatial indices
@@ -183,14 +184,15 @@ Segment spatial index requires only cell collection, and thus can be built prior
 
 .. raw:: html
 
-   <details open>
-   <summary>DAG for the rule: spatial_index_segment</summary>
+    <details open>
+    <summary>Spatial index segment</summary>
 
-.. graphviz:: dag/spatial_index_segment.dot
+.. image:: ../build/graphs/spatial_index_segment_filegraph.svg
+    :target: _images/spatial_index_segment_filegraph.svg
 
 .. raw:: html
 
-   </details>
+    </details>
 
 
 Structural circuit
@@ -218,14 +220,15 @@ instead of:
 
 .. raw:: html
 
-   <details open>
-   <summary>DAG for the rule: structural</summary>
+    <details open>
+    <summary>Structural</summary>
 
-.. graphviz:: dag/structural.dot
+.. image:: ../build/graphs/structural_filegraph.svg
+    :target: _images/structural_filegraph.svg
 
 .. raw:: html
 
-   </details>
+    </details>
 
 
 Subcellular
@@ -239,14 +242,15 @@ To assign gene expressions and protein concentrations to the cells:
 
 .. raw:: html
 
-   <details open>
-   <summary>DAG for the rule: subcellular</summary>
+    <details open>
+    <summary>Subcellular</summary>
 
-.. graphviz:: dag/subcellular.dot
+.. image:: ../build/graphs/subcellular_filegraph.svg
+    :target: _images/subcellular_filegraph.svg
 
 .. raw:: html
 
-   </details>
+    </details>
 
 
 .. _ref-cluster-config:
