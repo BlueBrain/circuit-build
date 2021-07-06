@@ -92,27 +92,31 @@ To get an absolute path to `circuit_build/snakemake/Snakefile` type:
 
     $ circuit-build snakefile-path
 
-To use custom modules for `circuit_build/snakemake/Snakefile` you can specify them via `-m` option.
-This option is multiple. It means you can use it multiple times to specify multiple custom modules.
 
-.. code-block:: bash
+Custom modules
+~~~~~~~~~~~~~~
 
-    $ circuit-build run -m custom_module1:module_name1:module_path -m custom_module2:module_name21,module_name22/0.1 ...
+To use custom modules for `circuit_build/snakemake/Snakefile` you can specify them
+inside ``MANIFEST.yaml`` in a separate section named ``modules``,
+as a list of strings using the format ``<module_env>:<module_names>`` or
+``<module_env>:<module_names>:<optional_module_path>``, where:
 
-The syntax is <*custom module name*>:<*modules list*>:<*optional module path*>.
+- *module_env* is the name of the environment used in a specific phase.
+- *module_names* is a comma-separated list of modules to be loaded.
+- *optional_module_path* is the module path where to search the modules specified in *module_names*.
+  If omitted, a default value is used.
 
-- *custom module name* - module name that is used as a key in ``MODULES`` variable of the default ``Snakefile``.
-- *modules list* - list of actual modules to load separated by a comma.
-- *optional module path* - module path where to search modules of *modules list*. It can be omitted
-  then ``SPACK_MODULEPATH`` of the default ``Snakefile`` is used.
+Example:
 
-Alternatively, you can specify the custom modules inside ``MANIFEST.yaml`` as a list of strings using the same format.
-
-::
+.. code-block:: yaml
 
     modules:
-      - custom_module1:module_name1:module_path
-      - custom_module2:module_name21,module_name22/0.1
+      - brainbuilder:archive/2020-08,brainbuilder/0.14.0
+      - touchdetector:archive/2020-05,touchdetector/5.4.0,hpe-mpi
+      - spykfunc:archive/2020-06,spykfunc/0.15.6:/gpfs/bbp.cscs.ch/ssd/apps/hpc/jenkins/modules/all
+
+Alternatively, you can specify the custom modules from the command line, but this option is
+intended for internal or experimental use.
 
 
 Cell collection

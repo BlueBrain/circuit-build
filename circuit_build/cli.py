@@ -94,8 +94,8 @@ def cli(verbose):
 @click.option(
     '-m', '--module', 'modules', multiple=True, required=False,
     help='''
-Modules to be overwritten. Multiple configurations are allowed, and each one
-should be given in the format:\n
+Modules to be overwritten, intended for internal or experimental use.\n
+Multiple configurations are allowed, and each one should be given in the format:\n
     module_env:module_name/module_version[,module_name/module_version...][:module_path]\n
 Examples:\n
     brainbuilder:archive/2020-08,brainbuilder/0.14.0\n
