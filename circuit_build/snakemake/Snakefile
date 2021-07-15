@@ -528,7 +528,7 @@ rule parquet_to_sonata:
                 "--to {input[cells]}",
                 ctx.NODE_POPULATION_NAME,
                 "-o {output}",
-                "connectome/{wildcards.connectome_dir}/spykfunc/circuit.parquet/*.parquet",
+                "connectome/{wildcards.connectome_dir}/spykfunc/circuit.parquet/",
             ],
             slurm_env="parquet2syn2",
         )
