@@ -318,26 +318,15 @@ class Context:
 
     def write_network_config(self, connectome_dir):
         return self.bbp_env(
-            "brainbuilder",
+            "jinja2",
             [
-                "brainbuilder sonata network-config",
-                "--base-dir",
-                "'.'",
-                "--morph-dir",
-                "components/morphologies",
-                "--emodel-dir",
-                "components/biophysical_neuron_models",
-                "--nodes-dir",
-                "networks/nodes",
-                "--nodes",
-                self.NODE_POPULATION_NAME,
-                "--node-sets",
-                self.NODESETS_FILE,
-                "--edges-dir",
-                f"networks/edges/{connectome_dir}",
-                "--edges",
-                self.EDGE_POPULATION_NAME,
-                "-o {output}",
+                "jinja2 --strict",
+                f"-D CONNECTOME_DIR={connectome_dir}",
+                f"-D NODESETS_FILE={self.NODESETS_FILE}",
+                f"-D NODE_POPULATION_NAME={self.NODE_POPULATION_NAME}",
+                f"-D EDGE_POPULATION_NAME={self.EDGE_POPULATION_NAME}",
+                self.template_path("SonataConfig.j2"),
+                "> {output}",
             ],
         )
 
