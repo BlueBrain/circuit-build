@@ -1,13 +1,16 @@
 import logging
 import os.path
 import subprocess
+import traceback
 import warnings
+from contextlib import contextmanager
 from datetime import datetime
 from pathlib import Path
 from typing import Dict
 
 import jsonschema
 import yaml
+from jinja2 import Environment, PackageLoader, select_autoescape, StrictUndefined
 
 import snakemake
 
@@ -20,13 +23,22 @@ NIX_MODULEPATH = (
 MODULES = {
     "brainbuilder": (SPACK_MODULEPATH, ["archive/2021-07", "brainbuilder/0.16.1"]),
     "flatindexer": (NIX_MODULEPATH, ["nix/hpc/flatindexer/1.8.12"]),
-    "jinja2": (SPACK_MODULEPATH, ["archive/2021-07", "python-dev/0.4"]),
     "parquet-converters": (SPACK_MODULEPATH, ["archive/2021-07", "parquet-converters/0.6.1"]),
     "placement-algorithm": (SPACK_MODULEPATH, ["archive/2021-07", "placement-algorithm/2.1.2"]),
     "region-grower": (SPACK_MODULEPATH, ["archive/2021-07", "py-region-grower/0.2.3"]),
     "spykfunc": (SPACK_MODULEPATH, ["archive/2021-07", "spykfunc/0.16.99"]),
     "touchdetector": (SPACK_MODULEPATH, ["archive/2021-07", "touchdetector/5.6.0"]),
 }
+
+
+def _render_template(template_name, *args, **kwargs):
+    env = Environment(
+        loader=PackageLoader("circuit_build", "snakemake/templates"),
+        autoescape=select_autoescape(),
+        undefined=StrictUndefined,
+    )
+    template = env.get_template(template_name)
+    return template.render(*args, **kwargs)
 
 
 class Config:
@@ -118,6 +130,17 @@ class Context:
 
     def partition_wildcard(self):
         return self.if_partition("_{partition}", "")
+
+    @staticmethod
+    @contextmanager
+    def write_with_log(out_file, log_file):
+        with open(log_file, "w") as lf:
+            try:
+                with open(out_file, "w") as f:
+                    yield f
+            except BaseException:
+                lf.write(traceback.format_exc())
+                raise
 
     @staticmethod
     def format_if(template, value, func=None):
@@ -291,21 +314,16 @@ class Context:
         ]
 
     def build_circuit_config(self, nrn_path, cell_library_file):
-        return self.bbp_env(
-            "jinja2",
-            [
-                "jinja2 --strict",
-                f"-D CIRCUIT_PATH={os.path.abspath(self.CIRCUIT_DIR)}",
-                f"-D NRN_PATH={os.path.abspath(nrn_path)}",
-                f"-D MORPH_PATH={self.if_synthesis(self.SYNTHESIZE_MORPH_DIR, self.MORPH_RELEASE)}",
-                f"-D ME_TYPE_PATH={self.EMODEL_RELEASE_HOC or 'SPECIFY_ME'}",
-                self.format_if("-D ME_COMBO_INFO_PATH={}", self.EMODEL_RELEASE_MECOMBO),
-                f"-D BIONAME={self.BIONAME}",
-                f"-D ATLAS={self.ATLAS}",
-                f"-D CELL_LIBRARY_FILE={cell_library_file}",
-                self.template_path("CircuitConfig.j2"),
-                "> {output}",
-            ],
+        return _render_template(
+            "CircuitConfig.j2",
+            CIRCUIT_PATH=os.path.abspath(self.CIRCUIT_DIR),
+            NRN_PATH=os.path.abspath(nrn_path),
+            MORPH_PATH=self.if_synthesis(self.SYNTHESIZE_MORPH_DIR, self.MORPH_RELEASE),
+            ME_TYPE_PATH=self.EMODEL_RELEASE_HOC or "SPECIFY_ME",
+            ME_COMBO_INFO_PATH=self.EMODEL_RELEASE_MECOMBO if self.EMODEL_RELEASE_MECOMBO else None,
+            BIONAME=self.BIONAME,
+            ATLAS=self.ATLAS,
+            CELL_LIBRARY_FILE=cell_library_file,
         )
 
     def get_targetgen_config(self, key, default_value=None):
@@ -317,17 +335,12 @@ class Context:
         return new.get(key, default_value)
 
     def write_network_config(self, connectome_dir):
-        return self.bbp_env(
-            "jinja2",
-            [
-                "jinja2 --strict",
-                f"-D CONNECTOME_DIR={connectome_dir}",
-                f"-D NODESETS_FILE={self.NODESETS_FILE}",
-                f"-D NODE_POPULATION_NAME={self.NODE_POPULATION_NAME}",
-                f"-D EDGE_POPULATION_NAME={self.EDGE_POPULATION_NAME}",
-                self.template_path("SonataConfig.j2"),
-                "> {output}",
-            ],
+        return _render_template(
+            "SonataConfig.j2",
+            CONNECTOME_DIR=connectome_dir,
+            NODESETS_FILE=self.NODESETS_FILE,
+            NODE_POPULATION_NAME=self.NODE_POPULATION_NAME,
+            EDGE_POPULATION_NAME=self.EDGE_POPULATION_NAME,
         )
 
     def run_spykfunc(self, rule):

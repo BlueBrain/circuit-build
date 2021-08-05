@@ -30,6 +30,7 @@ setup(
         'pyyaml>=5.0',
         'snakemake>=5.10,<7.0',
         'jsonschema>=3.2.0,<4.0',
+        'jinja2>=2.10.0,<4.0',
     ],
     extras_require={
         "reports": ['snakemake[reports]'],

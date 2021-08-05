@@ -20,8 +20,9 @@ rule circuitconfig_base:
         "CircuitConfig_base",
     log:
         ctx.log_path("circuitconfig_base"),
-    shell:
-        ctx.build_circuit_config(nrn_path=".", cell_library_file="circuit.mvd3")
+    run:
+        with ctx.write_with_log(output[0], log[0]) as out:
+            out.write(ctx.build_circuit_config(nrn_path=".", cell_library_file="circuit.mvd3"))
 
 
 rule circuitconfig_functional:
@@ -34,16 +35,19 @@ rule circuitconfig_functional:
         "CircuitConfig",
     log:
         ctx.log_path("circuitconfig_functional"),
-    shell:
-        ctx.build_circuit_config(
-            nrn_path=Path(
-                ctx.CIRCUIT_DIR,
-                f"sonata/networks/edges/functional/{ctx.EDGE_POPULATION_NAME}/edges.h5",
-            ).absolute(),
-            cell_library_file=Path(
-                ctx.CIRCUIT_DIR, f"sonata/networks/nodes/{ctx.NODE_POPULATION_NAME}/nodes.h5"
-            ).absolute(),
-        )
+    run:
+        with ctx.write_with_log(output[0], log[0]) as out:
+            out.write(
+                ctx.build_circuit_config(
+                    nrn_path=Path(
+                        ctx.CIRCUIT_DIR,
+                        f"sonata/networks/edges/functional/{ctx.EDGE_POPULATION_NAME}/edges.h5",
+                    ).absolute(),
+                    cell_library_file=Path(
+                        ctx.CIRCUIT_DIR, f"sonata/networks/nodes/{ctx.NODE_POPULATION_NAME}/nodes.h5"
+                    ).absolute(),
+                )
+            )
 
 
 rule circuitconfig_structural:
@@ -56,17 +60,19 @@ rule circuitconfig_structural:
         "CircuitConfig_struct",
     log:
         ctx.log_path("circuitconfig_structural"),
-    shell:
-        ctx.build_circuit_config(
-            nrn_path=Path(
-                ctx.CIRCUIT_DIR,
-                f"sonata/networks/edges/structural/{ctx.EDGE_POPULATION_NAME}/edges.h5",
-            ).absolute(),
-            cell_library_file=Path(
-                ctx.CIRCUIT_DIR, f"sonata/networks/nodes/{ctx.NODE_POPULATION_NAME}/nodes.h5"
-            ).absolute(),
-        )
-
+    run:
+        with ctx.write_with_log(output[0], log[0]) as out:
+            out.write(
+                ctx.build_circuit_config(
+                    nrn_path=Path(
+                        ctx.CIRCUIT_DIR,
+                        f"sonata/networks/edges/structural/{ctx.EDGE_POPULATION_NAME}/edges.h5",
+                    ).absolute(),
+                    cell_library_file=Path(
+                        ctx.CIRCUIT_DIR, f"sonata/networks/nodes/{ctx.NODE_POPULATION_NAME}/nodes.h5"
+                    ).absolute(),
+                )
+            )
 
 rule init_cells:
     message:
@@ -604,8 +610,9 @@ rule circuitconfig_sonata:
         "sonata/circuit_config.json",
     log:
         ctx.log_path("circuitconfig_sonata"),
-    shell:
-        ctx.write_network_config("functional")
+    run:
+        with ctx.write_with_log(output[0], log[0]) as out:
+            out.write(ctx.write_network_config("functional"))
 
 
 rule circuitconfig_struct_sonata:
@@ -615,8 +622,9 @@ rule circuitconfig_struct_sonata:
         "sonata/struct_circuit_config.json",
     log:
         ctx.log_path("circuitconfig_struct_sonata"),
-    shell:
-        ctx.write_network_config("structural")
+    run:
+        with ctx.write_with_log(output[0], log[0]) as out:
+            out.write(ctx.write_network_config("structural"))
 
 
 rule functional:

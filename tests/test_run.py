@@ -135,10 +135,10 @@ def test_no_emodel():
 
 def test_custom_module(caplog, capfd):
     with tmp_cwd():
-        args = SNAKEMAKE_ARGS + ['-m', 'jinja2:invalid_module1:invalid_module_path']
+        args = SNAKEMAKE_ARGS + ['-m', 'brainbuilder:invalid_module1:invalid_module_path']
         runner = CliRunner(mix_stderr=False)
 
-        result = runner.invoke(run, args + ['circuitconfig_base'], catch_exceptions=False)
+        result = runner.invoke(run, args + ['circuit.somata.h5'], catch_exceptions=False)
 
         captured = capfd.readouterr()
         assert result.exit_code == 1

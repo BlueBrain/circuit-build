@@ -28,6 +28,7 @@ Version 3.2.0 (2021-06-14)
 - Added ``partition`` option to specify the nodesets to be touchdetected and functionalized separately,
   needed for left/right hemispheres.
 - Use a jinja template to write Sonata config instead of brainbuilder CLI.
+- Use jinja to write templates directly without salloc
 
 Version 3.1.4 (2021-05-05)
 --------------------------
