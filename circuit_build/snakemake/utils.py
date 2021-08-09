@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Dict
 
 import jsonschema
+import pkg_resources
 import yaml
 from jinja2 import Environment, PackageLoader, select_autoescape, StrictUndefined
 
@@ -167,8 +168,13 @@ class Context:
             # else redirect to file
             return f"( {cmd} ) >{filename} 2>&1"
 
-    def template_path(self, name):
-        return os.path.join(self.workflow.basedir, "templates", name)
+    @staticmethod
+    def template_path(name):
+        return Path(pkg_resources.resource_filename(__name__, "templates")).resolve() / name
+
+    @staticmethod
+    def schema_path(name):
+        return Path(pkg_resources.resource_filename(__name__, "schemas")).resolve() / name
 
     def check_git(self, path):
         """Log some information and raise an exception if bioname is not under git control."""
@@ -201,8 +207,23 @@ class Context:
             raise RuntimeError(f"bioname folder: {path} must be under git (version control system)")
 
     def validate_config(self, config):
-        with Path(self.workflow.basedir, "schemas/MANIFEST.yaml").open() as schema_fd:
-            jsonschema.validate(instance=config, schema=yaml.safe_load(schema_fd))
+        with self.schema_path("MANIFEST.yaml").open() as schema_fd:
+            schema = yaml.safe_load(schema_fd)
+        cls = jsonschema.validators.validator_for(schema)
+        cls.check_schema(schema)
+        validator = cls(schema)
+        errors = list(validator.iter_errors(config))
+        if errors:
+            # Log an error message like the following:
+            # MANIFEST.yaml is invalid.
+            # 1: Failed validating root: Additional properties are not allowed ('x' was unexpected)
+            # 2: Failed validating root.assign_emodels.seed: 'a' is not of type 'integer'
+            msg = "\n".join(
+                f"{n}: Failed validating {'.'.join(['root'] + list(e.absolute_path))}: {e.message}"
+                for n, e in enumerate(errors, 1)
+            )
+            logger.error("MANIFEST.yaml is invalid.\n%s", msg)
+            raise Exception("Validation error")
 
     @staticmethod
     def validate_node_population_name(name):

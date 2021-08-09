@@ -22,13 +22,14 @@ Version 3.2.0 (2021-06-14)
 - Add option ``--with-report`` to save a report of the workflow in ``logs/<timestamp>/report.html``.
 - Add option ``--directory`` used as base directory for summary and reports, and passed to Snakemake.
 - Replace nose with pytest in unit tests.
-- Add jsonschema to validate MANIFEST.yaml and keep the documentation in sync.
+- Add jsonschema to validate MANIFEST.yaml, log all the errors and keep the documentation in sync.
 - Remove Projection section from CircuitConfig because the syntax is not up to date.
 - Added ``synthesis`` option to turn on synthesis.
 - Added ``partition`` option to specify the nodesets to be touchdetected and functionalized separately,
   needed for left/right hemispheres.
 - Use a jinja template to write Sonata config instead of brainbuilder CLI.
-- Use jinja to write templates directly without salloc
+- Use jinja to write templates directly without salloc.
+- Load templates and schemas from the correct location even in case of custom Snakefile.
 
 Version 3.1.4 (2021-05-05)
 --------------------------
