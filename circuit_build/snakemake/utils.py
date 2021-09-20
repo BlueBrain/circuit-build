@@ -1,3 +1,4 @@
+"""Common functions used in Snakefile."""
 import logging
 import os.path
 import subprocess
@@ -52,7 +53,15 @@ def _render_template(template_name, *args, **kwargs):
 
 
 class Config:
+    """Configuration class."""
+
     def __init__(self, config):
+        """Initialize the object.
+
+        Args:
+            config (dict): configuration dict.
+
+        """
         self._config = config
 
     def get(self, keys, *, default=None):
@@ -77,7 +86,16 @@ class Config:
 
 
 class Context:
+    """Context class."""
+
     def __init__(self, *, workflow: snakemake.Workflow, config: Dict, cluster_config: Dict):
+        """Initialize the object.
+
+        Args:
+            workflow: workflow object provided by snakemake.
+            config: configuration dict.
+            cluster_config: cluster config dict.
+        """
         self.workflow = workflow
         self.conf = Config(config=config)
         self.cluster_config = cluster_config
@@ -134,23 +152,28 @@ class Context:
         self.MODULES = self.build_modules(MODULES)
 
     def bioname_path(self, filename):
+        """Return the bioname path."""
         return str(Path(self.BIONAME, filename))
 
     def if_synthesis(self, true_value, false_value):
+        """Return ``true_value`` if synthesis is enabled, else ``false_value``."""
         return true_value if self.SYNTHESIZE else false_value
 
     def if_partition(self, true_value, false_value):
+        """Return ``true_value`` if partitions are enabled, else ``false_value``."""
         return true_value if self.PARTITION else false_value
 
     def partition_wildcard(self):
+        """Return the partition wildcard to be used in snakemake commands."""
         return self.if_partition("_{partition}", "")
 
     @staticmethod
     @contextmanager
     def write_with_log(out_file, log_file):
-        with open(log_file, "w") as lf:
+        """Context manager used to write to ``out_file``, and log any exception to ``log_file``."""
+        with open(log_file, "w", encoding="utf-8") as lf:
             try:
-                with open(out_file, "w") as f:
+                with open(out_file, "w", encoding="utf-8") as f:
                     yield f
             except BaseException:
                 lf.write(traceback.format_exc())
@@ -164,9 +187,11 @@ class Context:
 
     @staticmethod
     def escape_single_quotes(value):
+        """Return the given string after escaping the single quote character."""
         return value.replace("'", "'\\''")
 
     def log_path(self, name, _now=datetime.now()):
+        """Return the path to the logfile for a given rule, and create the dir if needed."""
         timestamp = self.conf.get("timestamp", default=_now.strftime("%Y%m%dT%H%M%S"))
         path = os.path.abspath(os.path.join(self.LOGS_DIR, timestamp, f"{name}.log"))
         os.makedirs(os.path.dirname(path), exist_ok=True)
@@ -174,19 +199,21 @@ class Context:
 
     @staticmethod
     def redirect_to_file(cmd, filename="{log}"):
+        """Return a command string with the right redirection."""
         if os.getenv("LOG_ALL_TO_STDERR") == "true":
             # redirect logs to stderr instead of files
             return f"( {cmd} ) 1>&2"
-        else:
-            # else redirect to file
-            return f"( {cmd} ) >{filename} 2>&1"
+        # else redirect to file
+        return f"( {cmd} ) >{filename} 2>&1"
 
     @staticmethod
     def template_path(name):
+        """Return the template path."""
         return Path(pkg_resources.resource_filename(__name__, "templates")).resolve() / name
 
     @staticmethod
     def schema_path(name):
+        """Return the schema path."""
         return Path(pkg_resources.resource_filename(__name__, "schemas")).resolve() / name
 
     def check_git(self, path):
@@ -216,10 +243,13 @@ class Context:
         path = path if os.path.isdir(path) else os.path.dirname(path)
         try:
             subprocess.run(cmd, shell=True, check=True, cwd=path)
-        except subprocess.CalledProcessError:
-            raise RuntimeError(f"bioname folder: {path} must be under git (version control system)")
+        except subprocess.CalledProcessError as ex:
+            raise RuntimeError(
+                f"bioname folder: {path} must be under git (version control system)"
+            ) from ex
 
     def validate_config(self, config):
+        """Raise an exception if the configuration is not valid."""
         with self.schema_path("MANIFEST.yaml").open() as schema_fd:
             schema = yaml.safe_load(schema_fd)
         cls = jsonschema.validators.validator_for(schema)
@@ -240,12 +270,13 @@ class Context:
 
     @staticmethod
     def validate_node_population_name(name):
+        """Validate the name of the node population."""
         doc_url = "https://bbpteam.epfl.ch/documentation/projects/circuit-build/latest/bioname.html#manifest-yaml"
         allowed_parts = {"ncx", "neocortex", "hippocampus", "thalamus", "mousify"}
         allowed_types = {"neurons", "astrocytes", "projections"}
         msg = (
-            '"node_population_name" in MANIFEST.yaml must exist and should fit the pattern: "<part>_<type>",'
-            f"see {doc_url} for details"
+            '"node_population_name" in MANIFEST.yaml must exist and should fit the pattern: '
+            f'"<part>_<type>", see {doc_url} for details'
         )
 
         if name is None:
@@ -260,6 +291,7 @@ class Context:
 
     @staticmethod
     def validate_edge_population_name(name):
+        """Validate the name of the edge population."""
         doc_url = "https://bbpteam.epfl.ch/documentation/projects/circuit-build/latest/bioname.html#manifest-yaml"
         allowed_connection = {"electrical", "chemical_synapse", "synapse_astrocyte", "endfoot"}
         msg = (
@@ -276,11 +308,12 @@ class Context:
         return name
 
     def build_modules(self, modules):
+        """Return the dictionary of modules after overwriting it with the custom modules."""
         custom_modules = self.conf.get("modules")
         if custom_modules:
             # Custom modules can be configured using one of:
-            # - configuration file MANIFEST.yaml -> list of strings from yaml
-            # - command line parameter --config -> list of strings from json for backward compatibility
+            # - configuration file MANIFEST.yaml -> list of str from yaml
+            # - command line parameter --config -> list of str from json for backward compatibility
             for module in custom_modules:
                 parts = module.split(":")
                 assert 2 <= len(parts) <= 3, "Invalid custom spack module description " + module
@@ -300,6 +333,7 @@ class Context:
         return modules
 
     def bbp_env(self, module_env, command, slurm_env=None, skip_srun=False):
+        """Wrap and return the command string to be executed."""
         result = " ".join(map(str, command))
 
         if slurm_env and self.cluster_config:
@@ -309,16 +343,14 @@ class Context:
             result = "salloc -J {jobname} {alloc} {srun} sh -c '{cmd}'".format(
                 jobname=slurm_config.get("jobname", "cbuild"),
                 alloc=slurm_config["salloc"],
-                srun=("" if skip_srun else "srun"),
+                srun="" if skip_srun else "srun",
                 cmd=self.escape_single_quotes(result),
             )
             # set the environment variables if needed
             env_vars = slurm_config.get("env_vars")
             if env_vars:
-                result = "env {} {}".format(
-                    " ".join(f"{k}={v}" for k, v in env_vars.items()),
-                    result,
-                )
+                variables = " ".join(f"{k}={v}" for k, v in env_vars.items())
+                result = f"env {variables} {result}"
 
         if module_env:
             modulepath, modules = self.MODULES[module_env]
@@ -338,6 +370,7 @@ class Context:
 
     @staticmethod
     def spatial_index_files(prefix):
+        """Return the list of files used for spatial index."""
         return [
             f"{prefix}_{filename}"
             for filename in [
@@ -348,6 +381,7 @@ class Context:
         ]
 
     def build_circuit_config(self, nrn_path, cell_library_file):
+        """Return the BBP circuit configuration as a string."""
         return _render_template(
             "CircuitConfig.j2",
             CIRCUIT_PATH=os.path.abspath(self.CIRCUIT_DIR),
@@ -361,6 +395,7 @@ class Context:
         )
 
     def get_targetgen_config(self, key, default_value=None):
+        """Return the right targetgen configuration, for backward compatibility."""
         old = self.conf.get("targetgen_mvd3", default={})
         new = self.conf.get("targetgen", default={})
         if old and not new:
@@ -369,6 +404,7 @@ class Context:
         return new.get(key, default_value)
 
     def write_network_config(self, connectome_dir):
+        """Return the SONATA circuit configuration as a string."""
         return _render_template(
             "SonataConfig.j2",
             CONNECTOME_DIR=connectome_dir,
@@ -378,6 +414,7 @@ class Context:
         )
 
     def run_spykfunc(self, rule):
+        """Return the spykfunc command as a string."""
         rules_conf = {
             "spykfunc_s2s": {
                 "mode": "--s2s",

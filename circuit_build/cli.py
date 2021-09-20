@@ -1,4 +1,4 @@
-"""Cli module"""
+"""Cli module."""
 import json
 import logging
 import subprocess
@@ -13,9 +13,9 @@ L = logging.getLogger()
 
 
 def _index(args, *opts):
-    """Finds index position of `opts` in `args`"""
+    """Finds index position of `opts` in `args`."""
     indices = [i for i, arg in enumerate(args) if arg in opts]
-    assert len(indices) < 2, f'{opts} options can\'t be used together, use only one of them'
+    assert len(indices) < 2, f"{opts} options can't be used together, use only one of them"
     if len(indices) == 0:
         return None
     return indices[0]
@@ -23,16 +23,16 @@ def _index(args, *opts):
 
 def _build_args(args, bioname, modules, timestamp):
     # force the timestamp to the same value in different executions of snakemake
-    extra_args = ['--config', f'bioname={bioname}', f'timestamp={timestamp}']
+    extra_args = ["--config", f"bioname={bioname}", f"timestamp={timestamp}"]
     if modules:
         # serialize the list of strings with json to be backward compatible with Snakemake:
         # snakemake >= 5.28.0 loads config using yaml.BaseLoader,
         # snakemake < 5.28.0 loads config using eval.
         extra_args += [f'modules={json.dumps(modules, separators=(",", ":"))}']
-    if _index(args, '--cores', '--jobs', '-j') is None:
-        extra_args += ['--jobs', '8']
-    if _index(args, '--printshellcmds', '-p') is None:
-        extra_args += ['--printshellcmds']
+    if _index(args, "--cores", "--jobs", "-j") is None:
+        extra_args += ["--jobs", "8"]
+    if _index(args, "--printshellcmds", "-p") is None:
+        extra_args += ["--printshellcmds"]
     # prepend the extra args to args
     return extra_args + args
 
@@ -40,7 +40,7 @@ def _build_args(args, bioname, modules, timestamp):
 def _run_snakemake_process(cmd, errorcode=1):
     """Run the main snakemake process."""
     L.info("Command: %s", " ".join(cmd))
-    result = subprocess.run(cmd)
+    result = subprocess.run(cmd, check=False)
     if result.returncode != 0:
         L.error("Snakemake process failed")
         return errorcode
@@ -49,11 +49,11 @@ def _run_snakemake_process(cmd, errorcode=1):
 
 def _run_summary_process(cmd, filepath: Path, errorcode=2):
     """Save the summary to file."""
-    cmd = cmd + ['--detailed-summary']
+    cmd = cmd + ["--detailed-summary"]
     L.info("Command: %s", " ".join(cmd))
     filepath.parent.mkdir(parents=True, exist_ok=True)
-    with filepath.open('w') as fd:
-        result = subprocess.run(cmd, stdout=fd)
+    with filepath.open("w") as fd:
+        result = subprocess.run(cmd, stdout=fd, check=False)
     if result.returncode != 0:
         L.error("Summary process failed")
         return errorcode
@@ -62,10 +62,10 @@ def _run_summary_process(cmd, filepath: Path, errorcode=2):
 
 def _run_report_process(cmd, filepath: Path, errorcode=4):
     """Save the report to file."""
-    cmd = cmd + ['--report', str(filepath)]
+    cmd = cmd + ["--report", str(filepath)]
     L.info("Command: %s", " ".join(cmd))
     filepath.parent.mkdir(parents=True, exist_ok=True)
-    result = subprocess.run(cmd)
+    result = subprocess.run(cmd, check=False)
     if result.returncode != 0:
         L.error("Report process failed")
         return errorcode
@@ -74,7 +74,7 @@ def _run_report_process(cmd, filepath: Path, errorcode=4):
 
 @click.group()
 @click.version_option()
-@click.option('-v', '--verbose', count=True, default=0, help='-v for INFO, -vv for DEBUG')
+@click.option("-v", "--verbose", count=True, default=0, help="-v for INFO, -vv for DEBUG")
 def cli(verbose):
     """The CLI entry point."""
     logformat = "[%(asctime)s] %(levelname)s %(name)s: %(message)s"
@@ -84,16 +84,25 @@ def cli(verbose):
 
 @cli.command(context_settings=dict(ignore_unknown_options=True, allow_extra_args=True))
 @click.option(
-    '-u', '--cluster-config', required=True, type=click.Path(exists=True, dir_okay=False),
-    help='Path to cluster config.',
+    "-u",
+    "--cluster-config",
+    required=True,
+    type=click.Path(exists=True, dir_okay=False),
+    help="Path to cluster config.",
 )
 @click.option(
-    '--bioname', required=True, type=click.Path(exists=True, file_okay=False),
-    help='Path to `bioname` folder of a circuit.',
+    "--bioname",
+    required=True,
+    type=click.Path(exists=True, file_okay=False),
+    help="Path to `bioname` folder of a circuit.",
 )
 @click.option(
-    '-m', '--module', 'modules', multiple=True, required=False,
-    help='''
+    "-m",
+    "--module",
+    "modules",
+    multiple=True,
+    required=False,
+    help="""
 Modules to be overwritten, intended for internal or experimental use.\n
 Multiple configurations are allowed, and each one should be given in the format:\n
     module_env:module_name/module_version[,module_name/module_version...][:module_path]\n
@@ -101,23 +110,31 @@ Examples:\n
     brainbuilder:archive/2020-08,brainbuilder/0.14.0\n
     touchdetector:archive/2020-05,touchdetector/5.4.0,hpe-mpi\n
     spykfunc:archive/2020-06,spykfunc/0.15.6:/gpfs/bbp.cscs.ch/ssd/apps/hpc/jenkins/modules/all
-    '''
+    """,
 )
 @click.option(
-    '-s', '--snakefile', required=False, type=click.Path(exists=True, dir_okay=False),
-    default=pkg_resources.resource_filename(__name__, 'snakemake/Snakefile'), show_default=True,
-    help='Path to workflow definition in form of a snakefile.',
+    "-s",
+    "--snakefile",
+    required=False,
+    type=click.Path(exists=True, dir_okay=False),
+    default=pkg_resources.resource_filename(__name__, "snakemake/Snakefile"),
+    show_default=True,
+    help="Path to workflow definition in form of a snakefile.",
 )
 @click.option(
-    '-d', '--directory', required=False, type=click.Path(exists=False, file_okay=False),
-    help='Specify working directory (relative paths in the snakefile will use this as their origin).',
-    default='.', show_default=True,
+    "-d",
+    "--directory",
+    required=False,
+    type=click.Path(exists=False, file_okay=False),
+    help="Working directory (relative paths in the snakefile will use this as their origin).",
+    default=".",
+    show_default=True,
 )
 @click.option(
-    '--with-summary', is_flag=True, help='Save a summary in `logs/<timestamp>/summary.tsv`.'
+    "--with-summary", is_flag=True, help="Save a summary in `logs/<timestamp>/summary.tsv`."
 )
 @click.option(
-    '--with-report', is_flag=True, help='Save a report in `logs/<timestamp>/report.html`.'
+    "--with-report", is_flag=True, help="Save a report in `logs/<timestamp>/report.html`."
 )
 @click.pass_context
 def run(
@@ -136,32 +153,32 @@ def run(
     """
     args = ctx.args
     if snakefile is None:
-        snakefile = pkg_resources.resource_filename(__name__, 'snakemake/Snakefile')
+        snakefile = pkg_resources.resource_filename(__name__, "snakemake/Snakefile")
     assert Path(snakefile).is_file(), f'Snakefile "{snakefile}" does not exist!'
-    assert _index(args, '--config', '-C') is None, 'snakemake `--config` option is not allowed'
+    assert _index(args, "--config", "-C") is None, "snakemake `--config` option is not allowed"
 
     timestamp = f"{datetime.now():%Y%m%dT%H%M%S}"
     args = _build_args(args, bioname, modules, timestamp)
 
     cmd = [
-        'snakemake',
-        '--snakefile',
+        "snakemake",
+        "--snakefile",
         snakefile,
-        '--cluster-config',
+        "--cluster-config",
         cluster_config,
-        '--directory',
+        "--directory",
         directory,
         *args,
     ]
     exit_code = _run_snakemake_process(cmd)
     if with_summary:
         # snakemake with the --summary/--detailed-summary option does not execute the workflow
-        filepath = Path(f'{directory}/logs/{timestamp}/summary.tsv')
+        filepath = Path(f"{directory}/logs/{timestamp}/summary.tsv")
         L.info("Creating report in %s", filepath)
         exit_code += _run_summary_process(cmd, filepath)
     if with_report:
         # snakemake with the --report option does not execute the workflow
-        filepath = Path(f'{directory}/logs/{timestamp}/report.html')
+        filepath = Path(f"{directory}/logs/{timestamp}/report.html")
         L.info("Creating summary in %s", filepath)
         exit_code += _run_report_process(cmd, filepath)
 
@@ -176,4 +193,4 @@ def run(
 @cli.command()
 def snakefile_path():
     """Outputs a path to the default Snakefile."""
-    click.echo(pkg_resources.resource_filename(__name__, 'snakemake/Snakefile'))
+    click.echo(pkg_resources.resource_filename(__name__, "snakemake/Snakefile"))
