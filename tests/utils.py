@@ -10,10 +10,10 @@ import yaml
 import circuit_build
 
 TEST_DIR = Path(__file__).resolve().parent
-TEST_DATA_DIR = TEST_DIR / 'proj66-tiny'
-TEST_DATA_DIR_SYNTH = TEST_DIR / 'proj66-tiny-synth'
-SNAKEFILE = pkg_resources.resource_filename(circuit_build.__name__, 'snakemake/Snakefile')
-SNAKEMAKE_ARGS = ['--bioname', str(TEST_DATA_DIR), '-u', str(TEST_DATA_DIR / 'cluster.yaml')]
+TEST_DATA_DIR = TEST_DIR / "proj66-tiny"
+TEST_DATA_DIR_SYNTH = TEST_DIR / "proj66-tiny-synth"
+SNAKEFILE = pkg_resources.resource_filename(circuit_build.__name__, "snakemake/Snakefile")
+SNAKEMAKE_ARGS = ["--bioname", str(TEST_DATA_DIR), "-u", str(TEST_DATA_DIR / "cluster.yaml")]
 
 
 @contextmanager
@@ -39,7 +39,7 @@ def tmp_mkdir():
         NEVER: never delete (useful for full inspection)
     """
     error = False
-    when = os.getenv('DELETE_TEST_TMP_DIR', 'ALWAYS')
+    when = os.getenv("DELETE_TEST_TMP_DIR", "ALWAYS")
     name = tempfile.mkdtemp(dir=TEST_DIR)
     try:
         yield name
@@ -47,7 +47,7 @@ def tmp_mkdir():
         error = True
         raise
     finally:
-        if when == 'ALWAYS' or when == 'ON_SUCCESS' and not error:
+        if when == "ALWAYS" or when == "ON_SUCCESS" and not error:
             shutil.rmtree(name, ignore_errors=True)
 
 
@@ -62,10 +62,10 @@ def edit_yaml(yaml_file):
         Yields a dict instance of `yaml_file`. This instance will be saved later on the context
             manager leave.
     """
-    with yaml_file.open('r') as f:
+    with yaml_file.open("r") as f:
         config = yaml.safe_load(f)
     try:
         yield config
     finally:
-        with yaml_file.open('w') as f:
+        with yaml_file.open("w") as f:
             yaml.safe_dump(config, f)
