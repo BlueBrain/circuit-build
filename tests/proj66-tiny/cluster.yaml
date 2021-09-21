@@ -20,11 +20,11 @@ touchdetector:
 
 spykfunc_s2f:
   jobname: s2f
-  salloc: '-A ${{SALLOC_ACCOUNT:-proj83}} -p prod_small -c 36 -C nvme --exclusive --mem 0 --time 0:15:00'
+  salloc: '-A ${{SALLOC_ACCOUNT:-proj83}} -p prod_small --ntasks-per-node=1 -C nvme --exclusive --mem 0 --time 0:15:00'
 
 spykfunc_s2s:
   jobname: s2s
-  salloc: '-A ${{SALLOC_ACCOUNT:-proj83}} -p prod_small -c 36 -C nvme --exclusive --mem 0 --time 0:15:00'
+  salloc: '-A ${{SALLOC_ACCOUNT:-proj83}} -p prod_small --ntasks-per-node=1 -C nvme --exclusive --mem 0 --time 0:15:00'
 
 spatial_index_segment:
   jobname: segment_index
