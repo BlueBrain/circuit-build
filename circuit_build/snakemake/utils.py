@@ -337,11 +337,13 @@ class Context:
         result = " ".join(map(str, command))
 
         if slurm_env and self.cluster_config:
-            if slurm_env not in self.cluster_config:
-                slurm_env = "__default__"
-            slurm_config = self.cluster_config[slurm_env]
+            if slurm_env in self.cluster_config:
+                slurm_config = self.cluster_config[slurm_env]
+            else:
+                # break only if __default__ is needed and missing
+                slurm_config = self.cluster_config["__default__"]
             result = "salloc -J {jobname} {alloc} {srun} sh -c '{cmd}'".format(
-                jobname=slurm_config.get("jobname", "cbuild"),
+                jobname=slurm_config.get("jobname", slurm_env),
                 alloc=slurm_config["salloc"],
                 srun="" if skip_srun else "srun",
                 cmd=self.escape_single_quotes(result),

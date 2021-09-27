@@ -2,6 +2,7 @@ __default__:
   salloc: '-A ${{SALLOC_ACCOUNT:-proj83}} -p prod_small --time 0:05:00'
 
 choose_morphologies:
+  jobname: choose_morphologies
   salloc: >-
     -A ${{SALLOC_ACCOUNT:-proj83}}
     -p prod_small
