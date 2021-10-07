@@ -66,7 +66,7 @@ then get familiar with Slurm allocations in :ref:`ref-cluster-config` section. `
 flag ensures that subsequent spawned commands are dumped to the logs.  `--jobs 8` allows to launch
 up to `8` tasks in parallel.
 
-Since version 3.2.0, ``circuit-build`` provides two options useful for reporting:
+Since version 4.0.0, ``circuit-build`` provides two options useful for reporting:
 
 - ``--with-summary``: it will save a tab-separated summary in ``logs/<timestamp>/summary.tsv``
   (it wraps the ``--detailed-summary`` option of Snakemake).
@@ -166,8 +166,8 @@ After the command above has completed, any analysis not involving spatial indice
     <details open>
     <summary>Functional</summary>
 
-.. image:: ../build/graphs/functional_filegraph.svg
-    :target: _images/functional_filegraph.svg
+.. image:: ../build/graphs/functional.svg
+    :target: _images/functional.svg
 
 .. raw:: html
 
@@ -191,8 +191,8 @@ Segment spatial index requires only cell collection, and thus can be built prior
     <details open>
     <summary>Spatial index segment</summary>
 
-.. image:: ../build/graphs/spatial_index_segment_filegraph.svg
-    :target: _images/spatial_index_segment_filegraph.svg
+.. image:: ../build/graphs/spatial_index_segment.svg
+    :target: _images/spatial_index_segment.svg
 
 .. raw:: html
 
@@ -227,8 +227,8 @@ instead of:
     <details open>
     <summary>Structural</summary>
 
-.. image:: ../build/graphs/structural_filegraph.svg
-    :target: _images/structural_filegraph.svg
+.. image:: ../build/graphs/structural.svg
+    :target: _images/structural.svg
 
 .. raw:: html
 
@@ -249,8 +249,8 @@ To assign gene expressions and protein concentrations to the cells:
     <details open>
     <summary>Subcellular</summary>
 
-.. image:: ../build/graphs/subcellular_filegraph.svg
-    :target: _images/subcellular_filegraph.svg
+.. image:: ../build/graphs/subcellular.svg
+    :target: _images/subcellular.svg
 
 .. raw:: html
 
@@ -297,9 +297,10 @@ like:
         jobname: td
         salloc: '-A proj68 -p prod --constraint=cpu -n100 --time 1:00:00'
 
-``jobname`` key is optional (if omitted, Slurm job will be given some default name). ``salloc``
-specifies the necessary contraints. Sometimes it can be convenient to use multi-line string for
-``salloc`` key:
+- ``jobname`` is optional. If omitted, the Slurm job will use the entry name.
+- ``salloc`` specifies the necessary parameters for the job allocation.
+  Sometimes it can be convenient to use a multi-line string for the ``salloc`` key,
+  as in the following example:
 
 .. code-block:: yaml
 
@@ -312,7 +313,20 @@ specifies the necessary contraints. Sometimes it can be convenient to use multi-
             -n100
             --time 1:00:00
 
-`YAML` *must* also contain `__default__` section which will be used for phases with no corresponding section, for instance:
+- It's also possible to specify ``env_vars`` to set some environment variables before allocating the job,
+  as in this example:
+
+.. code-block:: yaml
+
+    synthesize_morphologies:
+        jobname: synthesize_morphologies
+        salloc: '-A proj68 -p prod_small --constraint=cpu -n20 --time 1:00:00'
+        env_vars:
+            NEURON_MODULE_OPTIONS: "-nogui"
+
+
+The `YAML` file *must* also contain a `__default__` section which will be used for phases
+without a corresponding section, for instance:
 
 .. code-block:: yaml
 

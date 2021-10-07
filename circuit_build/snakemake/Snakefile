@@ -388,7 +388,7 @@ rule provide_me_info:
                 "--output {output}",
                 "{input}",
             ],
-            slurm_env="sonata_provide_me_info",
+            slurm_env="provide_me_info",
         )
 
 
@@ -562,10 +562,14 @@ rule targetgen:
             "brainbuilder",
             [
                 "brainbuilder targets from-input",
-                f"--targets {ctx.bioname_path(ctx.get_targetgen_config('targets'))}"
-                if ctx.get_targetgen_config("targets", False)
+                ctx.format_if(
+                    "--targets {}",
+                    value=ctx.conf.get(["targetgen", "targets"]),
+                    func=ctx.bioname_path,
+                ),
+                "--allow-empty"
+                if ctx.conf.get(["targetgen", "allow_empty"], default=False)
                 else "",
-                "--allow-empty" if ctx.get_targetgen_config("allow_empty", False) else "",
                 "--atlas",
                 ctx.ATLAS,
                 "--atlas-cache",
@@ -573,7 +577,7 @@ rule targetgen:
                 "--output {output}",
                 "{input}",
             ],
-            slurm_env="targetgen_mvd3",
+            slurm_env="targetgen",
         )
 
 
@@ -594,10 +598,14 @@ rule node_sets:
             "brainbuilder",
             [
                 "brainbuilder targets node-sets",
-                f"--targets {ctx.bioname_path(ctx.get_targetgen_config('targets'))}"
-                if ctx.get_targetgen_config("targets", False)
+                ctx.format_if(
+                    "--targets {}",
+                    value=ctx.conf.get(["targetgen", "targets"]),
+                    func=ctx.bioname_path,
+                ),
+                "--allow-empty"
+                if ctx.conf.get(["targetgen", "allow_empty"], default=False)
                 else "",
-                "--allow-empty" if ctx.get_targetgen_config("allow_empty", False) else "",
                 "--population",
                 ctx.NODE_POPULATION_NAME,
                 "--atlas",
@@ -607,6 +615,7 @@ rule node_sets:
                 "--output {output}",
                 "{input}",
             ],
+            slurm_env="node_sets",
         )
 
 
@@ -649,7 +658,7 @@ rule parquet_to_sonata:
                 "{output}",
                 ctx.EDGE_POPULATION_NAME,
             ],
-            slurm_env="parquet2sonata",
+            slurm_env="parquet_to_sonata",
         )
 
 

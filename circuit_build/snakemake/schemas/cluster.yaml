@@ -1,0 +1,67 @@
+%YAML 1.1
+---
+$schema: 'http://json-schema.org/draft-07/schema#'
+$id: 'https://bbp.epfl.ch/schemas/common/circuit-build/v1/cluster.yaml'
+type: object
+additionalProperties: false
+properties:
+  __default__:
+    $ref: '#/$defs/jobconfig'
+  place_cells:
+    $ref: '#/$defs/jobconfig'
+  choose_morphologies:
+    $ref: '#/$defs/jobconfig'
+  assign_morphologies:
+    $ref: '#/$defs/jobconfig'
+  synthesize_morphologies:
+    $ref: '#/$defs/jobconfig'
+  assign_emodels:
+    $ref: '#/$defs/jobconfig'
+  compute_ais_scales:
+    $ref: '#/$defs/jobconfig'
+  provide_me_info:
+    $ref: '#/$defs/jobconfig'
+  compute_currents:
+    $ref: '#/$defs/jobconfig'
+  touchdetector:
+    $ref: '#/$defs/jobconfig'
+  touch2parquet:
+    $ref: '#/$defs/jobconfig'
+  spykfunc_s2s:
+    $ref: '#/$defs/jobconfig'
+  spykfunc_s2f:
+    $ref: '#/$defs/jobconfig'
+  spykfunc_merge:
+    $ref: '#/$defs/jobconfig'
+  targetgen:
+    $ref: '#/$defs/jobconfig'
+  node_sets:
+    $ref: '#/$defs/jobconfig'
+  spatial_index_segment:
+    $ref: '#/$defs/jobconfig'
+  parquet_to_sonata:
+    $ref: '#/$defs/jobconfig'
+  subcellular:
+    $ref: '#/$defs/jobconfig'
+
+$defs:
+  jobconfig:
+    type: object
+    additionalProperties: false
+    required:
+      - salloc
+    properties:
+      jobname:
+        description: Override the name of the job that will be used in slurm (optional).
+        type: string
+      salloc:
+        description: Parameters to be passed to ``salloc`` as a string (required).
+        type: string
+      env_vars:
+        description: Environment variables that should be set before running ``salloc`` (optional).
+        type: object
+        propertyNames:
+          pattern: "^[A-Za-z_][A-Za-z0-9_]*$"
+        patternProperties:
+          .*:
+            type: string

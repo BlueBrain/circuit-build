@@ -1,7 +1,7 @@
 Changelog
 =========
 
-Version 3.2.0 (2021-06-14)
+Version 4.0.0 (2021-xx-xx)
 --------------------------
 - Move to SONATA only:
     - nodes and edges only output in SONATA format, under the `sonata` directory
@@ -14,7 +14,7 @@ Version 3.2.0 (2021-06-14)
     - `sonata_to_nrn`
     - `symlink_sonata_edges`
 - Require touchdetector/5.6.0. [NSETM-1384]
-- Require spykfunc/0.16.1.
+- Require spykfunc/0.17.0.
 - Use nodes.h5 instead of circuit.mvd3 in circuitconfig_structural.
 - Split all the job logs in separate files. [NSETM-1428]
 - Log more git information and the md5 checksum of bioname files.
@@ -22,7 +22,8 @@ Version 3.2.0 (2021-06-14)
 - Add option ``--with-report`` to save a report of the workflow in ``logs/<timestamp>/report.html``.
 - Add option ``--directory`` used as base directory for summary and reports, and passed to Snakemake.
 - Replace nose with pytest in unit tests.
-- Add jsonschema to validate MANIFEST.yaml, log all the errors and keep the documentation in sync.
+- Add schemas MANIFEST.yaml and cluster.yaml to validate the configuration files, log the validation
+  errors and keep the documentation in sync.
 - Remove Projection section from CircuitConfig because the syntax is not up to date.
 - Added ``synthesis`` option to turn on synthesis.
 - Added ``partition`` option to specify the nodesets to be touchdetected and functionalized separately,

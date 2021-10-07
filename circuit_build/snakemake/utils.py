@@ -23,17 +23,17 @@ NIX_MODULEPATH = (
     "/nix/var/nix/profiles/per-user/modules/bb5-x86_64/modules-all/release/share/modulefiles/"
 )
 MODULES = {
-    "brainbuilder": (SPACK_MODULEPATH, ["archive/2021-07", "brainbuilder/0.16.1"]),
+    "brainbuilder": (SPACK_MODULEPATH, ["archive/2021-09", "brainbuilder/0.16.1"]),
     "flatindexer": (NIX_MODULEPATH, ["nix/hpc/flatindexer/1.8.12"]),
-    "parquet-converters": (SPACK_MODULEPATH, ["archive/2021-07", "parquet-converters/0.6.1"]),
-    "placement-algorithm": (SPACK_MODULEPATH, ["archive/2021-07", "placement-algorithm/2.1.2"]),
-    "spykfunc": (SPACK_MODULEPATH, ["archive/2021-07", "spykfunc/0.16.99"]),
-    "touchdetector": (SPACK_MODULEPATH, ["archive/2021-07", "touchdetector/5.6.0"]),
-    "region-grower": (SPACK_MODULEPATH, ["archive/2021-08", "py-region-grower/0.2.3"]),
+    "parquet-converters": (SPACK_MODULEPATH, ["archive/2021-09", "parquet-converters/0.6.1"]),
+    "placement-algorithm": (SPACK_MODULEPATH, ["archive/2021-09", "placement-algorithm/2.2.0"]),
+    "spykfunc": (SPACK_MODULEPATH, ["archive/2021-09", "spykfunc/0.17.0"]),
+    "touchdetector": (SPACK_MODULEPATH, ["archive/2021-09", "touchdetector/5.6.0"]),
+    "region-grower": (SPACK_MODULEPATH, ["archive/2021-09", "py-region-grower/0.3.0"]),
     "bluepyemodel": (
         SPACK_MODULEPATH,
         [
-            "unstable",
+            "archive/2021-09",
             "py-bluepyemodel/0.0.5",
             "py-bglibpy/4.4.36",
             "neurodamus-neocortex/1.4-3.3.2",
@@ -103,8 +103,9 @@ class Context:
 
         # Load MANIFEST.yaml into workflow config
         self.workflow.configfile(self.bioname_path("MANIFEST.yaml"))
-        # Validate the merged configuration
-        self.validate_config(config)
+        # Validate the merged configuration and the cluster configuration
+        self.validate_config(config, "MANIFEST.yaml")
+        self.validate_config(cluster_config, "cluster.yaml")
 
         self.CIRCUIT_DIR = "."
         self.BUILDER_RECIPE = self.bioname_path("builderRecipeAllPathways.xml")
@@ -201,8 +202,9 @@ class Context:
     def redirect_to_file(cmd, filename="{log}"):
         """Return a command string with the right redirection."""
         if os.getenv("LOG_ALL_TO_STDERR") == "true":
-            # redirect logs to stderr instead of files
-            return f"( {cmd} ) 1>&2"
+            # Redirect stdout and stderr to file, and propagate everything to stderr.
+            # Calling ``set -o pipefail`` is needed to propagate the exit code through the pipe.
+            return f"set -o pipefail; ( {cmd} ) 2>&1 | tee -a {filename} 1>&2"
         # else redirect to file
         return f"( {cmd} ) >{filename} 2>&1"
 
@@ -248,9 +250,9 @@ class Context:
                 f"bioname folder: {path} must be under git (version control system)"
             ) from ex
 
-    def validate_config(self, config):
+    def validate_config(self, config, schema_name):
         """Raise an exception if the configuration is not valid."""
-        with self.schema_path("MANIFEST.yaml").open() as schema_fd:
+        with self.schema_path(schema_name).open() as schema_fd:
             schema = yaml.safe_load(schema_fd)
         cls = jsonschema.validators.validator_for(schema)
         cls.check_schema(schema)
@@ -258,14 +260,18 @@ class Context:
         errors = list(validator.iter_errors(config))
         if errors:
             # Log an error message like the following:
-            # MANIFEST.yaml is invalid.
-            # 1: Failed validating root: Additional properties are not allowed ('x' was unexpected)
-            # 2: Failed validating root.assign_emodels.seed: 'a' is not of type 'integer'
+            #  Invalid configuration: MANIFEST.yaml
+            #  1: Failed validating root: Additional properties are not allowed ('x' was unexpected)
+            #  2: Failed validating root.assign_emodels.seed: 'a' is not of type 'integer'
             msg = "\n".join(
-                f"{n}: Failed validating {'.'.join(['root'] + list(e.absolute_path))}: {e.message}"
+                "{n}: Failed validating {path}: {message}".format(
+                    n=n,
+                    path=".".join(str(elem) for elem in ["root"] + list(e.absolute_path)),
+                    message=e.message,
+                )
                 for n, e in enumerate(errors, 1)
             )
-            logger.error("MANIFEST.yaml is invalid.\n%s", msg)
+            logger.error("Invalid configuration: %s\n%s", schema_name, msg)
             raise Exception("Validation error")
 
     @staticmethod
@@ -396,15 +402,6 @@ class Context:
             CELL_LIBRARY_FILE=cell_library_file,
         )
 
-    def get_targetgen_config(self, key, default_value=None):
-        """Return the right targetgen configuration, for backward compatibility."""
-        old = self.conf.get("targetgen_mvd3", default={})
-        new = self.conf.get("targetgen", default={})
-        if old and not new:
-            logger.warning('"targetgen_mvd3" should be replaced by "targetgen" in MANIFEST.yaml')
-            new = old
-        return new.get(key, default_value)
-
     def write_network_config(self, connectome_dir):
         """Return the SONATA circuit configuration as a string."""
         return _render_template(
@@ -464,6 +461,7 @@ class Context:
             "spykfunc",
             [
                 "env",
+                "USER=$(whoami)",
                 "SPARK_USER=$(whoami)",
                 "sm_run",
                 self.cluster_config.get(rule, {}).get("sm_run", ""),
