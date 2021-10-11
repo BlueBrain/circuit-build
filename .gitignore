@@ -6,5 +6,4 @@ doc/build
 *.pyc
 __pycache__
 venv
-# ignore dag images
-doc/source/dag/*.dot
+tmptestdir

@@ -1,6 +1,4 @@
 import os
-import shutil
-import tempfile
 from contextlib import contextmanager
 from pathlib import Path
 
@@ -17,38 +15,14 @@ SNAKEMAKE_ARGS = ["--bioname", str(TEST_DATA_DIR), "-u", str(TEST_DATA_DIR / "cl
 
 
 @contextmanager
-def tmp_cwd():
-    """Context manager to create a temporary directory and temporarily change the cwd."""
+def cwd(path):
+    """Context manager to temporarily change the working directory."""
     original_cwd = os.getcwd()
-    with tmp_mkdir() as name:
-        try:
-            os.chdir(name)
-            yield name
-        finally:
-            os.chdir(original_cwd)
-
-
-@contextmanager
-def tmp_mkdir():
-    """Context manager to create and return a temporary directory.
-
-    Upon exiting the context, the directory and everything contained in it are removed,
-    depending on the value of the environment variable DELETE_TEST_TMP_DIR:
-        ALWAYS: always delete (default if the variable is not defined)
-        ON_SUCCESS: delete only on success (useful for inspection in case of errors)
-        NEVER: never delete (useful for full inspection)
-    """
-    error = False
-    when = os.getenv("DELETE_TEST_TMP_DIR", "ALWAYS")
-    name = tempfile.mkdtemp(dir=TEST_DIR)
+    os.chdir(path)
     try:
-        yield name
-    except:
-        error = True
-        raise
+        yield
     finally:
-        if when == "ALWAYS" or when == "ON_SUCCESS" and not error:
-            shutil.rmtree(name, ignore_errors=True)
+        os.chdir(original_cwd)
 
 
 @contextmanager

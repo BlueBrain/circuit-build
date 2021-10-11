@@ -10,7 +10,7 @@ How to contribute to this documentation?
 
 .. code-block:: bash
 
-    $ git clone ssh://bbpcode.epfl.ch/common/circuit-build
+    $ git clone git@bbpgitlab.epfl.ch:nse/circuit-build.git
 
 2. Edit the documentation in ``doc/source``
 
@@ -51,9 +51,10 @@ Why making an intermediate step?
 Where can I find a sample *bioname*?
 ------------------------------------
 
-Some sample bioname(s) can be found in ``circuit-build`` `Git repo <https://bbpcode.epfl.ch/browse/code/common/circuit-build/tree/tests>`_.
+Some sample bioname(s) can be found in ``circuit-build`` `Git repo <https://bbpgitlab.epfl.ch/nse/circuit-build/-/tree/main/tests>`_.
 
-While not biologically realistic, these sample bionames serve as integration tests and are built on BB5 `daily <https://bbpcode.epfl.ch/ci/job/nse.circuit-build.tests/>`_; which gives certain guarantee that they are in sync with latest S/W deployed on BB5 cluster, as well as `circuit-build` script itself.
+While not biologically realistic, these sample bionames serve as integration tests and are built on BB5
+when the CI pipeline is executed.
 
 
 Where can I find logs for a given circuit build?

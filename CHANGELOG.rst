@@ -21,7 +21,7 @@ Version 4.0.0 (2021-xx-xx)
 - Add option ``--with-summary`` to save a summary of the workflow in ``logs/<timestamp>/summary.tsv``.
 - Add option ``--with-report`` to save a report of the workflow in ``logs/<timestamp>/report.html``.
 - Add option ``--directory`` used as base directory for summary and reports, and passed to Snakemake.
-- Replace nose with pytest in unit tests.
+- Replace nose with pytest in unit tests, save output to tmptestdir.
 - Add schemas MANIFEST.yaml and cluster.yaml to validate the configuration files, log the validation
   errors and keep the documentation in sync.
 - Remove Projection section from CircuitConfig because the syntax is not up to date.

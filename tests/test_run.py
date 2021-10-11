@@ -13,20 +13,19 @@ from utils import (
     SNAKEMAKE_ARGS,
     TEST_DATA_DIR,
     TEST_DATA_DIR_SYNTH,
+    cwd,
     edit_yaml,
-    tmp_cwd,
-    tmp_mkdir,
 )
 
 from circuit_build.cli import run
 
 
-def test_functional_all():
+def test_functional_all(tmp_path):
     # don't test for a custom population names in a separate test because it will too long to execute
     node_population_name = "node_population_name"
     edge_population_name = "edge_population_name"
-    with tmp_cwd() as tmp_dir, tmp_mkdir() as data_copy_dir:
-        data_copy_dir = Path(data_copy_dir) / TEST_DATA_DIR.name
+    with cwd(tmp_path):
+        data_copy_dir = tmp_path / TEST_DATA_DIR.name
         shutil.copytree(TEST_DATA_DIR, data_copy_dir)
         with edit_yaml(data_copy_dir / "MANIFEST.yaml") as manifest:
             manifest["common"]["node_population_name"] = node_population_name
@@ -40,22 +39,21 @@ def test_functional_all():
             catch_exceptions=False,
         )
         assert result.exit_code == 0
-        tmp_dir = Path(tmp_dir)
 
-        assert tmp_dir.joinpath("CircuitConfig").stat().st_size > 100
-        assert tmp_dir.joinpath("circuit.mvd3").stat().st_size > 100
-        assert tmp_dir.joinpath("sonata/node_sets.json").stat().st_size > 100
-        assert tmp_dir.joinpath("sonata/circuit_config.json").stat().st_size > 100
-        assert tmp_dir.joinpath("start.target").stat().st_size > 100
+        assert tmp_path.joinpath("CircuitConfig").stat().st_size > 100
+        assert tmp_path.joinpath("circuit.mvd3").stat().st_size > 100
+        assert tmp_path.joinpath("sonata/node_sets.json").stat().st_size > 100
+        assert tmp_path.joinpath("sonata/circuit_config.json").stat().st_size > 100
+        assert tmp_path.joinpath("start.target").stat().st_size > 100
 
-        nodes_file = (tmp_dir / f"sonata/networks/nodes/{node_population_name}/nodes.h5").resolve()
-        assert f"CellLibraryFile {nodes_file}" in (tmp_dir / "CircuitConfig").open().read()
+        nodes_file = (tmp_path / f"sonata/networks/nodes/{node_population_name}/nodes.h5").resolve()
+        assert f"CellLibraryFile {nodes_file}" in (tmp_path / "CircuitConfig").open().read()
         assert nodes_file.stat().st_size > 100
         with h5py.File(nodes_file, "r") as h5f:
             assert f"/nodes/{node_population_name}" in h5f
 
         edges_file = (
-            tmp_dir / f"sonata/networks/edges/functional/{edge_population_name}/edges.h5"
+            tmp_path / f"sonata/networks/edges/functional/{edge_population_name}/edges.h5"
         ).resolve()
         assert edges_file.stat().st_size > 100
         # test output from choose_morphologies
@@ -72,7 +70,7 @@ def test_functional_all():
                 node_population_name
                 == h5f[f"/edges/{edge_population_name}/target_node_id"].attrs["node_population"]
             )
-        with tmp_dir.joinpath("sonata/circuit_config.json").open("r") as f:
+        with tmp_path.joinpath("sonata/circuit_config.json").open("r") as f:
             config = json.load(f)
             assert (
                 config["networks"]["nodes"][0]["nodes_file"]
@@ -84,12 +82,11 @@ def test_functional_all():
             )
 
 
-def test_synthesis():
-    # TODO: consider to unify with test_functional_all after all the phases are complete
+def test_synthesis(tmp_path):
     node_population_name = "node_population_name"
     edge_population_name = "edge_population_name"
-    with tmp_cwd() as tmp_dir, tmp_mkdir() as data_copy_dir:
-        data_copy_dir = Path(data_copy_dir) / TEST_DATA_DIR_SYNTH.name
+    with cwd(tmp_path):
+        data_copy_dir = tmp_path / TEST_DATA_DIR_SYNTH.name
         shutil.copytree(TEST_DATA_DIR_SYNTH, data_copy_dir)
         with edit_yaml(data_copy_dir / "MANIFEST.yaml") as manifest:
             manifest["common"]["node_population_name"] = node_population_name
@@ -103,21 +100,20 @@ def test_synthesis():
             catch_exceptions=False,
         )
         assert result.exit_code == 0
-        tmp_dir = Path(tmp_dir)
 
-        assert tmp_dir.joinpath("CircuitConfig").stat().st_size > 100
-        assert tmp_dir.joinpath("sonata/node_sets.json").stat().st_size > 100
-        assert tmp_dir.joinpath("sonata/circuit_config.json").stat().st_size > 100
-        assert tmp_dir.joinpath("start.target").stat().st_size > 100
+        assert tmp_path.joinpath("CircuitConfig").stat().st_size > 100
+        assert tmp_path.joinpath("sonata/node_sets.json").stat().st_size > 100
+        assert tmp_path.joinpath("sonata/circuit_config.json").stat().st_size > 100
+        assert tmp_path.joinpath("start.target").stat().st_size > 100
 
-        nodes_file = (tmp_dir / f"sonata/networks/nodes/{node_population_name}/nodes.h5").resolve()
-        assert f"CellLibraryFile {nodes_file}" in (tmp_dir / "CircuitConfig").open().read()
+        nodes_file = (tmp_path / f"sonata/networks/nodes/{node_population_name}/nodes.h5").resolve()
+        assert f"CellLibraryFile {nodes_file}" in (tmp_path / "CircuitConfig").open().read()
         assert nodes_file.stat().st_size > 100
         with h5py.File(nodes_file, "r") as h5f:
             assert f"/nodes/{node_population_name}" in h5f
 
         edges_file = (
-            tmp_dir / f"sonata/networks/edges/functional/{edge_population_name}/edges.h5"
+            tmp_path / f"sonata/networks/edges/functional/{edge_population_name}/edges.h5"
         ).resolve()
         assert edges_file.stat().st_size > 100
         # test output from choose_morphologies
@@ -136,7 +132,7 @@ def test_synthesis():
                 node_population_name
                 == h5f[f"/edges/{edge_population_name}/target_node_id"].attrs["node_population"]
             )
-        with tmp_dir.joinpath("sonata/circuit_config.json").open("r") as f:
+        with tmp_path.joinpath("sonata/circuit_config.json").open("r") as f:
             config = json.load(f)
             assert (
                 config["networks"]["nodes"][0]["nodes_file"]
@@ -148,9 +144,9 @@ def test_synthesis():
             )
 
 
-def test_no_emodel():
-    with tmp_cwd() as tmp_dir, tmp_mkdir() as data_copy_dir:
-        data_copy_dir = Path(data_copy_dir) / TEST_DATA_DIR.name
+def test_no_emodel(tmp_path):
+    with cwd(tmp_path):
+        data_copy_dir = tmp_path / TEST_DATA_DIR.name
         shutil.copytree(TEST_DATA_DIR, data_copy_dir)
         with edit_yaml(data_copy_dir / "MANIFEST.yaml") as manifest:
             del manifest["common"]["emodel_release"]
@@ -159,12 +155,11 @@ def test_no_emodel():
         runner = CliRunner()
         result = runner.invoke(run, args + ["assign_emodels"], catch_exceptions=False)
         assert result.exit_code == 0
-        tmp_dir = Path(tmp_dir)
-        assert tmp_dir.joinpath("circuit.h5").stat().st_size > 100
+        assert tmp_path.joinpath("circuit.h5").stat().st_size > 100
 
 
-def test_custom_module(caplog, capfd):
-    with tmp_cwd():
+def test_custom_module(tmp_path, caplog, capfd):
+    with cwd(tmp_path):
         args = SNAKEMAKE_ARGS + ["-m", "brainbuilder:invalid_module1:invalid_module_path"]
         runner = CliRunner(mix_stderr=False)
 
@@ -178,9 +173,10 @@ def test_custom_module(caplog, capfd):
         assert "Unable to locate a modulefile for 'invalid_module1'" in captured.err
 
 
-def test_no_git_bioname(caplog, capfd):
+def test_no_git_bioname(tmp_path, caplog, capfd):
     """This test verifies that bioname is checked to be under git."""
-    with tmp_cwd(), tempfile.TemporaryDirectory() as data_copy_dir:
+    with cwd(tmp_path), tempfile.TemporaryDirectory() as data_copy_dir:
+        # data_copy_dir must not be under git control
         data_copy_dir = Path(data_copy_dir) / TEST_DATA_DIR.name
         shutil.copytree(TEST_DATA_DIR, data_copy_dir)
         args = ["--bioname", str(data_copy_dir), "-u", str(data_copy_dir / "cluster.yaml")]
@@ -196,10 +192,10 @@ def test_no_git_bioname(caplog, capfd):
         assert f"{str(data_copy_dir)} must be under git" in captured.err
 
 
-def test_snakemake_circuit_config():
+def test_snakemake_circuit_config(tmp_path):
     """This test verifies that building can happen via `snakemake`,
     and `CircuitConfig.j2` is accessible in this case."""
-    with tmp_cwd() as tmp_dir:
+    with cwd(tmp_path):
         args = [
             "--jobs",
             "8",
@@ -213,14 +209,14 @@ def test_snakemake_circuit_config():
         result = subprocess.run(cmd, check=True)
 
         assert result.returncode == 0
-        tmp_dir = Path(tmp_dir)
-        assert tmp_dir.joinpath("CircuitConfig_base").stat().st_size > 100
-        assert f"CellLibraryFile circuit.mvd3" in (tmp_dir / "CircuitConfig_base").open().read()
+        assert tmp_path.joinpath("CircuitConfig_base").stat().st_size > 100
+        assert f"CellLibraryFile circuit.mvd3" in (tmp_path / "CircuitConfig_base").open().read()
 
 
-def test_snakemake_no_git_bioname():
+def test_snakemake_no_git_bioname(tmp_path):
     """This test verifies that bioname is checked to be under git when called via `snakemake`."""
-    with tmp_cwd(), tempfile.TemporaryDirectory() as data_copy_dir:
+    with cwd(tmp_path), tempfile.TemporaryDirectory() as data_copy_dir:
+        # data_copy_dir must not be under git control
         data_copy_dir = Path(data_copy_dir) / TEST_DATA_DIR.name
         shutil.copytree(TEST_DATA_DIR, data_copy_dir)
         args = [

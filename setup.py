@@ -18,7 +18,7 @@ setup(
     url="https://bbpteam.epfl.ch/documentation/projects/Circuit%20Building/latest/index.html",
     project_urls={
         "Tracker": "https://bbpteam.epfl.ch/project/issues/projects/NSETM/issues",
-        "Source": "ssh://bbpcode.epfl.ch/common/circuit-build",
+        "Source": "git@bbpgitlab.epfl.ch:nse/circuit-build.git",
     },
     entry_points={"console_scripts": ["circuit-build=circuit_build.cli:cli"]},
     license="BBP-internal-confidential",

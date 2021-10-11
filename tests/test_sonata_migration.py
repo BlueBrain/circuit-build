@@ -1,13 +1,12 @@
 from pathlib import Path
 
+from click.testing import CliRunner
+from numpy.testing import assert_almost_equal, assert_equal
+from pandas.testing import assert_frame_equal
+from utils import SNAKEMAKE_ARGS, cwd
 from voxcell import CellCollection
 
-from click.testing import CliRunner
 from circuit_build.cli import run
-from numpy.testing import assert_equal, assert_almost_equal
-from pandas.testing import assert_frame_equal
-
-from utils import tmp_cwd, SNAKEMAKE_ARGS
 
 
 def assert_equal_cells(c0, c1):
@@ -23,25 +22,24 @@ def assert_equal_cells(c0, c1):
     )
 
 
-def test_default_rule():
-    with tmp_cwd() as tmpdirname:
+def test_default_rule(tmp_path):
+    with cwd(tmp_path):
         runner = CliRunner()
         result = runner.invoke(run, SNAKEMAKE_ARGS + ["assign_emodels"], catch_exceptions=False)
         assert result.exit_code == 0
-        tmpdirname = Path(tmpdirname)
 
-        assert tmpdirname.joinpath("circuit.mvd3").stat().st_size > 100
-        mvd3_cells = CellCollection.load_mvd3(tmpdirname / "circuit.mvd3")
-        assert tmpdirname.joinpath("circuit.h5").stat().st_size > 100
-        sonata_cells = CellCollection.load_sonata(tmpdirname / "circuit.h5")
+        assert tmp_path.joinpath("circuit.mvd3").stat().st_size > 100
+        mvd3_cells = CellCollection.load_mvd3(tmp_path / "circuit.mvd3")
+        assert tmp_path.joinpath("circuit.h5").stat().st_size > 100
+        sonata_cells = CellCollection.load_sonata(tmp_path / "circuit.h5")
 
     assert_equal_cells(mvd3_cells, sonata_cells)
 
 
-def test_node_sets():
-    with tmp_cwd() as tmpdirname:
+def test_node_sets(tmp_path):
+    with cwd(tmp_path):
         runner = CliRunner()
         result = runner.invoke(run, SNAKEMAKE_ARGS + ["node_sets"], catch_exceptions=False)
         assert result.exit_code == 0
-        node_sets = Path(tmpdirname).joinpath("sonata/node_sets.json").read_text()
+        node_sets = tmp_path.joinpath("sonata/node_sets.json").read_text()
         assert len(node_sets) > 100

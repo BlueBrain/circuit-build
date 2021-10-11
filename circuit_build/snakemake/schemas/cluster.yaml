@@ -1,7 +1,7 @@
 %YAML 1.1
 ---
 $schema: 'http://json-schema.org/draft-07/schema#'
-$id: 'https://bbp.epfl.ch/schemas/common/circuit-build/v1/cluster.yaml'
+$id: 'https://bbp.epfl.ch/schemas/nse/circuit-build/v1/cluster.yaml'
 type: object
 additionalProperties: false
 properties:

@@ -32,7 +32,7 @@ Please refer to :ref:`ref-bioname` section for the list of the files that consti
 
 .. code-block:: bash
 
-    $ git clone ssh://bbpcode.epfl.ch/common/circuit-build
+    $ git clone git@bbpgitlab.epfl.ch:nse/circuit-build.git
     # we assume here that your `pip` points to a virtual environment
     $ pip install ./circuit-build
 
@@ -137,7 +137,7 @@ After the command above has completed, the following files could be found in cir
     start.target
 
 At this point the circuit is partially complete and should be readable by
-`BluePy <https://bbpcode.epfl.ch/documentation/bluepy-0.13.5/index.html>`_ for analysis not
+`BluePy <https://bbpteam.epfl.ch/documentation/projects/bluepy/latest/index.html>`_ for analysis not
 involving connectome. There are also some intermediate partial Sonata files:
 
 ::
