@@ -206,7 +206,6 @@ properties:
     additionalProperties: false
     required:
       - alpha
-      - seed
     properties:
       alpha:
         description: |
@@ -217,7 +216,7 @@ properties:
         description: |
           Pseudo-random generator seed.
         type: integer
-        example: 0
+        default: 0
       scales:
         description: |
           | Scaling factors to try for each axon, used only for `synthesis`.
@@ -239,6 +238,11 @@ properties:
         type: number
         default: 0.0
         example: 0.1
+      seed:
+        description: |
+          Pseudo-random generator seed.
+        type: integer
+        default: 0
 
   synthesize_morphologies:
     type: object

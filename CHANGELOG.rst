@@ -33,6 +33,8 @@ Version 4.0.0 (2021-xx-xx)
 - Load templates and schemas from the correct location even in case of custom Snakefile.
 - Added ais_scaler computation for synthesis (equivalent of old ModelManagement)
 - Added current computation (holding and threshold) for synthesis
+- Add ``seed`` parameter to ``assign_morphologies`` and ensure that it can be optionally defined for:
+  place_cells, choose_morphologies, assign_morphologies, synthesize_morphologies, assign_emodels.
 
 Version 3.1.4 (2021-05-05)
 --------------------------

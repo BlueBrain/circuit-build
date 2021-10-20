@@ -20,6 +20,7 @@ choose_morphologies:
 
 assign_morphologies:
   max_drop_ratio: 0.1
+  seed: 0
 
 assign_emodels:
   seed: 0
