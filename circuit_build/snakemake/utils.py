@@ -25,10 +25,10 @@ NIX_MODULEPATH = (
 MODULES = {
     "brainbuilder": (SPACK_MODULEPATH, ["archive/2021-09", "brainbuilder/0.16.1"]),
     "flatindexer": (NIX_MODULEPATH, ["nix/hpc/flatindexer/1.8.12"]),
-    "parquet-converters": (SPACK_MODULEPATH, ["archive/2021-09", "parquet-converters/0.6.1"]),
+    "parquet-converters": (SPACK_MODULEPATH, ["archive/2021-10", "parquet-converters/0.7.0"]),
     "placement-algorithm": (SPACK_MODULEPATH, ["archive/2021-09", "placement-algorithm/2.2.0"]),
-    "spykfunc": (SPACK_MODULEPATH, ["archive/2021-09", "spykfunc/0.17.0"]),
-    "touchdetector": (SPACK_MODULEPATH, ["archive/2021-09", "touchdetector/5.6.0"]),
+    "spykfunc": (SPACK_MODULEPATH, ["archive/2021-10", "spykfunc/0.17.1"]),
+    "touchdetector": (SPACK_MODULEPATH, ["archive/2021-10", "touchdetector/5.6.1"]),
     "region-grower": (SPACK_MODULEPATH, ["archive/2021-09", "py-region-grower/0.3.0"]),
     "bluepyemodel": (
         SPACK_MODULEPATH,
