@@ -1,10 +1,10 @@
 __default__:
-  salloc: '-A ${{SALLOC_ACCOUNT:-proj83}} -p prod_small --time 0:05:00'
+  salloc: '-A ${{SALLOC_ACCOUNT}} -p prod_small --time 0:05:00'
 
 choose_morphologies:
   jobname: choose_morphologies
   salloc: >-
-    -A ${{SALLOC_ACCOUNT:-proj83}}
+    -A ${{SALLOC_ACCOUNT}}
     -p prod_small
     -C cpu
     -n2
@@ -13,7 +13,7 @@ choose_morphologies:
 synthesize_morphologies:
   jobname: synthesize_morphologies
   salloc: >-
-    -A ${{SALLOC_ACCOUNT:-proj83}}
+    -A ${{SALLOC_ACCOUNT}}
     -p prod_small
     -C cpu
     -n20
@@ -38,7 +38,7 @@ synthesize_morphologies:
 compute_ais_scales:
   jobname: compute_ais_scales
   salloc: >-
-    -A ${{SALLOC_ACCOUNT:-proj83}}
+    -A ${{SALLOC_ACCOUNT}}
     -p prod_small
     -C cpu
     -n8
@@ -47,7 +47,7 @@ compute_ais_scales:
 compute_currents:
   jobname: compute_currents
   salloc: >-
-    -A ${{SALLOC_ACCOUNT:-proj83}}
+    -A ${{SALLOC_ACCOUNT}}
     -p prod_small
     -C cpu
     -n50
@@ -57,7 +57,7 @@ compute_currents:
 touchdetector:
   jobname: td
   salloc: >-
-    -A ${{SALLOC_ACCOUNT:-proj83}}
+    -A ${{SALLOC_ACCOUNT}}
     -p prod_small
     -C cpu
     -n2
@@ -66,18 +66,18 @@ touchdetector:
 # running on 'prod' since '-C nvme' is not available on 'prod_small'
 spykfunc_s2f:
   jobname: s2f
-  salloc: '-A ${{SALLOC_ACCOUNT:-proj83}} -p prod --ntasks-per-node=1 -C nvme --exclusive --mem 0 --time 0:15:00'
+  salloc: '-A ${{SALLOC_ACCOUNT}} -p prod --ntasks-per-node=1 -C nvme --exclusive --mem 0 --time 0:15:00'
 
 # running on 'prod' since '-C nvme' is not available on 'prod_small'
 spykfunc_s2s:
   jobname: s2s
-  salloc: '-A ${{SALLOC_ACCOUNT:-proj83}} -p prod --ntasks-per-node=1 -C nvme --exclusive --mem 0 --time 0:15:00'
+  salloc: '-A ${{SALLOC_ACCOUNT}} -p prod --ntasks-per-node=1 -C nvme --exclusive --mem 0 --time 0:15:00'
 
 # running on 'prod' since '-C nvme' is not available on 'prod_small'
 spykfunc_merge:
   jobname: merge
-  salloc: '-A ${{SALLOC_ACCOUNT:-proj83}} -p prod --ntasks-per-node=1 -C nvme --exclusive --mem 0 --time 0:15:00'
+  salloc: '-A ${{SALLOC_ACCOUNT}} -p prod --ntasks-per-node=1 -C nvme --exclusive --mem 0 --time 0:15:00'
 
 spatial_index_segment:
   jobname: segment_index
-  salloc: '-A ${{SALLOC_ACCOUNT:-proj83}} -p prod_small --constraint=cpu --time 0:05:00'
+  salloc: '-A ${{SALLOC_ACCOUNT}} -p prod_small --constraint=cpu --time 0:05:00'

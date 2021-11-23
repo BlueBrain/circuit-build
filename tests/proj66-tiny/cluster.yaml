@@ -1,10 +1,10 @@
 __default__:
-  salloc: '-A ${{SALLOC_ACCOUNT:-proj83}} -p prod_small --time 0:05:00'
+  salloc: '-A ${{SALLOC_ACCOUNT}} -p prod_small --time 0:05:00'
 
 choose_morphologies:
   jobname: choose_morphologies
   salloc: >-
-    -A ${{SALLOC_ACCOUNT:-proj83}}
+    -A ${{SALLOC_ACCOUNT}}
     -p prod_small
     -C cpu
     -n2
@@ -13,7 +13,7 @@ choose_morphologies:
 touchdetector:
   jobname: td
   salloc: >-
-    -A ${{SALLOC_ACCOUNT:-proj83}}
+    -A ${{SALLOC_ACCOUNT}}
     -p prod_small
     -C cpu
     -n2
@@ -21,12 +21,12 @@ touchdetector:
 
 spykfunc_s2f:
   jobname: s2f
-  salloc: '-A ${{SALLOC_ACCOUNT:-proj83}} -p prod_small --ntasks-per-node=1 -C nvme --exclusive --mem 0 --time 0:15:00'
+  salloc: '-A ${{SALLOC_ACCOUNT}} -p prod_small --ntasks-per-node=1 -C nvme --exclusive --mem 0 --time 0:15:00'
 
 spykfunc_s2s:
   jobname: s2s
-  salloc: '-A ${{SALLOC_ACCOUNT:-proj83}} -p prod_small --ntasks-per-node=1 -C nvme --exclusive --mem 0 --time 0:15:00'
+  salloc: '-A ${{SALLOC_ACCOUNT}} -p prod_small --ntasks-per-node=1 -C nvme --exclusive --mem 0 --time 0:15:00'
 
 spatial_index_segment:
   jobname: segment_index
-  salloc: '-A ${{SALLOC_ACCOUNT:-proj83}} -p prod_small --constraint=cpu --time 0:05:00'
+  salloc: '-A ${{SALLOC_ACCOUNT}} -p prod_small --constraint=cpu --time 0:05:00'
