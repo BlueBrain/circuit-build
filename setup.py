@@ -1,11 +1,19 @@
 #!/usr/bin/env python
 
-import imp
+import importlib.util
+
 from setuptools import setup, find_packages
 
 with open("README.rst", encoding="utf-8") as f:
     README = f.read()
-VERSION = imp.load_source("", "circuit_build/version.py").__version__
+
+spec = importlib.util.spec_from_file_location(
+    "circuit_build.version",
+    "circuit_build/version.py",
+)
+module = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(module)
+VERSION = module.__version__
 
 setup(
     name="circuit-build",
