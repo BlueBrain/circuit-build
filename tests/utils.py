@@ -25,6 +25,18 @@ def cwd(path):
         os.chdir(original_cwd)
 
 
+def load_yaml(filepath):
+    """Load from YAML file."""
+    with open(filepath, "r", encoding="utf-8") as fd:
+        return yaml.safe_load(fd)
+
+
+def dump_yaml(filepath, data):
+    """Dump to YAML file."""
+    with open(filepath, "w", encoding="utf-8") as fd:
+        return yaml.safe_dump(data, fd)
+
+
 @contextmanager
 def edit_yaml(yaml_file):
     """Context manager within which you can edit a yaml file.
@@ -36,10 +48,8 @@ def edit_yaml(yaml_file):
         Yields a dict instance of `yaml_file`. This instance will be saved later on the context
             manager leave.
     """
-    with yaml_file.open("r") as f:
-        config = yaml.safe_load(f)
+    config = load_yaml(yaml_file)
     try:
         yield config
     finally:
-        with yaml_file.open("w") as f:
-            yaml.safe_dump(config, f)
+        dump_yaml(yaml_file, config)

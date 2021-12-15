@@ -113,7 +113,7 @@ class Context:
         self.SYNTHESIZE_PROTOCOL_CONFIG = self.bioname_path("protocol_config.yaml")
 
         self.SYNTHESIZE = self.conf.get(["common", "synthesis"], default=False)
-        self.SYNTHESIZE_MORPH_DIR = "morphologies"
+        self.SYNTHESIZE_MORPH_DIR = str(Path("morphologies").resolve())
         self.SYNTHESIZE_MORPHDB = self.bioname_path("neurondb-axon.dat")
         self.PARTITION = self.if_synthesis(self.conf.get(["common", "partition"]), [])
 
@@ -410,6 +410,8 @@ class Context:
             NODESETS_FILE=self.NODESETS_FILE,
             NODE_POPULATION_NAME=self.NODE_POPULATION_NAME,
             EDGE_POPULATION_NAME=self.EDGE_POPULATION_NAME,
+            MORPHOLOGIES_DIR=self.if_synthesis(self.SYNTHESIZE_MORPH_DIR, self.MORPH_RELEASE),
+            BIOPHYSICAL_NEURON_MODELS_DIR=self.EMODEL_RELEASE_HOC or "",
         )
 
     def run_spykfunc(self, rule):

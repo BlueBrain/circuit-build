@@ -15,21 +15,19 @@ from utils import (
     TEST_DATA_DIR_SYNTH,
     cwd,
     edit_yaml,
+    load_yaml,
 )
 
 from circuit_build.cli import run
 
 
 def test_functional_all(tmp_path):
-    # don't test for a custom population names in a separate test because it will too long to execute
-    node_population_name = "node_population_name"
-    edge_population_name = "edge_population_name"
     with cwd(tmp_path):
         data_copy_dir = tmp_path / TEST_DATA_DIR.name
         shutil.copytree(TEST_DATA_DIR, data_copy_dir)
-        with edit_yaml(data_copy_dir / "MANIFEST.yaml") as manifest:
-            manifest["common"]["node_population_name"] = node_population_name
-            manifest["common"]["edge_population_name"] = edge_population_name
+        manifest = load_yaml(data_copy_dir / "MANIFEST.yaml")
+        node_population_name = manifest["common"]["node_population_name"]
+        edge_population_name = manifest["common"]["edge_population_name"]
 
         args = ["--bioname", str(data_copy_dir), "-u", str(data_copy_dir / "cluster.yaml")]
         runner = CliRunner()
@@ -83,14 +81,12 @@ def test_functional_all(tmp_path):
 
 
 def test_synthesis(tmp_path):
-    node_population_name = "node_population_name"
-    edge_population_name = "edge_population_name"
     with cwd(tmp_path):
         data_copy_dir = tmp_path / TEST_DATA_DIR_SYNTH.name
         shutil.copytree(TEST_DATA_DIR_SYNTH, data_copy_dir)
-        with edit_yaml(data_copy_dir / "MANIFEST.yaml") as manifest:
-            manifest["common"]["node_population_name"] = node_population_name
-            manifest["common"]["edge_population_name"] = edge_population_name
+        manifest = load_yaml(data_copy_dir / "MANIFEST.yaml")
+        node_population_name = manifest["common"]["node_population_name"]
+        edge_population_name = manifest["common"]["edge_population_name"]
 
         args = ["--bioname", str(data_copy_dir), "-u", str(data_copy_dir / "cluster.yaml")]
         runner = CliRunner()
