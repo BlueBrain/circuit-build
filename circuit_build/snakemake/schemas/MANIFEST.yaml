@@ -238,6 +238,12 @@ properties:
         type: number
         default: 0.0
         example: 0.1
+      rotations:
+        description: |
+          | :ref:`Rotations definitions <ref-bioname-rotations>` file in YAML format, that should be located in the ``bioname`` folder.
+          | Optional, if the file is not specified, apply by default a random rotation with uniform angle distribution around the Y-axis (the principal direction of the morphology).
+        type: string
+        example: rotations.yaml
       seed:
         description: |
           Pseudo-random generator seed.

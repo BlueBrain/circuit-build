@@ -225,3 +225,36 @@ Example:
 
 .. note::
   These query-based target definitions can be considered a stepping stone towards *node sets files* which would define cell subsets in the forthcoming `SONATA <https://github.com/AllenInstitute/sonata/blob/master/docs/SONATA_DEVELOPER_GUIDE.md>`_ circuit format.
+
+
+.. _ref-bioname-rotations:
+
+Rotations definitions (YAML)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This file is optional and it can be used to define one or more random angles distributions to be used in :ref:`ref-phase-assign-morphologies`.
+
+* If not specified, the morphologies are rotated by a random angle around the Y-axis (the principal direction of the morphology) using a uniform distribution between ``-pi`` and ``+pi``.
+* If specified, the morphologies are rotated by a random angle around the given axis using the given distribution, or they are not rotated if the distribution is ``null``.
+
+See `Rotation file format <https://bbpteam.epfl.ch/documentation/projects/placement-algorithm/latest/index.html#rotation-file-format>`__ for more details.
+
+Example:
+
+.. code-block:: yaml
+
+    rotations:
+      - query: "mtype=='L23_MC'"
+        distr: ["uniform", {"low": -3.14159, "high": 3.14159}]
+        axis: y
+      - query: "mtype=='L5_TPC:A' & etype=='bAC'"
+        distr: ["norm", {"mean": 0.0, "sd": 1.0}]
+        axis: y
+      - query: {"mtype": "L5_TPC:B"}
+        distr: ["vonmises", {"mu": 1.04720, "kappa": 2}]
+        axis: y
+      - query: "mtype=='L5_TPC:C'"
+        distr: null
+    default_rotation:
+      distr: ["truncnorm", {"mean": 0.0, "sd": 1.0, "low": -3.14159, "high": 3.14159}]
+      axis: y
