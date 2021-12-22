@@ -1,5 +1,3 @@
-from pathlib import Path
-
 from click.testing import CliRunner
 from numpy.testing import assert_almost_equal, assert_equal
 from pandas.testing import assert_frame_equal

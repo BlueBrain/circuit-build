@@ -526,3 +526,9 @@ properties:
       Enforce the timestamp used for the log path, only for internal use.
     type: string
     example: '20210615T123456'
+
+  skip_check_git:
+    description: |
+      Skip the git checks, only for internal use.
+    type: integer
+    example: 1

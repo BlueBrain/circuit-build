@@ -4,6 +4,7 @@ import logging
 import subprocess
 import sys
 from datetime import datetime
+from functools import partial
 from pathlib import Path
 
 import click
@@ -21,7 +22,7 @@ def _index(args, *opts):
     return indices[0]
 
 
-def _build_args(args, bioname, modules, timestamp):
+def _build_cmd(base_cmd, args, bioname, modules, timestamp, skip_check_git=False):
     # force the timestamp to the same value in different executions of snakemake
     extra_args = ["--config", f"bioname={bioname}", f"timestamp={timestamp}"]
     if modules:
@@ -29,12 +30,14 @@ def _build_args(args, bioname, modules, timestamp):
         # snakemake >= 5.28.0 loads config using yaml.BaseLoader,
         # snakemake < 5.28.0 loads config using eval.
         extra_args += [f'modules={json.dumps(modules, separators=(",", ":"))}']
+    if skip_check_git:
+        extra_args += ["skip_check_git=1"]
     if _index(args, "--cores", "--jobs", "-j") is None:
         extra_args += ["--jobs", "8"]
     if _index(args, "--printshellcmds", "-p") is None:
         extra_args += ["--printshellcmds"]
     # prepend the extra args to args
-    return extra_args + args
+    return base_cmd + extra_args + args
 
 
 def _run_snakemake_process(cmd, errorcode=1):
@@ -157,10 +160,7 @@ def run(
     assert Path(snakefile).is_file(), f'Snakefile "{snakefile}" does not exist!'
     assert _index(args, "--config", "-C") is None, "snakemake `--config` option is not allowed"
 
-    timestamp = f"{datetime.now():%Y%m%dT%H%M%S}"
-    args = _build_args(args, bioname, modules, timestamp)
-
-    cmd = [
+    base_cmd = [
         "snakemake",
         "--snakefile",
         snakefile,
@@ -168,19 +168,20 @@ def run(
         cluster_config,
         "--directory",
         directory,
-        *args,
     ]
-    exit_code = _run_snakemake_process(cmd)
+    timestamp = f"{datetime.now():%Y%m%dT%H%M%S}"
+    build_cmd = partial(_build_cmd, base_cmd, args, bioname, modules, timestamp)
+    exit_code = _run_snakemake_process(cmd=build_cmd())
     if with_summary:
         # snakemake with the --summary/--detailed-summary option does not execute the workflow
         filepath = Path(f"{directory}/logs/{timestamp}/summary.tsv")
         L.info("Creating report in %s", filepath)
-        exit_code += _run_summary_process(cmd, filepath)
+        exit_code += _run_summary_process(cmd=build_cmd(skip_check_git=True), filepath=filepath)
     if with_report:
         # snakemake with the --report option does not execute the workflow
         filepath = Path(f"{directory}/logs/{timestamp}/report.html")
         L.info("Creating summary in %s", filepath)
-        exit_code += _run_report_process(cmd, filepath)
+        exit_code += _run_report_process(cmd=build_cmd(skip_check_git=True), filepath=filepath)
 
     # cumulative exit code given by the union of the exit codes, only for internal use
     #   0: success

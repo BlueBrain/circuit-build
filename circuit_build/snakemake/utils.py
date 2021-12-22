@@ -201,6 +201,8 @@ class Context:
     @staticmethod
     def redirect_to_file(cmd, filename="{log}"):
         """Return a command string with the right redirection."""
+        # very verbose output, but may be useful
+        cmd = f"""set -ex; {cmd}"""
         if os.getenv("LOG_ALL_TO_STDERR") == "true":
             # Redirect stdout and stderr to file, and propagate everything to stderr.
             # Calling ``set -o pipefail`` is needed to propagate the exit code through the pipe.
@@ -220,9 +222,12 @@ class Context:
 
     def check_git(self, path):
         """Log some information and raise an exception if bioname is not under git control."""
-        # note: temporary git remote credentials added by the CI are stripped away if present
+        if self.conf.get("skip_check_git"):
+            # should be skipped when circuit-build is run with --with-summary or --with-report
+            return
+        # strip away any git credentials added by the CI from `git remote get-url origin`
         cmd = """
-            set -e
+            set -e +x
             echo "### Environment info"
             echo "date: $(date +'%Y-%m-%dT%H:%M:%S%z')"
             echo "user: $(whoami)"

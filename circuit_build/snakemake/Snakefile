@@ -2,8 +2,21 @@ from pathlib import Path
 
 from utils import Context
 
+# this code may be executed multiple times in different processes by snakemake
 ctx = Context(workflow=workflow, config=config, cluster_config=cluster_config)
-ctx.check_git(ctx.BIONAME)
+
+
+onstart:
+    logger.info("Starting workflow")
+    ctx.check_git(ctx.BIONAME)
+
+
+onsuccess:
+    logger.info("Workflow finished without errors")
+
+
+onerror:
+    logger.error("An error occurred, check the logs for more details")
 
 
 rule default:
