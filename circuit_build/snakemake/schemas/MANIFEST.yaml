@@ -99,12 +99,6 @@ properties:
 
                 * ``tmd_distributions.json``
                 * ``tmd_parameters.json``
-
-             3. The special value ``FAST-HEMISPHERE`` can be used in place of dataset name when defining
-                :ref:`atlas_property <ref-phase-place-cells>` in ``place_cells`` configuration.
-
-                Unlike regular atlas-based property, no volumetric dataset would be queried;
-                cell property values would be chosen based on Z-coordinate: ``(z < 5700) ? "left" : "right")``.
         type: boolean
         default: false
       partition:
@@ -164,6 +158,40 @@ properties:
           For instance, when building a model of Neocortex, one can opt for assigning ``region`` without layers (i.e., ``SSp-ll`` instead of ``SSp-ll[1-6]``.
           It also allows to embed additional properties like cell position in brain region-specific coordinate system; or column ID for artificial mosaic circuits.
 
+          .. note::
+
+            If you need to create a property to identify the hemisphere, you can proceed in one of two possible ways:
+  
+            1. `Recommended`. Specify `hemisphere` as the name of the property, and the name of the volumetric dataset
+               containing the hemisphere information as the value.
+  
+               The values of the dataset are converted and assigned to the `hemisphere` property in *Cells*.
+               See also `scalar field <https://bbpteam.epfl.ch/project/spaces/display/NRINF/Scalar+Value+Image>`__
+               and :ref:`ref-atlas` for more information about the expected values in the dataset.
+  
+               ::
+  
+                   place_cells:
+                       ...
+                       atlas_property:
+                           region: '~brain_regions'
+                           hemisphere: 'hemisphere'
+                       append_hemisphere: True  # if desired, see below
+  
+            2. `Deprecated`. Use the special value ``FAST-HEMISPHERE`` in place of the dataset name.
+  
+               Unlike regular atlas-based property, no volumetric dataset would be queried;
+               cell property values would be chosen based on Z-coordinate: ``(z < 5700) ? "left" : "right")``.
+  
+               ::
+  
+                   place_cells:
+                       ...
+                       atlas_property:
+                           region: '~brain_regions'
+                           hemisphere: 'FAST-HEMISPHERE'
+                       append_hemisphere: True  # if desired, see below
+
           .. warning::
 
               | Please note that it's mandatory to define ``region`` property.
@@ -172,8 +200,6 @@ properties:
         default: {'region': '~brain_regions'}
       append_hemisphere:
         description: |
-          Neocortex-specific flag.
-
           | If set to ``True``, ``hemisphere`` values would be appended to ``region`` (i.e., ``SSp-ll@left`` instead of ``SSp-ll``).
           | ``region`` and ``hemisphere`` should be specified using **atlas_property** mechanism.
         type: boolean

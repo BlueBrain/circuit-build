@@ -10,8 +10,9 @@ Atlas is a collection of volumetric datasets stored either at `VoxelBrain <http:
 In particular, the following *data_types* are expected to be found in the atlas:
 
 - `brain_regions`, `scalar field <https://bbpteam.epfl.ch/project/spaces/display/NRINF/Scalar+Value+Image>`_ specifying region ID for each voxel
+- `hemisphere`, `scalar field <https://bbpteam.epfl.ch/project/spaces/display/NRINF/Scalar+Value+Image>`_ specifying the hemisphere ID for each voxel (0: undefined, 1: right, 2: left)
 - `orientation`, `orientation field <https://bbpteam.epfl.ch/project/spaces/display/NRINF/Orientation+Field>`_ defining cell orientation for each voxel in quaternion representation
-- `[PH]<X>`, `layer profiles <https://bbpteam.epfl.ch/documentation/placement-algorithm-1.1/index.html#ref-data-atlas>`_
+- `[PH]<X>`, `layer profiles <https://bbpteam.epfl.ch/documentation/projects/placement-algorithm/latest/index.html#ref-data-atlas>`_
 
 .. tip::
 
