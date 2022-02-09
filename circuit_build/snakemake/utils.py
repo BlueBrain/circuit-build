@@ -23,7 +23,7 @@ NIX_MODULEPATH = (
     "/nix/var/nix/profiles/per-user/modules/bb5-x86_64/modules-all/release/share/modulefiles/"
 )
 MODULES = {
-    "brainbuilder": (SPACK_MODULEPATH, ["unstable", "brainbuilder/0.17.0"]),
+    "brainbuilder": (SPACK_MODULEPATH, ["archive/2022-01", "brainbuilder/0.17.0"]),
     "flatindexer": (NIX_MODULEPATH, ["nix/hpc/flatindexer/1.8.12"]),
     "parquet-converters": (SPACK_MODULEPATH, ["archive/2021-10", "parquet-converters/0.7.0"]),
     "placement-algorithm": (SPACK_MODULEPATH, ["archive/2021-12", "placement-algorithm/2.3.0"]),
