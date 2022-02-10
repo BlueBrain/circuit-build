@@ -1,42 +1,71 @@
 Changelog
 =========
 
-Version 4.0.0 (2021-xx-xx)
+Version 4.0.0 (2022-02-10)
 --------------------------
-- Move to SONATA only:
-    - nodes and edges only output in SONATA format, under the `sonata` directory
-    - the ``functional`` & ``structural`` rules create a CircuitConfig and start.target files, but with SONATA contents
-- The following rules were removed:
-    - `functional_nrn`
-    - `functional_sonata`
-    - `structural_sonata`
-    - `circuitconfig_nrn`
-    - `sonata_to_nrn`
-    - `symlink_sonata_edges`
-- Require touchdetector/5.6.0. [NSETM-1384]
-- Require spykfunc/0.17.0.
-- Require placement-algorithm/2.3.0 to specify a custom random rotation for morphologies. [NSETM-1589]
-- Require brainbuilder/0.17.0 to be able to assign the hemisphere property from a given volumetric dataset.
+
+New features
+~~~~~~~~~~~~
+- Add configuration parameter ``synthesis`` to turn on synthesis [NSETM-1161].
+  In particular, these new jobs have been added:
+
+  - ``compute_ais_scales``: ais_scaler computation for synthesis (equivalent of old ModelManagement).
+  - ``compute_currents``: current computation (holding and threshold) for synthesis.
+
+- Add configuration parameter ``partition`` to specify the nodesets to be touchdetected and functionalized separately [NSETM-1504].
+  It can be used to process separately left and right hemispheres.
+- Allow to specify a custom random rotation for morphologies [NSETM-1589].
+- Allow to assign  to cells the ``hemisphere`` property from a given volumetric dataset, replacing ``FAST-HEMISPHERE`` [BRBLD-89].
+- Add CLI option ``--with-summary`` to save a summary of the workflow in ``logs/<timestamp>/summary.tsv`` [NSETM-1428].
+- Add CLI option ``--with-report`` to save a report of the workflow in ``logs/<timestamp>/report.html`` [NSETM-1428].
+- Add CLI option ``--directory`` used as base directory for summary and reports, and passed to Snakemake [NSETM-1428].
+- Add configuration parameter ``seed`` in ``assign_morphologies`` [NSETM-1641].
+  Ensure that it can be optionally defined for: place_cells, choose_morphologies, assign_morphologies, synthesize_morphologies, assign_emodels.
+- Allow to specify custom environment variables in ``cluster.yaml`` with ``env_vars``.
+
+Improvements
+~~~~~~~~~~~~
 - Use nodes.h5 instead of circuit.mvd3 in circuitconfig_structural.
-- Split all the job logs in separate files. [NSETM-1428]
-- Log more git information and the md5 checksum of bioname files.
-- Add option ``--with-summary`` to save a summary of the workflow in ``logs/<timestamp>/summary.tsv``.
-- Add option ``--with-report`` to save a report of the workflow in ``logs/<timestamp>/report.html``.
-- Add option ``--directory`` used as base directory for summary and reports, and passed to Snakemake.
-- Replace nose with pytest in unit tests, save output to tmptestdir.
-- Add schemas MANIFEST.yaml and cluster.yaml to validate the configuration files, log the validation
-  errors and keep the documentation in sync.
-- Remove Projection section from CircuitConfig because the syntax is not up to date.
-- Added ``synthesis`` option to turn on synthesis.
-- Added ``partition`` option to specify the nodesets to be touchdetected and functionalized separately,
-  needed for left/right hemispheres.
+- Add schemas MANIFEST.yaml and cluster.yaml to validate the configuration files and keep the documentation in sync [NSETM-1503, NSETM-1619].
+- Split all the job logs in separate files [NSETM-1428].
+- Log more git information and the md5 checksum of bioname files [NSETM-1428].
 - Use a jinja template to write Sonata config instead of brainbuilder CLI.
 - Use jinja to write templates directly without salloc.
+- Replace nose with pytest in unit tests, save output to tmptestdir.
+- Support nodesets with touchdetector. [NSETM-1384]
+
+Bug Fixes
+~~~~~~~~~
 - Load templates and schemas from the correct location even in case of custom Snakefile.
-- Added ais_scaler computation for synthesis (equivalent of old ModelManagement)
-- Added current computation (holding and threshold) for synthesis
-- Add ``seed`` parameter to ``assign_morphologies`` and ensure that it can be optionally defined for:
-  place_cells, choose_morphologies, assign_morphologies, synthesize_morphologies, assign_emodels.
+
+Removed
+~~~~~~~
+- Move to SONATA only:
+
+  - nodes and edges only output in SONATA format, under the `sonata` directory
+  - the ``functional`` & ``structural`` rules create a CircuitConfig and start.target files, but with SONATA contents
+
+- The following rules were removed:
+
+  - `functional_nrn`
+  - `functional_sonata`
+  - `structural_sonata`
+  - `circuitconfig_nrn`
+  - `sonata_to_nrn`
+  - `symlink_sonata_edges`
+
+- Remove Projection section from CircuitConfig because the syntax is not up to date.
+
+Used modules
+~~~~~~~~~~~~
+- brainbuilder/0.17.0
+- parquet-converters/0.7.0
+- placement-algorithm/2.3.0
+- spykfunc/0.17.1
+- touchdetector/5.6.1
+- py-region-grower/0.3.0
+- py-bluepyemodel/0.0.5
+- flatindexer/1.8.12
 
 Version 3.1.4 (2021-05-05)
 --------------------------

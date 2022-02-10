@@ -30,7 +30,6 @@ setup(
     },
     entry_points={"console_scripts": ["circuit-build=circuit_build.cli:cli"]},
     license="BBP-internal-confidential",
-    # see `basepython` in tox.ini for explanation on the version.
     python_requires=">=3.8",
     install_requires=[
         "click>=7.0,<8",
@@ -52,5 +51,6 @@ setup(
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
     ],
 )
