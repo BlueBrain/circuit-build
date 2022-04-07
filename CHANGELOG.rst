@@ -1,6 +1,25 @@
 Changelog
 =========
 
+Version 4.0.1 (2022-04-07)
+--------------------------
+
+Improvements
+~~~~~~~~~~~~
+- Use modules from archive/2022-03 that support Morphology format spec version 1.3 [NSETM-1776].
+
+Used modules
+~~~~~~~~~~~~
+- archive/2022-03/brainbuilder/0.17.0
+- archive/2022-03/parquet-converters/0.7.0
+- archive/2022-03/placement-algorithm/2.3.0
+- archive/2022-03/spykfunc/0.17.1
+- archive/2022-03/touchdetector/5.6.1
+- archive/2022-03/py-region-grower/0.3.0
+- archive/2021-09/py-bluepyemodel/0.0.5
+- nix/hpc/flatindexer/1.8.12
+
+
 Version 4.0.0 (2022-02-10)
 --------------------------
 
@@ -58,14 +77,15 @@ Removed
 
 Used modules
 ~~~~~~~~~~~~
-- brainbuilder/0.17.0
-- parquet-converters/0.7.0
-- placement-algorithm/2.3.0
-- spykfunc/0.17.1
-- touchdetector/5.6.1
-- py-region-grower/0.3.0
-- py-bluepyemodel/0.0.5
-- flatindexer/1.8.12
+- archive/2022-01/brainbuilder/0.17.0
+- archive/2021-10/parquet-converters/0.7.0
+- archive/2021-12/placement-algorithm/2.3.0
+- archive/2021-10/spykfunc/0.17.1
+- archive/2021-10/touchdetector/5.6.1
+- archive/2021-09/py-region-grower/0.3.0
+- archive/2021-09/py-bluepyemodel/0.0.5
+- nix/hpc/flatindexer/1.8.12
+
 
 Version 3.1.4 (2021-05-05)
 --------------------------
