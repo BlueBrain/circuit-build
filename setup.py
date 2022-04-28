@@ -23,7 +23,7 @@ setup(
     long_description=README,
     long_description_content_type="text/x-rst",
     description="Tool for building circuits",
-    url="https://bbpteam.epfl.ch/documentation/projects/Circuit%20Building/latest/index.html",
+    url="https://bbpteam.epfl.ch/documentation/projects/circuit-build/latest/index.html",
     project_urls={
         "Tracker": "https://bbpteam.epfl.ch/project/issues/projects/NSETM/issues",
         "Source": "git@bbpgitlab.epfl.ch:nse/circuit-build.git",
