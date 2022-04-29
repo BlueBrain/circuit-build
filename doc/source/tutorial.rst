@@ -113,7 +113,7 @@ Example:
     modules:
       - brainbuilder:archive/2020-08,brainbuilder/0.14.0
       - touchdetector:archive/2020-05,touchdetector/5.4.0,hpe-mpi
-      - spykfunc:archive/2020-06,spykfunc/0.15.6:/gpfs/bbp.cscs.ch/ssd/apps/hpc/jenkins/modules/all
+      - spykfunc:archive/2020-06,spykfunc/0.15.6:/gpfs/bbp.cscs.ch/ssd/apps/bsd/modules/_meta
 
 Alternatively, you can specify the custom modules from the command line, but this option is
 intended for internal or experimental use.

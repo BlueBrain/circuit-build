@@ -82,7 +82,7 @@ class CheckVoxelData:
         del data
 
 
-class CheckOrientationField(object):
+class CheckOrientationField:
     def __init__(self):
         self.title = "orientation"
 

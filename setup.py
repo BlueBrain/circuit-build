@@ -30,13 +30,13 @@ setup(
     },
     entry_points={"console_scripts": ["circuit-build=circuit_build.cli:cli"]},
     license="BBP-internal-confidential",
-    python_requires=">=3.8",
+    python_requires=">=3.9",
     install_requires=[
-        "click>=7.0,<8",
+        "click>=7.0",
         "pyyaml>=5.0",
-        "snakemake>=5.10,<7.0",
-        "jsonschema>=3.2.0,<4.0",
-        "jinja2>=2.10.0,<4.0",
+        "snakemake>=5.10",
+        "jsonschema>=3.2.0",
+        "jinja2>=2.10.0",
     ],
     extras_require={
         "reports": ["snakemake[reports]"],

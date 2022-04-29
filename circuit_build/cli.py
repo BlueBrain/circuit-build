@@ -112,7 +112,7 @@ Multiple configurations are allowed, and each one should be given in the format:
 Examples:\n
     brainbuilder:archive/2020-08,brainbuilder/0.14.0\n
     touchdetector:archive/2020-05,touchdetector/5.4.0,hpe-mpi\n
-    spykfunc:archive/2020-06,spykfunc/0.15.6:/gpfs/bbp.cscs.ch/ssd/apps/hpc/jenkins/modules/all
+    spykfunc:archive/2020-06,spykfunc/0.15.6:/gpfs/bbp.cscs.ch/ssd/apps/bsd/modules/_meta
     """,
 )
 @click.option(

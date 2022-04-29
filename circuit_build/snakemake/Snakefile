@@ -1,8 +1,9 @@
+# the code in this file may be executed multiple times in different processes by snakemake
 from pathlib import Path
 
-from utils import Context
+from circuit_build.context import Context
+from circuit_build.utils import format_if, write_with_log
 
-# this code may be executed multiple times in different processes by snakemake
 ctx = Context(workflow=workflow, config=config, cluster_config=cluster_config)
 
 
@@ -34,7 +35,7 @@ rule circuitconfig_base:
     log:
         ctx.log_path("circuitconfig_base"),
     run:
-        with ctx.write_with_log(output[0], log[0]) as out:
+        with write_with_log(output[0], log[0]) as out:
             out.write(ctx.build_circuit_config(nrn_path=".", cell_library_file="circuit.mvd3"))
 
 
@@ -49,7 +50,7 @@ rule circuitconfig_functional:
     log:
         ctx.log_path("circuitconfig_functional"),
     run:
-        with ctx.write_with_log(output[0], log[0]) as out:
+        with write_with_log(output[0], log[0]) as out:
             out.write(
                 ctx.build_circuit_config(
                     nrn_path=Path(
@@ -75,7 +76,7 @@ rule circuitconfig_structural:
     log:
         ctx.log_path("circuitconfig_structural"),
     run:
-        with ctx.write_with_log(output[0], log[0]) as out:
+        with write_with_log(output[0], log[0]) as out:
             out.write(
                 ctx.build_circuit_config(
                     nrn_path=Path(
@@ -137,8 +138,8 @@ rule place_cells:
                 f"--mini-frequencies {ctx.bioname_path('mini_frequencies.tsv')}"
                 if ctx.conf.get(["place_cells", "mini_frequencies"], default=False)
                 else "",
-                ctx.format_if("--region {}", ctx.conf.get(["common", "region"])),
-                ctx.format_if("--mask {}", ctx.conf.get(["common", "mask"])),
+                format_if("--region {}", ctx.conf.get(["common", "region"])),
+                format_if("--mask {}", ctx.conf.get(["common", "mask"])),
                 "--soma-placement",
                 ctx.conf.get(["place_cells", "soma_placement"]),
                 "--density-factor",
@@ -154,7 +155,7 @@ rule place_cells:
                 "--append-hemisphere"
                 if ctx.conf.get(["place_cells", "append_hemisphere"], default=False)
                 else "",
-                ctx.format_if(
+                format_if(
                     "--sort-by {}",
                     value=ctx.conf.get(["place_cells", "sort_by"]),
                     func=lambda x: ",".join(x),
@@ -205,7 +206,7 @@ rule choose_morphologies:
                 [
                     "--segment-type",
                     "axon",
-                    ctx.format_if(
+                    format_if(
                         "--scales {}",
                         ctx.conf.get(["choose_morphologies", "scales"]),
                         func=lambda x: " ".join(map(str, x)),
@@ -244,7 +245,7 @@ rule assign_morphologies:
                 ctx.conf.get(["assign_morphologies", "max_drop_ratio"], default=0.0),
                 "--seed",
                 ctx.conf.get(["assign_morphologies", "seed"], default=0),
-                ctx.format_if(
+                format_if(
                     "--rotations {}",
                     value=ctx.conf.get(["assign_morphologies", "rotations"]),
                     func=ctx.bioname_path,
@@ -303,19 +304,19 @@ rule synthesize_morphologies:
                 "--out-morph-ext h5",
                 "--out-morph-ext asc",
                 "--with-mpi",
-                ctx.format_if(
+                format_if(
                     "--scaling-jitter-std {}",
                     ctx.conf.get(["synthesize_morphologies", "scaling_jitter_std"]),
                 ),
-                ctx.format_if(
+                format_if(
                     "--rotational-jitter-std {}",
                     ctx.conf.get(["synthesize_morphologies", "rotational_jitter_std"]),
                 ),
-                ctx.format_if(
+                format_if(
                     "--out-debug-data {}",
                     ctx.conf.get(["synthesize_morphologies", "out_debug_data"]),
                 ),
-                ctx.format_if(
+                format_if(
                     "--log-level {}",
                     ctx.conf.get(["synthesize_morphologies", "log_level"]),
                 ),
@@ -403,7 +404,7 @@ rule provide_me_info:
             "brainbuilder",
             [
                 "brainbuilder sonata provide-me-info",
-                ctx.format_if("--mecombo-info {}", ctx.EMODEL_RELEASE_MECOMBO),
+                format_if("--mecombo-info {}", ctx.EMODEL_RELEASE_MECOMBO),
                 "--model-type biophysical",
                 "--output {output}",
                 "{input}",
@@ -582,7 +583,7 @@ rule targetgen:
             "brainbuilder",
             [
                 "brainbuilder targets from-input",
-                ctx.format_if(
+                format_if(
                     "--targets {}",
                     value=ctx.conf.get(["targetgen", "targets"]),
                     func=ctx.bioname_path,
@@ -618,7 +619,7 @@ rule node_sets:
             "brainbuilder",
             [
                 "brainbuilder targets node-sets",
-                ctx.format_if(
+                format_if(
                     "--targets {}",
                     value=ctx.conf.get(["targetgen", "targets"]),
                     func=ctx.bioname_path,
@@ -718,7 +719,7 @@ rule circuitconfig_sonata:
     log:
         ctx.log_path("circuitconfig_sonata"),
     run:
-        with ctx.write_with_log(output[0], log[0]) as out:
+        with write_with_log(output[0], log[0]) as out:
             out.write(ctx.write_network_config("functional"))
 
 
@@ -730,7 +731,7 @@ rule circuitconfig_struct_sonata:
     log:
         ctx.log_path("circuitconfig_struct_sonata"),
     run:
-        with ctx.write_with_log(output[0], log[0]) as out:
+        with write_with_log(output[0], log[0]) as out:
             out.write(ctx.write_network_config("structural"))
 
 

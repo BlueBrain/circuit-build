@@ -1,6 +1,18 @@
 Changelog
 =========
 
+Version 4.0.2
+--------------------------
+
+Improvements
+~~~~~~~~~~~~
+- Internal change, split ``utils.py`` into separate modules.
+
+Removed
+~~~~~~~
+- Drop support for Python 3.8, the minimum supported version is Python 3.9.
+
+
 Version 4.0.1 (2022-04-07)
 --------------------------
 

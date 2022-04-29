@@ -1,55 +1,23 @@
-"""Common functions used in Snakefile."""
+"""Context used in Snakefile."""
 import logging
 import os.path
 import subprocess
-import traceback
-import warnings
-from contextlib import contextmanager
 from datetime import datetime
 from pathlib import Path
 from typing import Dict
 
-import jsonschema
-import pkg_resources
-import yaml
-from jinja2 import Environment, PackageLoader, StrictUndefined, select_autoescape
-
 import snakemake
 
-logger = logging.getLogger(__name__)
-
-SPACK_MODULEPATH = "/gpfs/bbp.cscs.ch/ssd/apps/bsd/modules/_meta"
-NIX_MODULEPATH = (
-    "/nix/var/nix/profiles/per-user/modules/bb5-x86_64/modules-all/release/share/modulefiles/"
+from circuit_build.commands import bbp_env
+from circuit_build.constants import INDEX_FILES, MODULES, SPACK_MODULEPATH
+from circuit_build.utils import redirect_to_file, render_template
+from circuit_build.validators import (
+    validate_config,
+    validate_edge_population_name,
+    validate_node_population_name,
 )
-MODULES = {
-    "brainbuilder": (SPACK_MODULEPATH, ["archive/2022-03", "brainbuilder/0.17.0"]),
-    "flatindexer": (NIX_MODULEPATH, ["nix/hpc/flatindexer/1.8.12"]),
-    "parquet-converters": (SPACK_MODULEPATH, ["archive/2022-03", "parquet-converters/0.7.0"]),
-    "placement-algorithm": (SPACK_MODULEPATH, ["archive/2022-03", "placement-algorithm/2.3.0"]),
-    "spykfunc": (SPACK_MODULEPATH, ["archive/2022-03", "spykfunc/0.17.1"]),
-    "touchdetector": (SPACK_MODULEPATH, ["archive/2022-03", "touchdetector/5.6.1"]),
-    "region-grower": (SPACK_MODULEPATH, ["archive/2022-03", "py-region-grower/0.3.0"]),
-    "bluepyemodel": (
-        SPACK_MODULEPATH,
-        [
-            "archive/2021-09",
-            "py-bluepyemodel/0.0.5",
-            "py-bglibpy/4.4.36",
-            "neurodamus-neocortex/1.4-3.3.2",
-        ],
-    ),
-}
 
-
-def _render_template(template_name, *args, **kwargs):
-    env = Environment(
-        loader=PackageLoader("circuit_build", "snakemake/templates"),
-        autoescape=select_autoescape(),
-        undefined=StrictUndefined,
-    )
-    template = env.get_template(template_name)
-    return template.render(*args, **kwargs)
+logger = logging.getLogger(__name__)
 
 
 class Config:
@@ -104,8 +72,8 @@ class Context:
         # Load MANIFEST.yaml into workflow config
         self.workflow.configfile(self.bioname_path("MANIFEST.yaml"))
         # Validate the merged configuration and the cluster configuration
-        self.validate_config(config, "MANIFEST.yaml")
-        self.validate_config(cluster_config, "cluster.yaml")
+        validate_config(config, "MANIFEST.yaml")
+        validate_config(cluster_config, "cluster.yaml")
 
         self.CIRCUIT_DIR = "."
         self.BUILDER_RECIPE = self.bioname_path("builderRecipeAllPathways.xml")
@@ -120,10 +88,10 @@ class Context:
         self.ATLAS = self.conf.get(["common", "atlas"])
         self.ATLAS_CACHE_DIR = ".atlas"
 
-        self.NODE_POPULATION_NAME = self.validate_node_population_name(
+        self.NODE_POPULATION_NAME = validate_node_population_name(
             self.conf.get(["common", "node_population_name"])
         )
-        self.EDGE_POPULATION_NAME = self.validate_edge_population_name(
+        self.EDGE_POPULATION_NAME = validate_edge_population_name(
             self.conf.get(["common", "edge_population_name"])
         )
         self.MORPH_RELEASE = self.conf.get(["common", "morph_release"])
@@ -168,57 +136,12 @@ class Context:
         """Return the partition wildcard to be used in snakemake commands."""
         return self.if_partition("_{partition}", "")
 
-    @staticmethod
-    @contextmanager
-    def write_with_log(out_file, log_file):
-        """Context manager used to write to ``out_file``, and log any exception to ``log_file``."""
-        with open(log_file, "w", encoding="utf-8") as lf:
-            try:
-                with open(out_file, "w", encoding="utf-8") as f:
-                    yield f
-            except BaseException:
-                lf.write(traceback.format_exc())
-                raise
-
-    @staticmethod
-    def format_if(template, value, func=None):
-        """Return the template formatted, or empty string if value is None."""
-        func = func or (lambda x: x)
-        return template.format(func(value)) if value is not None else ""
-
-    @staticmethod
-    def escape_single_quotes(value):
-        """Return the given string after escaping the single quote character."""
-        return value.replace("'", "'\\''")
-
     def log_path(self, name, _now=datetime.now()):
         """Return the path to the logfile for a given rule, and create the dir if needed."""
         timestamp = self.conf.get("timestamp", default=_now.strftime("%Y%m%dT%H%M%S"))
         path = os.path.abspath(os.path.join(self.LOGS_DIR, timestamp, f"{name}.log"))
         os.makedirs(os.path.dirname(path), exist_ok=True)
         return path
-
-    @staticmethod
-    def redirect_to_file(cmd, filename="{log}"):
-        """Return a command string with the right redirection."""
-        # very verbose output, but may be useful
-        cmd = f"""set -ex; {cmd}"""
-        if os.getenv("LOG_ALL_TO_STDERR") == "true":
-            # Redirect stdout and stderr to file, and propagate everything to stderr.
-            # Calling ``set -o pipefail`` is needed to propagate the exit code through the pipe.
-            return f"set -o pipefail; ( {cmd} ) 2>&1 | tee -a {filename} 1>&2"
-        # else redirect to file
-        return f"( {cmd} ) >{filename} 2>&1"
-
-    @staticmethod
-    def template_path(name):
-        """Return the template path."""
-        return Path(pkg_resources.resource_filename(__name__, "templates")).resolve() / name
-
-    @staticmethod
-    def schema_path(name):
-        """Return the schema path."""
-        return Path(pkg_resources.resource_filename(__name__, "schemas")).resolve() / name
 
     def check_git(self, path):
         """Log some information and raise an exception if bioname is not under git control."""
@@ -246,7 +169,7 @@ class Context:
             git --no-pager diff
             git --no-pager diff --staged
             """
-        cmd = self.redirect_to_file(cmd, filename=self.log_path("git_info"))
+        cmd = redirect_to_file(cmd, filename=self.log_path("git_info"))
         path = path if os.path.isdir(path) else os.path.dirname(path)
         try:
             subprocess.run(cmd, shell=True, check=True, cwd=path)
@@ -254,69 +177,6 @@ class Context:
             raise RuntimeError(
                 f"bioname folder: {path} must be under git (version control system)"
             ) from ex
-
-    def validate_config(self, config, schema_name):
-        """Raise an exception if the configuration is not valid."""
-        with self.schema_path(schema_name).open() as schema_fd:
-            schema = yaml.safe_load(schema_fd)
-        cls = jsonschema.validators.validator_for(schema)
-        cls.check_schema(schema)
-        validator = cls(schema)
-        errors = list(validator.iter_errors(config))
-        if errors:
-            # Log an error message like the following:
-            #  Invalid configuration: MANIFEST.yaml
-            #  1: Failed validating root: Additional properties are not allowed ('x' was unexpected)
-            #  2: Failed validating root.assign_emodels.seed: 'a' is not of type 'integer'
-            msg = "\n".join(
-                "{n}: Failed validating {path}: {message}".format(
-                    n=n,
-                    path=".".join(str(elem) for elem in ["root"] + list(e.absolute_path)),
-                    message=e.message,
-                )
-                for n, e in enumerate(errors, 1)
-            )
-            logger.error("Invalid configuration: %s\n%s", schema_name, msg)
-            raise Exception("Validation error")
-
-    @staticmethod
-    def validate_node_population_name(name):
-        """Validate the name of the node population."""
-        doc_url = "https://bbpteam.epfl.ch/documentation/projects/circuit-build/latest/bioname.html#manifest-yaml"
-        allowed_parts = {"ncx", "neocortex", "hippocampus", "thalamus", "mousify"}
-        allowed_types = {"neurons", "astrocytes", "projections"}
-        msg = (
-            '"node_population_name" in MANIFEST.yaml must exist and should fit the pattern: '
-            f'"<part>_<type>", see {doc_url} for details'
-        )
-
-        if name is None:
-            raise ValueError(msg)
-        name_parts = name.split("_")
-        if len(name_parts) != 2:
-            warnings.warn(msg)
-        elif name_parts[0] not in allowed_parts or name_parts[1] not in allowed_types:
-            warnings.warn(msg)
-
-        return name
-
-    @staticmethod
-    def validate_edge_population_name(name):
-        """Validate the name of the edge population."""
-        doc_url = "https://bbpteam.epfl.ch/documentation/projects/circuit-build/latest/bioname.html#manifest-yaml"
-        allowed_connection = {"electrical", "chemical_synapse", "synapse_astrocyte", "endfoot"}
-        msg = (
-            '"edge_population_name" in MANIFEST.yaml must exist and should fit the pattern: '
-            f'"<source_population>__<target_population>__<connection>", see {doc_url} for details'
-        )
-
-        if name is None:
-            raise ValueError(msg)
-        name_parts = name.split("__")
-        if (len(name_parts) not in [2, 3]) or (name_parts[-1] not in allowed_connection):
-            warnings.warn(msg)
-
-        return name
 
     def build_modules(self, modules):
         """Return the dictionary of modules after overwriting it with the custom modules."""
@@ -345,57 +205,23 @@ class Context:
 
     def bbp_env(self, module_env, command, slurm_env=None, skip_srun=False):
         """Wrap and return the command string to be executed."""
-        result = " ".join(map(str, command))
-
-        if slurm_env and self.cluster_config:
-            if slurm_env in self.cluster_config:
-                slurm_config = self.cluster_config[slurm_env]
-            else:
-                # break only if __default__ is needed and missing
-                slurm_config = self.cluster_config["__default__"]
-            result = "salloc -J {jobname} {alloc} {srun} sh -c '{cmd}'".format(
-                jobname=slurm_config.get("jobname", slurm_env),
-                alloc=slurm_config["salloc"],
-                srun="" if skip_srun else "srun",
-                cmd=self.escape_single_quotes(result),
-            )
-            # set the environment variables if needed
-            env_vars = slurm_config.get("env_vars")
-            if env_vars:
-                variables = " ".join(f"{k}={v}" for k, v in env_vars.items())
-                result = f"env {variables} {result}"
-
-        if module_env:
-            modulepath, modules = self.MODULES[module_env]
-            result = " && ".join(
-                [
-                    ". /etc/profile.d/modules.sh",
-                    "module purge",
-                    f"export MODULEPATH={modulepath}",
-                    f"module load {' '.join(modules)}",
-                    f"echo MODULEPATH={modulepath}",
-                    "module list",
-                    result,
-                ]
-            )
-
-        return self.redirect_to_file(result)
+        return bbp_env(
+            modules_config=self.MODULES,
+            cluster_config=self.cluster_config,
+            module_env=module_env,
+            command=command,
+            slurm_env=slurm_env,
+            skip_srun=skip_srun,
+        )
 
     @staticmethod
     def spatial_index_files(prefix):
         """Return the list of files used for spatial index."""
-        return [
-            f"{prefix}_{filename}"
-            for filename in [
-                "index.dat",
-                "index.idx",
-                "payload.dat",
-            ]
-        ]
+        return [f"{prefix}_{filename}" for filename in INDEX_FILES]
 
     def build_circuit_config(self, nrn_path, cell_library_file):
         """Return the BBP circuit configuration as a string."""
-        return _render_template(
+        return render_template(
             "CircuitConfig.j2",
             CIRCUIT_PATH=os.path.abspath(self.CIRCUIT_DIR),
             NRN_PATH=os.path.abspath(nrn_path),
@@ -409,7 +235,7 @@ class Context:
 
     def write_network_config(self, connectome_dir):
         """Return the SONATA circuit configuration as a string."""
-        return _render_template(
+        return render_template(
             "SonataConfig.j2",
             CONNECTOME_DIR=connectome_dir,
             NODESETS_FILE=self.NODESETS_FILE,

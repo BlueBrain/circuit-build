@@ -1,4 +1,4 @@
-from circuit_build.snakemake.utils import MODULES
+from circuit_build.constants import MODULES
 from circuit_build.version import VERSION
 
 
