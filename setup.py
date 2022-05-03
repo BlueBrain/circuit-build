@@ -34,7 +34,7 @@ setup(
     install_requires=[
         "click>=7.0",
         "pyyaml>=5.0",
-        "snakemake>=5.10",
+        "snakemake>=6.0",
         "jsonschema>=3.2.0",
         "jinja2>=2.10.0",
     ],

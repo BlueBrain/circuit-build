@@ -13,6 +13,7 @@ from utils import (
     SNAKEMAKE_ARGS,
     TEST_DATA_DIR,
     TEST_DATA_DIR_SYNTH,
+    TEST_DATA_DIR_NGV,
     cwd,
     edit_yaml,
     load_yaml,
@@ -138,6 +139,30 @@ def test_synthesis(tmp_path):
                 config["networks"]["edges"][0]["edges_file"]
                 == f"$NETWORK_EDGES_DIR/{edge_population_name}/edges.h5"
             )
+
+
+def test_ngv(tmp_path):
+
+    data_copy_dir = tmp_path / TEST_DATA_DIR_NGV.name
+    shutil.copytree(TEST_DATA_DIR_NGV, data_copy_dir)
+
+    build_dir = data_copy_dir / "build"
+    build_dir.mkdir(exist_ok=False)
+
+    with cwd(build_dir):
+        runner = CliRunner()
+        result = runner.invoke(
+            run,
+            [
+                "--bioname",
+                str(data_copy_dir / "bioname"),
+                "-u",
+                str(data_copy_dir / "bioname/cluster.yaml"),
+                "ngv",
+            ],
+            catch_exceptions=False,
+        )
+        assert result.exit_code == 0
 
 
 def test_no_emodel(tmp_path):

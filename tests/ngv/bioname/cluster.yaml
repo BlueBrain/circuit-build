@@ -1,0 +1,53 @@
+__default__:
+  salloc: '-A ${{SALLOC_ACCOUNT}} -p prod_small --time 0:05:00'
+
+choose_morphologies:
+  jobname: choose_morphologies
+  salloc: >-
+    -A ${{SALLOC_ACCOUNT}}
+    -p prod_small
+    -C cpu
+    -n2
+    --time 0:10:00
+
+touchdetector:
+  jobname: td
+  salloc: >-
+    -A ${{SALLOC_ACCOUNT}}
+    -p prod_small
+    -C cpu
+    -n2
+    --time 0:05:00
+
+spykfunc_s2f:
+  jobname: s2f
+  salloc: '-A ${{SALLOC_ACCOUNT}} -p prod_small --ntasks-per-node=1 -C nvme --exclusive --mem 0 --time 0:15:00'
+
+spykfunc_s2s:
+  jobname: s2s
+  salloc: '-A ${{SALLOC_ACCOUNT}} -p prod_small --ntasks-per-node=1 -C nvme --exclusive --mem 0 --time 0:15:00'
+
+spatial_index_segment:
+  jobname: segment_index
+  salloc: '-A ${{SALLOC_ACCOUNT}} -p prod_small --constraint=cpu --time 0:05:00'
+
+synthesize_glia:
+  jobname: synthesize_glia
+  salloc: '-A ${{SALLOC_ACCOUNT}} -p prod_small -N 1 -n 5 --constraint=cpu --time 0:10:00'
+  env_vars:
+    DASK_DISTRIBUTED__LOGGING__DISTRIBUTED: "info"
+    DASK_DISTRIBUTED__WORKER__USE_FILE_LOCKING: "False"
+    DASK_DISTRIBUTED__WORKER__MEMORY__TARGET: "False"  # don't spill to disk
+    DASK_DISTRIBUTED__WORKER__MEMORY__SPILL: "False"  # don't spill to disk
+    DASK_DISTRIBUTED__WORKER__MEMORY__PAUSE: "0.80"  # pause execution at 80% memory use
+    DASK_DISTRIBUTED__WORKER__MEMORY__TERMINATE: "0.95"  # restart the worker at 95% use
+    DASK_DISTRIBUTED__WORKER__MULTIPROCESSING_METHOD: "spawn"
+    DASK_DISTRIBUTED__WORKER__DAEMON: "True"
+    DASK_DISTRIBUTED__ADMIN__TICK__LIMIT: "3h"
+    # Reduce dask profile memory usage/leak (see https://github.com/dask/distributed/issues/4091)
+    DASK_DISTRIBUTED__WORKER__PROFILE__INTERVAL: "10000ms"  # Time between statistical profiling queries
+    DASK_DISTRIBUTED__WORKER__PROFILE__CYCLE: "1000000ms"  # Time between starting new profile
+    DASK_DISTRIBUTED__COMM__TIMEOUTS__TCP: "200000ms"  # Time for handshake
+    DASK_DISTRIBUTED__COMM__TIMEOUTS__CONNECT: "200000ms"  # Time for handshake
+    # The time allowed before triggering a warning
+    DASK_DISTRIBUTED__ADMIN__TICK__LIMIT: "1h"

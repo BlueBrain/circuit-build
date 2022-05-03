@@ -43,6 +43,8 @@ properties:
     $ref: '#/$defs/jobconfig'
   subcellular:
     $ref: '#/$defs/jobconfig'
+  synthesize_glia:
+    $ref: '#/$defs/jobconfig'
 
 $defs:
   jobconfig:

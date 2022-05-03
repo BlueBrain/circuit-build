@@ -116,6 +116,7 @@ class Context:
         self.NODESETS_FILE = "node_sets.json"
 
         self.TOUCHES_DIR = "connectome/touches"
+        self.TOUCHES_GLIA_DIR = "connectome/astrocytes/touches"
         self.CONNECTOME_FUNCTIONAL_DIR = "connectome/functional"
         self.CONNECTOME_STRUCTURAL_DIR = "connectome/structural"
         self.MODULES = self.build_modules(MODULES)

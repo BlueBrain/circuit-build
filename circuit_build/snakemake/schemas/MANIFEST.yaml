@@ -558,3 +558,7 @@ properties:
       Skip the git checks, only for internal use.
     type: integer
     example: 1
+
+  ngv:
+    description: Configuration entries for the NGV workflow.
+    type: object

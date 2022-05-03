@@ -24,6 +24,18 @@ MODULES = {
             "neurodamus-neocortex/1.4-3.3.2",
         ],
     ),
+    "ngv": (
+        SPACK_MODULEPATH,
+        ["unstable", "py-archngv/2.0.1"],
+    ),
+    "synthesize-glia": (
+        SPACK_MODULEPATH,
+        ["unstable", "py-archngv/2.0.1", "py-mpi4py"],
+    ),
+    "ngv-touchdetector": (
+        SPACK_MODULEPATH,
+        ["unstable", "py-archngv/2.0.1", "touchdetector/5.6.1"],
+    ),
 }
 INDEX_FILES = [
     "index.dat",

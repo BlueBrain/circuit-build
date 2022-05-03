@@ -1,12 +1,17 @@
 Changelog
 =========
 
-Version 4.0.2
+Version 4.1.0
 --------------------------
+
+New Features
+~~~~~~~~~~~~
+- NGV workflow is added to circuit-build [NSETM-1873]
 
 Improvements
 ~~~~~~~~~~~~
 - Internal change, split ``utils.py`` into separate modules.
+- Generalize snakemake rules to allow for multiple workflows [NSETM-1878].
 
 Removed
 ~~~~~~~
