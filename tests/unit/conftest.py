@@ -8,8 +8,8 @@ class CustomScheduler(LoadScopeScheduling):
         """Determine the scope (grouping) of a nodeid."""
         # tests that should not be grouped together, even though they belong to the same module
         if nodeid in {
-            "tests/test_run.py::test_functional_all",
-            "tests/test_run.py::test_synthesis",
+            "tests/unit/test_run.py::test_functional_all",
+            "tests/unit/test_run.py::test_synthesis",
         }:
             return nodeid
         return super()._split_scope(nodeid)

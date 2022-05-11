@@ -6,7 +6,11 @@ from click.testing import CliRunner
 
 from circuit_build.cli import run, snakefile_path
 
-from utils import TEST_DATA_DIR, SNAKEMAKE_ARGS, SNAKEFILE
+from utils import (
+    SNAKEMAKE_ARGS,
+    SNAKEFILE,
+    TEST_DATA_DIR,
+)
 
 
 @patch("circuit_build.cli.Path.mkdir")

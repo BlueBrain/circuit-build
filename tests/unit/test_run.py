@@ -8,24 +8,29 @@ from subprocess import CalledProcessError
 import h5py
 import pytest
 from click.testing import CliRunner
+
+from circuit_build.cli import run
+
 from utils import (
     SNAKEFILE,
     SNAKEMAKE_ARGS,
     TEST_DATA_DIR,
     TEST_DATA_DIR_SYNTH,
-    TEST_DATA_DIR_NGV,
     cwd,
     edit_yaml,
     load_yaml,
 )
 
-from circuit_build.cli import run
-
 
 def test_functional_all(tmp_path):
+
+    data_dir = TEST_DATA_DIR
+
     with cwd(tmp_path):
-        data_copy_dir = tmp_path / TEST_DATA_DIR.name
-        shutil.copytree(TEST_DATA_DIR, data_copy_dir)
+
+        data_copy_dir = tmp_path / data_dir.name
+        shutil.copytree(data_dir, data_copy_dir)
+
         manifest = load_yaml(data_copy_dir / "MANIFEST.yaml")
         node_population_name = manifest["common"]["node_population_name"]
         edge_population_name = manifest["common"]["edge_population_name"]
@@ -82,9 +87,12 @@ def test_functional_all(tmp_path):
 
 
 def test_synthesis(tmp_path):
+
+    data_dir = TEST_DATA_DIR_SYNTH
+
     with cwd(tmp_path):
-        data_copy_dir = tmp_path / TEST_DATA_DIR_SYNTH.name
-        shutil.copytree(TEST_DATA_DIR_SYNTH, data_copy_dir)
+        data_copy_dir = tmp_path / data_dir.name
+        shutil.copytree(data_dir, data_copy_dir)
         manifest = load_yaml(data_copy_dir / "MANIFEST.yaml")
         node_population_name = manifest["common"]["node_population_name"]
         edge_population_name = manifest["common"]["edge_population_name"]
@@ -141,34 +149,13 @@ def test_synthesis(tmp_path):
             )
 
 
-def test_ngv(tmp_path):
-
-    data_copy_dir = tmp_path / TEST_DATA_DIR_NGV.name
-    shutil.copytree(TEST_DATA_DIR_NGV, data_copy_dir)
-
-    build_dir = data_copy_dir / "build"
-    build_dir.mkdir(exist_ok=False)
-
-    with cwd(build_dir):
-        runner = CliRunner()
-        result = runner.invoke(
-            run,
-            [
-                "--bioname",
-                str(data_copy_dir / "bioname"),
-                "-u",
-                str(data_copy_dir / "bioname/cluster.yaml"),
-                "ngv",
-            ],
-            catch_exceptions=False,
-        )
-        assert result.exit_code == 0
-
-
 def test_no_emodel(tmp_path):
+
+    data_dir = TEST_DATA_DIR
+
     with cwd(tmp_path):
-        data_copy_dir = tmp_path / TEST_DATA_DIR.name
-        shutil.copytree(TEST_DATA_DIR, data_copy_dir)
+        data_copy_dir = tmp_path / data_dir.name
+        shutil.copytree(data_dir, data_copy_dir)
         with edit_yaml(data_copy_dir / "MANIFEST.yaml") as manifest:
             del manifest["common"]["emodel_release"]
         args = ["--bioname", str(data_copy_dir), "-u", str(data_copy_dir / "cluster.yaml")]
@@ -196,10 +183,13 @@ def test_custom_module(tmp_path, caplog, capfd):
 
 def test_no_git_bioname(tmp_path, caplog, capfd):
     """This test verifies that bioname is checked to be under git."""
+
+    data_dir = TEST_DATA_DIR
+
     with cwd(tmp_path), tempfile.TemporaryDirectory() as data_copy_dir:
         # data_copy_dir must not be under git control
-        data_copy_dir = Path(data_copy_dir) / TEST_DATA_DIR.name
-        shutil.copytree(TEST_DATA_DIR, data_copy_dir)
+        data_copy_dir = Path(data_copy_dir) / data_dir.name
+        shutil.copytree(data_dir, data_copy_dir)
         args = ["--bioname", str(data_copy_dir), "-u", str(data_copy_dir / "cluster.yaml")]
         runner = CliRunner(mix_stderr=False)
 
@@ -216,15 +206,18 @@ def test_no_git_bioname(tmp_path, caplog, capfd):
 def test_snakemake_circuit_config(tmp_path):
     """This test verifies that building can happen via `snakemake`,
     and `CircuitConfig.j2` is accessible in this case."""
+
+    data_dir = TEST_DATA_DIR
+
     with cwd(tmp_path):
         args = [
             "--jobs",
             "8",
             "-p",
             "--config",
-            f"bioname={TEST_DATA_DIR}",
+            f"bioname={data_dir}",
             "-u",
-            str(TEST_DATA_DIR / "cluster.yaml"),
+            str(data_dir / "cluster.yaml"),
         ]
         cmd = ["snakemake", "--snakefile", SNAKEFILE] + args + ["CircuitConfig_base"]
         result = subprocess.run(cmd, check=True)
@@ -236,10 +229,13 @@ def test_snakemake_circuit_config(tmp_path):
 
 def test_snakemake_no_git_bioname(tmp_path):
     """This test verifies that bioname is checked to be under git when called via `snakemake`."""
+
+    data_dir = TEST_DATA_DIR
+
     with cwd(tmp_path), tempfile.TemporaryDirectory() as data_copy_dir:
         # data_copy_dir must not be under git control
-        data_copy_dir = Path(data_copy_dir) / TEST_DATA_DIR.name
-        shutil.copytree(TEST_DATA_DIR, data_copy_dir)
+        data_copy_dir = Path(data_copy_dir) / data_dir.name
+        shutil.copytree(data_dir, data_copy_dir)
         args = [
             "--jobs",
             "8",
@@ -247,7 +243,7 @@ def test_snakemake_no_git_bioname(tmp_path):
             "--config",
             f"bioname={data_copy_dir}",
             "-u",
-            str(TEST_DATA_DIR / "cluster.yaml"),
+            str(data_dir / "cluster.yaml"),
         ]
         cmd = ["snakemake", "--snakefile", SNAKEFILE] + args + ["CircuitConfig_base"]
 

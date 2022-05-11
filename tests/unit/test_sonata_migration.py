@@ -1,10 +1,11 @@
 from click.testing import CliRunner
 from numpy.testing import assert_almost_equal, assert_equal
 from pandas.testing import assert_frame_equal
-from utils import SNAKEMAKE_ARGS, cwd
 from voxcell import CellCollection
 
 from circuit_build.cli import run
+
+from utils import SNAKEMAKE_ARGS, cwd
 
 
 def assert_equal_cells(c0, c1):
