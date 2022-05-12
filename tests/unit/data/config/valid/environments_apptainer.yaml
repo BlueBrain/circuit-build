@@ -1,0 +1,5 @@
+version: 1
+env_config:
+  brainbuilder:
+    env_type: APPTAINER
+    image: nse/brainbuilder_0.17.1.sif

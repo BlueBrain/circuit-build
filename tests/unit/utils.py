@@ -3,9 +3,9 @@ from contextlib import contextmanager
 from pathlib import Path
 
 import pkg_resources
-import yaml
 
 import circuit_build
+from circuit_build.utils import dump_yaml, load_yaml
 
 
 UNIT_TESTS_DIR = Path(__file__).resolve().parent
@@ -30,18 +30,6 @@ def cwd(path):
         yield
     finally:
         os.chdir(original_cwd)
-
-
-def load_yaml(filepath):
-    """Load from YAML file."""
-    with open(filepath, "r", encoding="utf-8") as fd:
-        return yaml.safe_load(fd)
-
-
-def dump_yaml(filepath, data):
-    """Dump to YAML file."""
-    with open(filepath, "w", encoding="utf-8") as fd:
-        return yaml.safe_dump(data, fd)
 
 
 @contextmanager

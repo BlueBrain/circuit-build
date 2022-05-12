@@ -1,0 +1,44 @@
+__default__:
+  salloc: '-p prod_small'
+place_cells:
+  jobname: place_cells
+  salloc: '-p prod_small'
+  env_vars:
+    MY_VAR1: "a"
+    MY_VAR2: "1"
+choose_morphologies:
+  salloc: '-p prod_small'
+assign_morphologies:
+  salloc: '-p prod_small'
+synthesize_morphologies:
+  salloc: '-p prod_small'
+assign_emodels:
+  salloc: '-p prod_small'
+compute_ais_scales:
+  salloc: '-p prod_small'
+provide_me_info:
+  salloc: '-p prod_small'
+compute_currents:
+  salloc: '-p prod_small'
+touchdetector:
+  salloc: '-p prod_small'
+touch2parquet:
+  salloc: '-p prod_small'
+spykfunc_s2s:
+  salloc: '-p prod_small'
+spykfunc_s2f:
+  salloc: '-p prod_small'
+spykfunc_merge:
+  salloc: '-p prod_small'
+targetgen:
+  salloc: '-p prod_small'
+node_sets:
+  salloc: '-p prod_small'
+spatial_index_segment:
+  salloc: '-p prod_small'
+parquet_to_sonata:
+  salloc: '-p prod_small'
+subcellular:
+  salloc: '-p prod_small'
+synthesize_glia:
+  salloc: '-p prod_small'

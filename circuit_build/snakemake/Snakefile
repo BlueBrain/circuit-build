@@ -11,6 +11,7 @@ ctx = Context(workflow=workflow, config=config, cluster_config=cluster_config)
 onstart:
     logger.info("Starting workflow")
     ctx.check_git(ctx.BIONAME)
+    ctx.dump_env_config()
 
 
 onsuccess:

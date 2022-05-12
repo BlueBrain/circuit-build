@@ -1,0 +1,7 @@
+version: 1
+env_config:
+  brainbuilder:
+    env_type: MODULE
+    modules:
+      - archive/2022-03
+      - brainbuilder/0.17.1

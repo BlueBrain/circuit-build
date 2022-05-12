@@ -1,0 +1,4 @@
+env_config:
+  invalid_name:
+    env_type: MODULE
+    modules: [ archive/2022-03, testmodule/0.17.1 ]

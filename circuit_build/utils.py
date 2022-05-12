@@ -10,9 +10,16 @@ from jinja2 import Environment, PackageLoader, StrictUndefined, select_autoescap
 from circuit_build.constants import PACKAGE_NAME, SCHEMAS_DIR, TEMPLATES_DIR
 
 
-def escape_single_quotes(value):
-    """Return the given string after escaping the single quote character."""
-    return value.replace("'", "'\\''")
+def load_yaml(filepath):
+    """Load from YAML file."""
+    with open(filepath, "r", encoding="utf-8") as fd:
+        return yaml.safe_load(fd)
+
+
+def dump_yaml(filepath, data, sort_keys=False):
+    """Dump to YAML file."""
+    with open(filepath, "w", encoding="utf-8") as fd:
+        return yaml.safe_dump(data, fd, sort_keys=sort_keys)
 
 
 def format_if(template, value, func=None):

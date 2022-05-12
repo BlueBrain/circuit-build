@@ -1,0 +1,5 @@
+version: 1
+env_config:
+  brainbuilder:
+    env_type: VENV
+    path: /path/to/venv

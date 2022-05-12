@@ -1,0 +1,34 @@
+env_config:
+  brainbuilder:
+    env_type: MODULE
+    modules: [ archive/2022-03, testmodule/0.17.1 ]
+  flatindexer:
+    env_type: MODULE
+    modules: [ archive/2022-03, testmodule/0.17.1 ]
+  parquet-converters:
+    env_type: MODULE
+    modules: [ archive/2022-03, testmodule/0.17.1 ]
+  placement-algorithm:
+    env_type: MODULE
+    modules: [ archive/2022-03, testmodule/0.17.1 ]
+  spykfunc:
+    env_type: MODULE
+    modules: [ archive/2022-03, testmodule/0.17.1 ]
+  touchdetector:
+    env_type: MODULE
+    modules: [ archive/2022-03, testmodule/0.17.1 ]
+  region-grower:
+    env_type: MODULE
+    modules: [ archive/2022-03, testmodule/0.17.1 ]
+  bluepyemodel:
+    env_type: MODULE
+    modules: [ archive/2022-03, testmodule/0.17.1 ]
+  ngv:
+    env_type: MODULE
+    modules: [ archive/2022-03, testmodule/0.17.1 ]
+  synthesize-glia:
+    env_type: MODULE
+    modules: [ archive/2022-03, testmodule/0.17.1 ]
+  ngv-touchdetector:
+    env_type: MODULE
+    modules: [ archive/2022-03, testmodule/0.17.1 ]

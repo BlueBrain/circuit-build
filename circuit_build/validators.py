@@ -9,8 +9,20 @@ from circuit_build.utils import read_schema
 logger = logging.getLogger(__name__)
 
 
+class ValidationError(Exception):
+    """Validation error."""
+
+
 def validate_config(config, schema_name):
-    """Raise an exception if the configuration is not valid."""
+    """Raise an exception if the configuration is not valid.
+
+    Args:
+        config (dict): configuration to be validated.
+        schema_name (str): filename of the configuration schema, searched in the schemas directory.
+
+    Raises:
+        ValidationError in case of validation error.
+    """
     schema = read_schema(schema_name)
     cls = jsonschema.validators.validator_for(schema)
     cls.check_schema(schema)
@@ -29,8 +41,8 @@ def validate_config(config, schema_name):
             )
             for n, e in enumerate(errors, 1)
         )
-        logger.error("Invalid configuration: %s\n%s", schema_name, msg)
-        raise Exception("Validation error")
+        logger.error("Invalid configuration [%s]\n%s", schema_name, msg)
+        raise ValidationError(f"Invalid configuration [{schema_name}]")
 
 
 def validate_node_population_name(name):
@@ -44,7 +56,7 @@ def validate_node_population_name(name):
     )
 
     if name is None:
-        raise ValueError(msg)
+        raise ValidationError(msg)
     name_parts = name.split("_")
     if len(name_parts) != 2:
         warnings.warn(msg)
@@ -64,7 +76,7 @@ def validate_edge_population_name(name):
     )
 
     if name is None:
-        raise ValueError(msg)
+        raise ValidationError(msg)
     name_parts = name.split("__")
     if (len(name_parts) not in [2, 3]) or (name_parts[-1] not in allowed_connection):
         warnings.warn(msg)

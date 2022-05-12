@@ -1,0 +1,99 @@
+%YAML 1.1
+---
+$schema: 'http://json-schema.org/draft-07/schema#'
+$id: 'https://bbp.epfl.ch/schemas/nse/environments/v1/environments.yaml'
+type: object
+additionalProperties: false
+required:
+  - env_config
+properties:
+  version:
+    description: Version of the configuration.
+    type: integer
+    example: 1
+  env_config:
+    type: object
+    additionalProperties: false
+    patternProperties:
+      ? "^\
+        brainbuilder|\
+        flatindexer|\
+        parquet-converters|\
+        placement-algorithm|\
+        spykfunc|\
+        touchdetector|\
+        region-grower|\
+        bluepyemodel|\
+        ngv|\
+        synthesize-glia|\
+        ngv-touchdetector$"
+      : oneOf:
+          - $ref: '#/$defs/module_config'
+          - $ref: '#/$defs/apptainer_config'
+          - $ref: '#/$defs/venv_config'
+
+$defs:
+  module_config:
+    type: object
+    additionalProperties: false
+    required:
+      - env_type
+      - modules
+    properties:
+      env_type:
+        description: Literal value MODULE.
+        const: MODULE
+      modules:
+        description: Spack modules to be loaded.
+        type: array
+        items:
+          type: string
+        uniqueItems: true
+        example: [ "archive/2022-03", "brainbuilder/0.17.0" ]
+      modulepath:
+        description: Optional base path to the spack modules.
+        type: string
+        example: "/gpfs/bbp.cscs.ch/ssd/apps/bsd/modules/_meta"
+  apptainer_config:
+    type: object
+    additionalProperties: false
+    required:
+      - env_type
+      - image
+    properties:
+      env_type:
+        description: Literal value APPTAINER.
+        const: APPTAINER
+      image:
+        description: Absolute or relative path to the Apptainer image to be run.
+        type: string
+        example: "nse/brainbuilder_0.17.1.dev0-singularity-notes.sif"
+      options:
+        description: Options to pass to Apptainer.
+        type: string
+        example: "--cleanenv --containall --bind $TMPDIR:/tmp,/gpfs/bbp.cscs.ch/project"
+      modules:
+        description: Apptainer spack modules to be loaded.
+        type: array
+        items:
+          type: string
+        uniqueItems: true
+        example: [ "archive/2021-12", "singularityce" ]
+      modulepath:
+        description: Optional base path to the Apptainer spack module.
+        type: string
+        example: "/gpfs/bbp.cscs.ch/apps/hpc/singularity/modules/linux-rhel7-x86_64"
+  venv_config:
+    type: object
+    additionalProperties: false
+    required:
+      - env_type
+      - path
+    properties:
+      env_type:
+        description: Literal value VENV.
+        const: VENV
+      path:
+        description: Absolute path to the python virtual environment.
+        type: string
+        example: "/path/to/venv"

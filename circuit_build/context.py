@@ -2,15 +2,16 @@
 import logging
 import os.path
 import subprocess
+from copy import deepcopy
 from datetime import datetime
 from pathlib import Path
 from typing import Dict
 
 import snakemake
 
-from circuit_build.commands import bbp_env
-from circuit_build.constants import INDEX_FILES, MODULES, SPACK_MODULEPATH
-from circuit_build.utils import redirect_to_file, render_template
+from circuit_build.commands import build_command, load_legacy_env_config
+from circuit_build.constants import ENV_CONFIG, ENV_FILE, INDEX_FILES
+from circuit_build.utils import dump_yaml, load_yaml, redirect_to_file, render_template
 from circuit_build.validators import (
     validate_config,
     validate_edge_population_name,
@@ -119,7 +120,7 @@ class Context:
         self.TOUCHES_GLIA_DIR = "connectome/astrocytes/touches"
         self.CONNECTOME_FUNCTIONAL_DIR = "connectome/functional"
         self.CONNECTOME_STRUCTURAL_DIR = "connectome/structural"
-        self.MODULES = self.build_modules(MODULES)
+        self.ENV_CONFIG = self.load_env_config()
 
     def bioname_path(self, filename):
         """Return the bioname path."""
@@ -179,38 +180,35 @@ class Context:
                 f"bioname folder: {path} must be under git (version control system)"
             ) from ex
 
-    def build_modules(self, modules):
-        """Return the dictionary of modules after overwriting it with the custom modules."""
-        custom_modules = self.conf.get("modules")
+    def load_env_config(self):
+        """Load the environment configuration."""
+        config = deepcopy(ENV_CONFIG)
+        custom_modules = self.conf.get("modules", default=[])
         if custom_modules:
-            # Custom modules can be configured using one of:
-            # - configuration file MANIFEST.yaml -> list of str from yaml
-            # - command line parameter --config -> list of str from json for backward compatibility
-            for module in custom_modules:
-                parts = module.split(":")
-                assert 2 <= len(parts) <= 3, "Invalid custom spack module description " + module
-                module_name = parts[0]
-                assert module_name in modules, (
-                    "Unknown spack module: "
-                    + module_name
-                    + ", known modules are: "
-                    + ",".join(modules.keys())
-                )
-                module_list = parts[1].split(",")
-                if len(parts) == 3:
-                    module_path = parts[2]
-                    modules[module_name] = (module_path, module_list)
-                else:
-                    modules[module_name] = (SPACK_MODULEPATH, module_list)
-        return modules
+            logger.info("Loading custom modules (deprecated, use environments.yaml")
+            config.update(load_legacy_env_config(custom_modules))
+        custom_env_file = self.bioname_path(ENV_FILE)
+        if os.path.exists(custom_env_file):
+            logger.info("Loading custom environments")
+            custom_env = load_yaml(custom_env_file)
+            # validate the custom configuration
+            validate_config(custom_env, "environments.yaml")
+            config.update(custom_env["env_config"])
+        # validate the final configuration
+        validate_config({"env_config": config}, "environments.yaml")
+        return config
+
+    def dump_env_config(self):
+        """Write the environment configuration into the log directory."""
+        dump_yaml(self.log_path("environments"), data=self.ENV_CONFIG)
 
     def bbp_env(self, module_env, command, slurm_env=None, skip_srun=False):
         """Wrap and return the command string to be executed."""
-        return bbp_env(
-            modules_config=self.MODULES,
+        return build_command(
+            cmd=command,
+            env_config=self.ENV_CONFIG,
+            env_name=module_env,
             cluster_config=self.cluster_config,
-            module_env=module_env,
-            command=command,
             slurm_env=slurm_env,
             skip_srun=skip_srun,
         )
