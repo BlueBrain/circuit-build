@@ -96,6 +96,10 @@ To get an absolute path to `circuit_build/snakemake/Snakefile` type:
 Custom modules
 ~~~~~~~~~~~~~~
 
+.. warning::
+
+    Deprecated, see how to define custom environments :ref:`here <ref-environments>`.
+
 To use custom modules for `circuit_build/snakemake/Snakefile` you can specify them
 inside ``MANIFEST.yaml`` in a separate section named ``modules``,
 as a list of strings using the format ``<module_env>:<module_names>`` or

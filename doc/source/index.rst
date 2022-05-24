@@ -12,5 +12,6 @@ This documentation outline the Blue Brain Project circuit building pipeline.
    atlas
    tutorial
    phases
+   environments
    faq
    changelog

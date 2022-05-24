@@ -19,24 +19,6 @@ ENV_TYPE_MODULE = "MODULE"
 ENV_TYPE_APPTAINER = "APPTAINER"
 ENV_TYPE_VENV = "VENV"
 
-# Default environment configuration.
-# Examples:
-# "brainbuilder": {
-#     "env_type": ENV_TYPE_MODULE,
-#     "modulepath": SPACK_MODULEPATH,
-#     "modules": ["archive/2022-03", "brainbuilder/0.17.0"],
-# },
-# "brainbuilder": {
-#     "env_type": ENV_TYPE_APPTAINER,
-#     "image": f"{APPTAINER_IMAGEPATH}/brainbuilder_0.17.1.sif",
-#     "options": "--cleanenv --containall",  # optional
-#     "modulepath": "/path/to/apptainer/module",  # optional
-#     "modules": ["archive/2021-12", "singularityce"],  # optional
-# },
-# "brainbuilder": {
-#     "env_type": ENV_TYPE_VENV,
-#     "path": "/absolute/path/to/venv/",
-# },
 ENV_CONFIG = {
     "brainbuilder": {
         "env_type": ENV_TYPE_MODULE,

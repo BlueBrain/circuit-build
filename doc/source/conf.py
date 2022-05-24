@@ -26,6 +26,7 @@ extensions = [
     "sphinx.ext.todo",
     "sphinx.ext.mathjax",
     "sphinx-jsonschema",
+    "sphinx_exec_code",
 ]
 
 # General information about the project.

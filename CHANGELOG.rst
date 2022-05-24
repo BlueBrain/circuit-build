@@ -7,7 +7,7 @@ Version 4.1.0
 New Features
 ~~~~~~~~~~~~
 - NGV workflow is added to circuit-build [NSETM-1873]
-- Add custom environments: module, apptainer, venv.
+- Add custom environments: MODULE, APPTAINER, VENV.
 
 Improvements
 ~~~~~~~~~~~~
