@@ -9,6 +9,20 @@ from circuit_build.utils import read_schema
 logger = logging.getLogger(__name__)
 
 
+def _format_error(error):
+    """Return a formatted error message.
+
+    Args:
+        error (jsonschema.exceptions.ValidationError): validation error from jsonschema.
+
+    Examples:
+        Failed validating root: Additional properties are not allowed ('x' was unexpected)
+        Failed validating root.assign_emodels.seed: 'a' is not of type 'integer'
+    """
+    path = ".".join(str(elem) for elem in ["root"] + list(error.absolute_path))
+    return f"Failed validating {path}: {error.message}"
+
+
 class ValidationError(Exception):
     """Validation error."""
 
@@ -29,18 +43,7 @@ def validate_config(config, schema_name):
     validator = cls(schema)
     errors = list(validator.iter_errors(config))
     if errors:
-        # Log an error message like the following:
-        #  Invalid configuration: MANIFEST.yaml
-        #  1: Failed validating root: Additional properties are not allowed ('x' was unexpected)
-        #  2: Failed validating root.assign_emodels.seed: 'a' is not of type 'integer'
-        msg = "\n".join(
-            "{n}: Failed validating {path}: {message}".format(
-                n=n,
-                path=".".join(str(elem) for elem in ["root"] + list(e.absolute_path)),
-                message=e.message,
-            )
-            for n, e in enumerate(errors, 1)
-        )
+        msg = "\n".join(f"{n}: {_format_error(e)}" for n, e in enumerate(errors, 1))
         logger.error("Invalid configuration [%s]\n%s", schema_name, msg)
         raise ValidationError(f"Invalid configuration [{schema_name}]")
 

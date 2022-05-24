@@ -7,17 +7,18 @@ import pkg_resources
 import circuit_build
 from circuit_build.utils import dump_yaml, load_yaml
 
-
-UNIT_TESTS_DIR = Path(__file__).resolve().parent
-TEST_DATA_DIR = UNIT_TESTS_DIR / "proj66-tiny"
-TEST_DATA_DIR_SYNTH = UNIT_TESTS_DIR / "proj66-tiny-synth"
+TESTS_DIR = Path(__file__).resolve().parent
+UNIT_TESTS_DATA = TESTS_DIR / "unit" / "data"
+FUNC_TESTS_DATA = TESTS_DIR / "functional" / "data"
+TEST_PROJ_TINY = FUNC_TESTS_DATA / "proj66-tiny"
+TEST_PROJ_SYNTH = FUNC_TESTS_DATA / "proj66-tiny-synth"
 
 SNAKEFILE = pkg_resources.resource_filename(circuit_build.__name__, "snakemake/Snakefile")
 SNAKEMAKE_ARGS = [
     "--bioname",
-    str(TEST_DATA_DIR),
+    str(TEST_PROJ_TINY),
     "-u",
-    str(TEST_DATA_DIR / "cluster.yaml"),
+    str(TEST_PROJ_TINY / "cluster.yaml"),
 ]
 
 

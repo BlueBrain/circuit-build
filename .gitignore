@@ -1,4 +1,6 @@
 doc/build
+coverage.xml
+.coverage
 .tox/
 .idea
 .snakemake

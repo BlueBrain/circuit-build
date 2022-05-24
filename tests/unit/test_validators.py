@@ -1,7 +1,7 @@
 import warnings
 
 import pytest
-from utils import UNIT_TESTS_DIR
+from utils import TEST_PROJ_SYNTH, TEST_PROJ_TINY, UNIT_TESTS_DATA
 
 from circuit_build import validators as test_module
 from circuit_build.constants import ENV_CONFIG
@@ -18,34 +18,34 @@ def test_validate_default_environments():
 @pytest.mark.parametrize(
     "schema_file, config_file",
     [
-        ("MANIFEST.yaml", "proj66-tiny/MANIFEST.yaml"),
-        ("MANIFEST.yaml", "proj66-tiny-synth/MANIFEST.yaml"),
-        ("cluster.yaml", "proj66-tiny/cluster.yaml"),
-        ("cluster.yaml", "proj66-tiny-synth/cluster.yaml"),
-        ("cluster.yaml", "data/config/valid/cluster_empty.yaml"),
-        ("cluster.yaml", "data/config/valid/cluster_all.yaml"),
-        ("environments.yaml", "data/config/valid/environments_empty.yaml"),
-        ("environments.yaml", "data/config/valid/environments_all.yaml"),
-        ("environments.yaml", "data/config/valid/environments_apptainer.yaml"),
-        ("environments.yaml", "data/config/valid/environments_module.yaml"),
-        ("environments.yaml", "data/config/valid/environments_venv.yaml"),
+        ("MANIFEST.yaml", TEST_PROJ_TINY / "MANIFEST.yaml"),
+        ("MANIFEST.yaml", TEST_PROJ_SYNTH / "MANIFEST.yaml"),
+        ("cluster.yaml", TEST_PROJ_TINY / "cluster.yaml"),
+        ("cluster.yaml", TEST_PROJ_SYNTH / "cluster.yaml"),
+        ("cluster.yaml", UNIT_TESTS_DATA / "config/valid/cluster_empty.yaml"),
+        ("cluster.yaml", UNIT_TESTS_DATA / "config/valid/cluster_all.yaml"),
+        ("environments.yaml", UNIT_TESTS_DATA / "config/valid/environments_empty.yaml"),
+        ("environments.yaml", UNIT_TESTS_DATA / "config/valid/environments_all.yaml"),
+        ("environments.yaml", UNIT_TESTS_DATA / "config/valid/environments_apptainer.yaml"),
+        ("environments.yaml", UNIT_TESTS_DATA / "config/valid/environments_module.yaml"),
+        ("environments.yaml", UNIT_TESTS_DATA / "config/valid/environments_venv.yaml"),
     ],
 )
 def test_validate_config_success(schema_file, config_file):
-    config = load_yaml(UNIT_TESTS_DIR / config_file)
+    config = load_yaml(config_file)
     test_module.validate_config(config, schema_file)
 
 
 @pytest.mark.parametrize(
     "schema_file, config_file",
     [
-        ("MANIFEST.yaml", "data/config/invalid/MANIFEST_invalid_name.yaml"),
-        ("cluster.yaml", "data/config/invalid/cluster_invalid_name.yaml"),
-        ("environments.yaml", "data/config/invalid/environments_invalid_name.yaml"),
+        ("MANIFEST.yaml", UNIT_TESTS_DATA / "config/invalid/MANIFEST_invalid_name.yaml"),
+        ("cluster.yaml", UNIT_TESTS_DATA / "config/invalid/cluster_invalid_name.yaml"),
+        ("environments.yaml", UNIT_TESTS_DATA / "config/invalid/environments_invalid_name.yaml"),
     ],
 )
 def test_validate_config_failure(schema_file, config_file):
-    config = load_yaml(UNIT_TESTS_DIR / config_file)
+    config = load_yaml(config_file)
     with pytest.raises(ValidationError):
         test_module.validate_config(config, schema_file)
 
@@ -73,15 +73,29 @@ def test_validate_edge_population_name(allowed_connection):
         test_module.validate_edge_population_name(name)
 
 
-@pytest.mark.parametrize("name", ["All", "neocortex"])
-def test_validate_node_population_name_failure(name):
+@pytest.mark.parametrize("name", ["All", "neocortex", "ncx_nonexistent", "nonexistent_neurons"])
+def test_validate_node_population_name_warns(name):
     match = '"node_population_name" in MANIFEST.yaml must exist and should fit the pattern'
     with pytest.warns(UserWarning, match=match):
         test_module.validate_node_population_name(name)
 
 
 @pytest.mark.parametrize("name", ["All", "neocortex_neurons__chemical"])
-def test_validate_edge_population_name_failure(name):
+def test_validate_edge_population_name_warns(name):
     match = '"edge_population_name" in MANIFEST.yaml must exist and should fit the pattern'
     with pytest.warns(UserWarning, match=match):
+        test_module.validate_edge_population_name(name)
+
+
+def test_validate_node_population_name_raises():
+    name = None
+    match = '"node_population_name" in MANIFEST.yaml must exist and should fit the pattern'
+    with pytest.raises(ValidationError, match=match):
+        test_module.validate_node_population_name(name)
+
+
+def test_validate_edge_population_name_raises():
+    name = None
+    match = '"edge_population_name" in MANIFEST.yaml must exist and should fit the pattern'
+    with pytest.raises(ValidationError, match=match):
         test_module.validate_edge_population_name(name)

@@ -51,7 +51,7 @@ Why making an intermediate step?
 Where can I find a sample *bioname*?
 ------------------------------------
 
-Some sample bioname(s) can be found in ``circuit-build`` `Git repo <https://bbpgitlab.epfl.ch/nse/circuit-build/-/tree/main/tests/unit>`_.
+Some sample bioname(s) can be found in ``circuit-build`` `Git repo <https://bbpgitlab.epfl.ch/nse/circuit-build/-/tree/main/tests/functional/data>`_.
 
 While not biologically realistic, these sample bionames serve as integration tests and are built on BB5
 when the CI pipeline is executed.

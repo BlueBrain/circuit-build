@@ -145,7 +145,7 @@ def load_legacy_env_config(custom_modules):
         module_env = parts[0]
         if module_env not in ENV_CONFIG:
             raise Exception(
-                f"Unknown spack module: {module_env}, known modules are: {','.join(ENV_CONFIG)}"
+                f"Unknown environment: {module_env}, known environments are: {','.join(ENV_CONFIG)}"
             )
         module_list = parts[1].split(",")
         module_path = parts[2] if len(parts) == 3 else SPACK_MODULEPATH
