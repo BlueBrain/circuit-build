@@ -40,10 +40,13 @@ ngv:
     atlas: ../data/atlas/
     vasculature: ../data/atlas/vasculature.h5
     vasculature_mesh: ../data/atlas/vasculature.obj
-    base_circuit: ''
-    base_circuit_sonata: ../data/circuit/circuit_config.json
-    base_circuit_cells: ../data/circuit/nodes.h5
-    base_circuit_connectome: ../data/circuit/edges.h5
+    base_circuit:
+        config: ../data/circuit/circuit_config.json
+        nodes_file: ../data/circuit/nodes.h5
+        morphologies_dir: ../data/circuit/morphologies
+        node_population_name: All
+        edges_file: ../data/circuit/edges.h5
+        edge_population_name: All
 
   assign_emodels:
     templates_dir: ../data/emodels/

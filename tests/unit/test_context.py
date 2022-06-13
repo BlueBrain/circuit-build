@@ -9,6 +9,24 @@ from circuit_build.utils import load_yaml
 from utils import TEST_PROJ_TINY
 
 
+@pytest.mark.parametrize(
+    "parent_dir, path, expected",
+    [
+        (".", "$A", "$A"),
+        ("/a/b", "c", "/a/b/c"),
+        ("/a/b", "/c", "/c"),
+        (".", "c", str(Path(".").resolve() / "c")),
+        ("..", "c", str(Path(".").resolve().parent / "c")),
+        ("a", "c", str(Path(".").resolve() / "a/c")),
+        ("a", "/c/d", "/c/d"),
+    ],
+)
+def test_make_abs(parent_dir, path, expected):
+
+    path = test_module._make_abs(parent_dir, path)
+    assert path == expected
+
+
 def _get_context(bioname):
     workflow = Mock()
     cluster_config = load_yaml(bioname / "cluster.yaml")
@@ -50,27 +68,23 @@ def test_context_init(mocked_path_exists):
     ctx = _get_context(bioname)
 
     assert isinstance(ctx, test_module.Context)
-    assert ctx.BIONAME == str(bioname)
-    assert ctx.CIRCUIT_DIR == "."
-    assert ctx.BUILDER_RECIPE == str(bioname / "builderRecipeAllPathways.xml")
-    assert ctx.MORPHDB == str(bioname / "extNeuronDB.dat")
-    assert ctx.SYNTHESIZE_PROTOCOL_CONFIG == str(bioname / "protocol_config.yaml")
+    assert ctx.paths.bioname_dir == bioname
+    assert ctx.paths.circuit_dir == Path(".").resolve()
+    assert ctx.BUILDER_RECIPE == bioname / "builderRecipeAllPathways.xml"
+    assert ctx.MORPHDB == bioname / "extNeuronDB.dat"
+    assert ctx.SYNTHESIZE_PROTOCOL_CONFIG == bioname / "protocol_config.yaml"
     assert ctx.SYNTHESIZE is False
-    assert ctx.SYNTHESIZE_MORPH_DIR == str(cwd / "morphologies")
-    assert ctx.SYNTHESIZE_MORPHDB == str(bioname / "neurondb-axon.dat")
+    assert ctx.SYNTHESIZE_MORPH_DIR == cwd / "morphologies/neocortex_neurons"
+    assert ctx.SYNTHESIZE_MORPHDB == bioname / "neurondb-axon.dat"
     assert ctx.PARTITION == []
     assert ctx.ATLAS == "/gpfs/bbp.cscs.ch/project/proj66/entities/dev/atlas/O1-152"
     assert ctx.ATLAS_CACHE_DIR == ".atlas"
-    assert ctx.NODE_POPULATION_NAME == "neocortex_neurons"
-    assert ctx.EDGE_POPULATION_NAME == "neocortex_neurons__chemical_synapse"
+    assert ctx.nodes_neurons_name == "neocortex_neurons"
+    assert ctx.edges_neurons_neurons_name == "neocortex_neurons__chemical_synapse"
     assert ctx.MORPH_RELEASE == "/gpfs/bbp.cscs.ch/project/proj66/entities/morphologies/2018.02.16"
     assert ctx.EMODEL_RELEASE == "/gpfs/bbp.cscs.ch/project/proj66/entities/emodels/2018.02.26.dev0"
     assert ctx.SYNTHESIZE_EMODEL_RELEASE == ""
     assert ctx.EMODEL_RELEASE_MECOMBO == expected_emodel_release_mecombo
     assert ctx.EMODEL_RELEASE_HOC == expected_emodel_release_hoc
-    assert ctx.LOGS_DIR == "logs"
-    assert ctx.NODESETS_FILE == "node_sets.json"
-    assert ctx.TOUCHES_DIR == "connectome/touches"
-    assert ctx.TOUCHES_GLIA_DIR == "connectome/astrocytes/touches"
-    assert ctx.CONNECTOME_FUNCTIONAL_DIR == "connectome/functional"
-    assert ctx.CONNECTOME_STRUCTURAL_DIR == "connectome/structural"
+    assert ctx.paths.logs_dir == cwd / "logs"
+    assert ctx.NODESETS_FILE == cwd / "sonata/node_sets.json"

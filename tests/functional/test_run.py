@@ -52,9 +52,9 @@ def test_functional_all(tmp_path):
         ).resolve()
         assert edges_file.stat().st_size > 100
         # test output from choose_morphologies
-        assert Path("morphologies.tsv").stat().st_size > 100
+        assert Path("auxiliary/morphologies.tsv").stat().st_size > 100
         # test output from synthesize_morphologies
-        assert Path("circuit.morphologies.h5").stat().st_size > 100
+        assert Path("auxiliary/circuit.morphologies.h5").stat().st_size > 100
         with h5py.File(edges_file, "r") as h5f:
             assert f"/edges/{edge_population_name}" in h5f
             assert (
@@ -69,11 +69,11 @@ def test_functional_all(tmp_path):
             config = json.load(f)
             assert (
                 config["networks"]["nodes"][0]["nodes_file"]
-                == f"$NETWORK_NODES_DIR/{node_population_name}/nodes.h5"
+                == f"$BASE_DIR/networks/nodes/{node_population_name}/nodes.h5"
             )
             assert (
                 config["networks"]["edges"][0]["edges_file"]
-                == f"$NETWORK_EDGES_DIR/{edge_population_name}/edges.h5"
+                == f"$BASE_DIR/networks/edges/functional/{edge_population_name}/edges.h5"
             )
 
 
@@ -100,7 +100,9 @@ def test_custom_module(tmp_path, caplog, capfd):
         args = SNAKEMAKE_ARGS + ["-m", "brainbuilder:invalid_module1:invalid_module_path"]
         runner = CliRunner(mix_stderr=False)
 
-        result = runner.invoke(run, args + ["circuit.somata.h5"], catch_exceptions=False)
+        result = runner.invoke(
+            run, args + [f"{tmp_path}/auxiliary/circuit.somata.h5"], catch_exceptions=False
+        )
 
         captured = capfd.readouterr()
         assert result.exit_code == 1

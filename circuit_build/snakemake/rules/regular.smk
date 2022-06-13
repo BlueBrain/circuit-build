@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 from circuit_build.utils import format_if, write_with_log
 
@@ -19,59 +20,37 @@ rule circuitconfig_functional:
     message:
         "Generate CircuitConfig for functional circuit"
     input:
-        f"sonata/networks/edges/functional/{ctx.EDGE_POPULATION_NAME}/edges.h5",
-        f"sonata/networks/nodes/{ctx.NODE_POPULATION_NAME}/nodes.h5",
+        nodes=ctx.nodes_neurons_file,
+        edges=ctx.edges_neurons_neurons_file(connectome_type="functional"),
     output:
         "CircuitConfig",
     log:
         ctx.log_path("circuitconfig_functional"),
     run:
         with write_with_log(output[0], log[0]) as out:
-            out.write(
-                ctx.build_circuit_config(
-                    nrn_path=Path(
-                        ctx.CIRCUIT_DIR,
-                        f"sonata/networks/edges/functional/{ctx.EDGE_POPULATION_NAME}/edges.h5",
-                    ).absolute(),
-                    cell_library_file=Path(
-                        ctx.CIRCUIT_DIR,
-                        f"sonata/networks/nodes/{ctx.NODE_POPULATION_NAME}/nodes.h5",
-                    ).absolute(),
-                )
-            )
+            out.write(ctx.build_circuit_config(nrn_path=input.edges, cell_library_file=input.nodes))
 
 
 rule circuitconfig_structural:
     message:
         "Generate CircuitConfig for structural circuit"
     input:
-        f"sonata/networks/edges/structural/{ctx.EDGE_POPULATION_NAME}/edges.h5",
-        f"sonata/networks/nodes/{ctx.NODE_POPULATION_NAME}/nodes.h5",
+        nodes=ctx.nodes_neurons_file,
+        edges=ctx.edges_neurons_neurons_file(connectome_type="structural"),
     output:
         "CircuitConfig_struct",
     log:
         ctx.log_path("circuitconfig_structural"),
     run:
         with write_with_log(output[0], log[0]) as out:
-            out.write(
-                ctx.build_circuit_config(
-                    nrn_path=Path(
-                        ctx.CIRCUIT_DIR,
-                        f"sonata/networks/edges/structural/{ctx.EDGE_POPULATION_NAME}/edges.h5",
-                    ).absolute(),
-                    cell_library_file=Path(
-                        ctx.CIRCUIT_DIR,
-                        f"sonata/networks/nodes/{ctx.NODE_POPULATION_NAME}/nodes.h5",
-                    ).absolute(),
-                )
-            )
+            out.write(ctx.build_circuit_config(nrn_path=input.edges, cell_library_file=input.nodes))
 
 
 rule init_cells:
     message:
         "Create an empty cell collection with a correct population name. This collection will be populated further."
     output:
-        "circuit.empty.h5",
+        ctx.paths.auxiliary_path("circuit.empty.h5"),
     log:
         ctx.log_path("init_cells"),
     shell:
@@ -80,7 +59,7 @@ rule init_cells:
             [
                 'echo -n "Using python: " && which python &&',
                 'python -c "from voxcell import CellCollection;',
-                f"cells = CellCollection('{ctx.NODE_POPULATION_NAME}');",
+                f"cells = CellCollection('{ctx.nodes_neurons_name}');",
                 "cells.save('{output}');",
                 '"',
             ],
@@ -91,9 +70,9 @@ rule place_cells:
     message:
         "Generate cell positions; assign me-types"
     input:
-        "circuit.empty.h5",
+        ctx.paths.auxiliary_path("circuit.empty.h5"),
     output:
-        "circuit.somata.h5",
+        ctx.paths.auxiliary_path("circuit.somata.h5"),
     log:
         ctx.log_path("place_cells"),
     shell:
@@ -104,14 +83,14 @@ rule place_cells:
                 "--input",
                 "{input}",
                 "--composition",
-                ctx.bioname_path("cell_composition.yaml"),
+                ctx.paths.bioname_path("cell_composition.yaml"),
                 "--mtype-taxonomy",
-                ctx.bioname_path("mtype_taxonomy.tsv"),
+                ctx.paths.bioname_path("mtype_taxonomy.tsv"),
                 "--atlas",
                 ctx.ATLAS,
                 "--atlas-cache",
                 ctx.ATLAS_CACHE_DIR,
-                f"--mini-frequencies {ctx.bioname_path('mini_frequencies.tsv')}"
+                f"--mini-frequencies {ctx.paths.bioname_path('mini_frequencies.tsv')}"
                 if ctx.conf.get(["place_cells", "mini_frequencies"], default=False)
                 else "",
                 format_if("--region {}", ctx.conf.get(["common", "region"])),
@@ -149,9 +128,12 @@ rule choose_morphologies:
     message:
         "Choose morphologies/axons using 'placement hints' approach"
     input:
-        "circuit.somata.h5",
+        ctx.paths.auxiliary_path("circuit.somata.h5"),
     output:
-        ctx.if_synthesis("axon-morphologies.tsv", "morphologies.tsv"),
+        ctx.if_synthesis(
+            ctx.paths.auxiliary_path("axon-morphologies.tsv"),
+            ctx.paths.auxiliary_path("morphologies.tsv"),
+        ),
     log:
         ctx.log_path("choose_morphologies"),
     shell:
@@ -168,7 +150,7 @@ rule choose_morphologies:
                 "--morphdb",
                 ctx.if_synthesis(ctx.SYNTHESIZE_MORPHDB, ctx.MORPHDB),
                 "--rules",
-                ctx.bioname_path("placement_rules.xml"),
+                ctx.paths.bioname_path("placement_rules.xml"),
                 "--annotations",
                 Path(ctx.MORPH_RELEASE, "annotations.json"),
                 "--alpha",
@@ -198,10 +180,10 @@ rule assign_morphologies:
     message:
         "Assign morphologies"
     input:
-        cells="circuit.somata.h5",
-        morph="morphologies.tsv",
+        cells=ctx.paths.auxiliary_path("circuit.somata.h5"),
+        morph=ctx.paths.auxiliary_path("morphologies.tsv"),
     output:
-        "circuit.morphologies.h5",
+        ctx.paths.auxiliary_path("circuit.morphologies.h5"),
     log:
         ctx.log_path("assign_morphologies"),
     shell:
@@ -224,7 +206,7 @@ rule assign_morphologies:
                 format_if(
                     "--rotations {}",
                     value=ctx.conf.get(["assign_morphologies", "rotations"]),
-                    func=ctx.bioname_path,
+                    func=ctx.paths.bioname_path,
                 ),
                 "--out-cells-path",
                 "{output}",
@@ -237,10 +219,10 @@ rule synthesize_morphologies:
     message:
         "Synthesize morphologies"
     input:
-        cells="circuit.somata.h5",
-        morph="axon-morphologies.tsv",
+        cells=ctx.paths.auxiliary_path("circuit.somata.h5"),
+        morph=ctx.paths.auxiliary_path("axon-morphologies.tsv"),
     output:
-        "circuit.synthesized_morphologies.h5",
+        ctx.paths.auxiliary_path("circuit.synthesized_morphologies.h5"),
     log:
         ctx.log_path("synthesize_morphologies"),
     shell:
@@ -260,9 +242,9 @@ rule synthesize_morphologies:
                 "--out-cells",
                 "{output}",
                 "--tmd-distributions",
-                ctx.bioname_path("tmd_distributions.json"),
+                ctx.paths.bioname_path("tmd_distributions.json"),
                 "--tmd-parameters",
-                ctx.bioname_path("tmd_parameters.json"),
+                ctx.paths.bioname_path("tmd_parameters.json"),
                 "--morph-axon",
                 "{input[morph]}",
                 "--base-morph-dir",
@@ -305,7 +287,7 @@ rule assign_emodels_per_type:
     message:
         "Assign electrical models"
     input:
-        "circuit.morphologies.h5",
+        ctx.paths.auxiliary_path("circuit.morphologies.h5"),
     output:
         "circuit.{ext}",
     log:
@@ -336,9 +318,9 @@ rule compute_ais_scales:
     message:
         "Add the column @dynamics:ais_scaler to SONATA nodes"
     input:
-        "circuit.synthesized_morphologies.h5",
+        ctx.paths.auxiliary_path("circuit.synthesized_morphologies.h5"),
     output:
-        "circuit.ais_scales.h5",
+        ctx.paths.auxiliary_path("circuit.ais_scales.h5"),
     log:
         ctx.log_path("compute_ais_scales"),
     shell:
@@ -372,7 +354,7 @@ rule provide_me_info:
     input:
         "circuit.h5",
     output:
-        f"sonata/networks/nodes/{ctx.NODE_POPULATION_NAME}/nodes.h5",
+        ctx.nodes_neurons_file,
     log:
         ctx.log_path("provide_me_info"),
     shell:
@@ -393,9 +375,9 @@ rule compute_currents:
     message:
         "Compute currents for SONATA Nodes"
     input:
-        "circuit.ais_scales.h5",
+        ctx.paths.auxiliary_path("circuit.ais_scales.h5"),
     output:
-        f"sonata/networks/nodes/{ctx.NODE_POPULATION_NAME}/nodes.h5",
+        ctx.nodes_neurons_file,
     log:
         ctx.log_path("compute_currents"),
     shell:
@@ -424,13 +406,17 @@ rule touchdetector:
     message:
         "Detect touches between neurites"
     input:
-        **ctx.if_partition({"nodesets": f"sonata/{ctx.NODESETS_FILE}"}, {}),
+        **ctx.if_partition({"nodesets": ctx.NODESETS_FILE}, {}),
         neurons=ctx.if_synthesis(
-            "circuit.synthesized_morphologies.h5",
-            f"sonata/networks/nodes/{ctx.NODE_POPULATION_NAME}/nodes.h5",
+            ctx.paths.auxiliary_path("circuit.synthesized_morphologies.h5"),
+            ctx.nodes_neurons_file,
         ),
     output:
-        success=touch(f"{ctx.TOUCHES_DIR}{ctx.partition_wildcard()}/_SUCCESS"),
+        success=touch(
+            ctx.tmp_edges_neurons_chemical_connectome_path(
+                f"touches{ctx.partition_wildcard()}/raw/_SUCCESS",
+            )
+        ),
     log:
         ctx.log_path(f"touchdetector{ctx.partition_wildcard()}"),
     params:
@@ -444,8 +430,8 @@ rule touchdetector:
                 "--output {params.output_dir}",
                 "--touchspace",
                 ctx.conf.get(["touchdetector", "touchspace"], default="axodendritic"),
-                f"--from {{input[neurons]}} {ctx.NODE_POPULATION_NAME}",
-                f"--to {{input[neurons]}} {ctx.NODE_POPULATION_NAME}",
+                f"--from {{input[neurons]}} {ctx.nodes_neurons_name}",
+                f"--to {{input[neurons]}} {ctx.nodes_neurons_name}",
                 *ctx.if_partition(
                     [
                         "--from-nodeset {input.nodesets} {wildcards.partition}",
@@ -464,15 +450,21 @@ rule touch2parquet:
     message:
         "Convert TouchDetector output to Parquet synapse files"
     input:
-        f"{ctx.TOUCHES_DIR}{ctx.partition_wildcard()}/_SUCCESS",
+        ctx.tmp_edges_neurons_chemical_connectome_path(
+            f"touches{ctx.partition_wildcard()}/raw/_SUCCESS",
+        ),
     output:
-        parquet_dir=directory(f"{ctx.TOUCHES_DIR}{ctx.partition_wildcard()}/parquet"),
+        parquet_dir=directory(
+            ctx.tmp_edges_neurons_chemical_connectome_path(
+                f"touches{ctx.partition_wildcard()}/parquet",
+            ),
+        ),
     log:
         ctx.log_path(f"touch2parquet{ctx.partition_wildcard()}"),
     shell:
         "mkdir -p {output.parquet_dir} && " + ctx.bbp_env(
             "parquet-converters",
-            ["cd {output.parquet_dir}", "&&", "touch2parquet ../touchesData.*"],
+            ["cd {output.parquet_dir}", "&&", "touch2parquet ../raw/touchesData.*"],
             slurm_env="touch2parquet",
         )
 
@@ -481,15 +473,17 @@ rule spykfunc_s2s:
     message:
         "Convert touches into synapses (S2S)"
     input:
-        **ctx.if_partition({"nodesets": f"sonata/{ctx.NODESETS_FILE}"}, {}),
+        **ctx.if_partition({"nodesets": ctx.NODESETS_FILE}, {}),
         neurons=ctx.if_synthesis(
-            "circuit.synthesized_morphologies.h5",
-            f"sonata/networks/nodes/{ctx.NODE_POPULATION_NAME}/nodes.h5",
+            ctx.paths.auxiliary_path("circuit.synthesized_morphologies.h5"),
+            ctx.nodes_neurons_file,
         ),
-        touches=f"{ctx.TOUCHES_DIR}{ctx.partition_wildcard()}/parquet",
+        touches=ctx.tmp_edges_neurons_chemical_connectome_path(
+            f"touches{ctx.partition_wildcard()}/parquet",
+        ),
     output:
-        success=(
-            f"connectome/structural/spykfunc{ctx.partition_wildcard()}/circuit.parquet/_SUCCESS"
+        success=ctx.tmp_edges_neurons_chemical_connectome_path(
+            f"structural/spykfunc{ctx.partition_wildcard()}/circuit.parquet/_SUCCESS",
         ),
     log:
         ctx.log_path(f"spykfunc_s2s{ctx.partition_wildcard()}"),
@@ -504,15 +498,17 @@ rule spykfunc_s2f:
     message:
         "Prune touches and convert them into synapses (S2F)"
     input:
-        **ctx.if_partition({"nodesets": f"sonata/{ctx.NODESETS_FILE}"}, {}),
+        **ctx.if_partition({"nodesets": ctx.NODESETS_FILE}, {}),
         neurons=ctx.if_synthesis(
-            "circuit.synthesized_morphologies.h5",
-            f"sonata/networks/nodes/{ctx.NODE_POPULATION_NAME}/nodes.h5",
+            ctx.paths.auxiliary_path("circuit.synthesized_morphologies.h5"),
+            ctx.nodes_neurons_file,
         ),
-        touches=f"{ctx.TOUCHES_DIR}{ctx.partition_wildcard()}/parquet",
+        touches=ctx.tmp_edges_neurons_chemical_connectome_path(
+            f"touches{ctx.partition_wildcard()}/parquet",
+        ),
     output:
-        success=(
-            f"connectome/functional/spykfunc{ctx.partition_wildcard()}/circuit.parquet/_SUCCESS"
+        success=ctx.tmp_edges_neurons_chemical_connectome_path(
+            f"functional/spykfunc{ctx.partition_wildcard()}/circuit.parquet/_SUCCESS",
         ),
     log:
         ctx.log_path(f"spykfunc_s2f{ctx.partition_wildcard()}"),
@@ -528,11 +524,15 @@ rule spykfunc_merge:
         "Merge synapses from different nodesets."
     input:
         expand(
-            "connectome/{{connectome_dir}}/spykfunc_{partition}/circuit.parquet/_SUCCESS",
+            ctx.tmp_edges_neurons_chemical_connectome_path(
+                "{{connectome_dir}}/spykfunc_{partition}/circuit.parquet/_SUCCESS",
+            ),
             partition=ctx.PARTITION,
         ),
     output:
-        success="connectome/{connectome_dir}/spykfunc/circuit.parquet/_SUCCESS",
+        success=ctx.tmp_edges_neurons_chemical_connectome_path(
+            "{connectome_dir}/spykfunc/circuit.parquet/_SUCCESS",
+        ),
     log:
         ctx.log_path("spykfunc_merge_{connectome_dir}"),
     params:
@@ -547,7 +547,7 @@ rule targetgen:
         "Generate start.target file"
     input:
         ctx.if_synthesis(
-            "circuit.synthesized_morphologies.h5",
+            ctx.paths.auxiliary_path("circuit.synthesized_morphologies.h5"),
             "circuit.h5",
         ),
     output:
@@ -562,7 +562,7 @@ rule targetgen:
                 format_if(
                     "--targets {}",
                     value=ctx.conf.get(["targetgen", "targets"]),
-                    func=ctx.bioname_path,
+                    func=ctx.paths.bioname_path,
                 ),
                 "--allow-empty"
                 if ctx.conf.get(["targetgen", "allow_empty"], default=False)
@@ -583,11 +583,11 @@ rule node_sets:
         "Generate SONATA node sets"
     input:
         ctx.if_synthesis(
-            "circuit.synthesized_morphologies.h5",
-            f"sonata/networks/nodes/{ctx.NODE_POPULATION_NAME}/nodes.h5",
+            ctx.paths.auxiliary_path("circuit.synthesized_morphologies.h5"),
+            ctx.nodes_neurons_file,
         ),
     output:
-        f"sonata/{ctx.NODESETS_FILE}",
+        ctx.NODESETS_FILE,
     log:
         ctx.log_path("node_sets"),
     shell:
@@ -598,13 +598,13 @@ rule node_sets:
                 format_if(
                     "--targets {}",
                     value=ctx.conf.get(["targetgen", "targets"]),
-                    func=ctx.bioname_path,
+                    func=ctx.paths.bioname_path,
                 ),
                 "--allow-empty"
                 if ctx.conf.get(["targetgen", "allow_empty"], default=False)
                 else "",
                 "--population",
-                ctx.NODE_POPULATION_NAME,
+                ctx.nodes_neurons_name,
                 "--atlas",
                 ctx.ATLAS,
                 "--atlas-cache",
@@ -641,9 +641,11 @@ rule parquet_to_sonata:
     message:
         "Convert synapses from Parquet to SONATA format"
     input:
-        "connectome/{connectome_dir}/spykfunc/circuit.parquet/_SUCCESS",
+        ctx.tmp_edges_neurons_chemical_connectome_path(
+            "{connectome_dir}/spykfunc/circuit.parquet/_SUCCESS",
+        ),
     output:
-        "sonata/networks/edges/{connectome_dir}/" + ctx.EDGE_POPULATION_NAME + "/edges.h5",
+        ctx.edges_neurons_neurons_file(connectome_type="{connectome_dir}"),
     log:
         ctx.log_path("parquet_to_sonata_{connectome_dir}"),
     shell:
@@ -651,9 +653,11 @@ rule parquet_to_sonata:
             "parquet-converters",
             [
                 "parquet2hdf5",
-                "connectome/{wildcards.connectome_dir}/spykfunc/circuit.parquet/",
+                ctx.tmp_edges_neurons_chemical_connectome_path(
+                    "{wildcards.connectome_dir}/spykfunc/circuit.parquet/",
+                ),
                 "{output}",
-                ctx.EDGE_POPULATION_NAME,
+                ctx.edges_neurons_neurons_name,
             ],
             slurm_env="parquet_to_sonata",
         )
@@ -696,7 +700,7 @@ rule circuitconfig_sonata:
         ctx.log_path("circuitconfig_sonata"),
     run:
         with write_with_log(output[0], log[0]) as out:
-            out.write(ctx.write_network_config("functional"))
+            ctx.write_network_config(connectome_dir="functional", output_file=out)
 
 
 rule circuitconfig_struct_sonata:
@@ -708,16 +712,16 @@ rule circuitconfig_struct_sonata:
         ctx.log_path("circuitconfig_struct_sonata"),
     run:
         with write_with_log(output[0], log[0]) as out:
-            out.write(ctx.write_network_config("structural"))
+            ctx.write_network_config(connectome_dir="structural", output_file=out)
 
 
 rule functional:
     # Note: creating both BlueConfig & circuit_config.json until we're fully transitioned to SONATA
     input:
         "sonata/circuit_config.json",
-        f"sonata/networks/nodes/{ctx.NODE_POPULATION_NAME}/nodes.h5",
-        f"sonata/{ctx.NODESETS_FILE}",
-        f"sonata/networks/edges/functional/{ctx.EDGE_POPULATION_NAME}/edges.h5",
+        ctx.nodes_neurons_file,
+        ctx.NODESETS_FILE,
+        ctx.edges_neurons_neurons_file(connectome_type="functional"),
         # for backwards compatibility
         "CircuitConfig",
         "start.target",
@@ -726,8 +730,8 @@ rule functional:
 rule structural:
     input:
         "sonata/struct_circuit_config.json",
-        f"sonata/{ctx.NODESETS_FILE}",
-        f"sonata/networks/nodes/{ctx.NODE_POPULATION_NAME}/nodes.h5",
-        f"sonata/networks/edges/structural/{ctx.EDGE_POPULATION_NAME}/edges.h5",
+        ctx.NODESETS_FILE,
+        ctx.nodes_neurons_file,
+        ctx.edges_neurons_neurons_file(connectome_type="structural"),
         "CircuitConfig_struct",
         "start.target",

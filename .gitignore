@@ -4,6 +4,8 @@ coverage.xml
 .tox/
 .idea
 .snakemake
+.coverage
+coverage.xml
 *.egg-info
 *.pyc
 __pycache__

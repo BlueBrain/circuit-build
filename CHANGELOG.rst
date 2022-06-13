@@ -6,6 +6,13 @@ Version 4.1.0
 
 New Features
 ~~~~~~~~~~~~
+- A dynamic config is added to circuit-build [NSETM-1905]
+    * The config is generated based on the node and edges passed
+    * Absolute paths are used throughout the workflow
+    * The auxiliary subfolder holds all intermediate files
+    * Morphologies dir is defined per population
+    * Connectome dir is defined per population
+    * Neuronal raw touches are stored in a raw subdir
 - NGV workflow is added to circuit-build [NSETM-1873]
 - Add custom environments: MODULE, APPTAINER, VENV.
 

@@ -10,7 +10,7 @@ ctx = Context(workflow=workflow, config=config, cluster_config=cluster_config)
 
 onstart:
     logger.info("Starting workflow")
-    ctx.check_git(ctx.BIONAME)
+    ctx.check_git(ctx.paths.bioname_dir)
     ctx.dump_env_config()
 
 
