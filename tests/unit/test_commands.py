@@ -90,7 +90,7 @@ from circuit_build import commands as test_module
                 "srun sh -c '"
                 "singularity exec --cleanenv --containall --bind $TMPDIR:/tmp,/gpfs/bbp.cscs.ch/project "
                 "/gpfs/bbp.cscs.ch/project/proj30/singularity-images/nse/brainbuilder_0.17.1.sif "
-                "echo mytest'"
+                'bash <<EOF\ncd "$(pwd)" && echo mytest\nEOF\n\''
             ),
             id="apptainer",
         ),
@@ -109,7 +109,7 @@ from circuit_build import commands as test_module
                 "&& singularity --version "
                 "&& singularity exec --cleanenv --containall --bind $TMPDIR:/tmp,/gpfs/bbp.cscs.ch/project "
                 "/gpfs/bbp.cscs.ch/project/proj30/singularity-images/nse/brainbuilder_0.17.1.sif "
-                "echo mytest"
+                'bash <<EOF\ncd "$(pwd)" && echo mytest\nEOF\n'
             ),
             id="apptainer_without_slurm",
         ),

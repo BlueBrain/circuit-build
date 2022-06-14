@@ -69,8 +69,10 @@ def build_apptainer_cmd(cmd, config, cluster_config, slurm_env=None, skip_srun=F
     modulepath = config.get("modulepath", APPTAINER_MODULEPATH)
     modules = config.get("modules", APPTAINER_MODULES)
     options = config.get("options", APPTAINER_OPTIONS)
+    executable = config.get("executable", APPTAINER_EXECUTABLE)
     image = Path(APPTAINER_IMAGEPATH, config["image"])
-    cmd = f"{APPTAINER_EXECUTABLE} exec {options} {image} {cmd}"
+    # the current working directory is used also inside the container
+    cmd = f'{executable} exec {options} {image} bash <<EOF\ncd "$(pwd)" && {cmd}\nEOF\n'
     if slurm_env and cluster_config:
         cmd = _with_slurm(cmd, cluster_config, slurm_env, skip_srun=skip_srun)
     cmd = " && ".join(

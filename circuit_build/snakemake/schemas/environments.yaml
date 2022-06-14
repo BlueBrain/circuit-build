@@ -68,6 +68,10 @@ $defs:
         description: Absolute or relative path to the Apptainer image to be run.
         type: string
         example: "nse/brainbuilder_0.17.1.dev0-singularity-notes.sif"
+      executable:
+        description: Apptainer executable.
+        type: string
+        example: "apptainer"
       options:
         description: Options to pass to Apptainer.
         type: string

@@ -96,8 +96,9 @@ If needed, it's possible to specify some optional keys as in the following examp
       brainbuilder:
         env_type: APPTAINER
         image: /path/to/apptainer/image.sif
-        options: "--cleanenv --containall"
-        modulepath: /path/to/apptainer/module
+        executable: apptainer
+        options: "--cleanenv --containall --bind $TMPDIR:/tmp,/gpfs/bbp.cscs.ch/project"
+        modulepath: /path/to/spack/modules
         modules:
-        - archive/2021-12
-        - singularityce
+        - archive/2022-05
+        - apptainer
