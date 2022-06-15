@@ -18,6 +18,7 @@ New Features
 
 Improvements
 ~~~~~~~~~~~~
+- Convert functional tests into independent gitlab jobs [NSETM-1938]
 - Move tests/ to tests/unit and add tests/functional for ngv-standalone [NSETM-1896]
 - Internal change, split ``utils.py`` into separate modules.
 - Generalize snakemake rules to allow for multiple workflows [NSETM-1878].
