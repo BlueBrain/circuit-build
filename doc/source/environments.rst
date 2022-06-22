@@ -20,7 +20,7 @@ In some exceptional cases, it may be desirable to override the modules:
 
 - with a custom module or custom version of the module,
 - with a custom Python virtual environment already existing,
-- with a custom Apptainer image already existing.
+- with a custom Apptainer/Singularity image already existing.
 
 The environments can be overridden adding an ``environments.yaml`` file in the bioname directory, containing only the environments to be overridden.
 
@@ -74,10 +74,10 @@ To use an existing custom virtual environment, you can add an ``environments.yam
         path: /absolute/path/to/existing/venv/
 
 
-Overriding with a custom Apptainer image
-----------------------------------------
+Overriding with a custom Apptainer/Singularity image
+----------------------------------------------------
 
-To use a custom Apptainer image, you can add an ``environments.yaml`` file with the following content:
+To use a custom Apptainer/Singularity image, you can add an ``environments.yaml`` file with the following content:
 
 .. code-block:: yaml
 
@@ -96,9 +96,9 @@ If needed, it's possible to specify some optional keys as in the following examp
       brainbuilder:
         env_type: APPTAINER
         image: /path/to/apptainer/image.sif
-        executable: apptainer
+        executable: singularity
         options: "--cleanenv --containall --bind $TMPDIR:/tmp,/gpfs/bbp.cscs.ch/project"
         modulepath: /path/to/spack/modules
         modules:
-        - archive/2022-05
-        - apptainer
+        - archive/2022-06
+        - singularityce

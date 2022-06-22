@@ -8,11 +8,11 @@ SPACK_MODULEPATH = "/gpfs/bbp.cscs.ch/ssd/apps/bsd/modules/_meta"
 NIX_MODULEPATH = (
     "/nix/var/nix/profiles/per-user/modules/bb5-x86_64/modules-all/release/share/modulefiles/"
 )
-APPTAINER_MODULEPATH = "/gpfs/bbp.cscs.ch/apps/hpc/singularity/modules/linux-rhel7-x86_64"
-APPTAINER_MODULES = ["archive/2021-12", "singularityce"]
+APPTAINER_MODULEPATH = SPACK_MODULEPATH
+APPTAINER_MODULES = ["unstable", "singularityce"]
 APPTAINER_EXECUTABLE = "singularity"
 APPTAINER_OPTIONS = "--cleanenv --containall --bind $TMPDIR:/tmp,/gpfs/bbp.cscs.ch/project"
-APPTAINER_IMAGEPATH = "/gpfs/bbp.cscs.ch/project/proj30/singularity-images"
+APPTAINER_IMAGEPATH = "/gpfs/bbp.cscs.ch/ssd/containers"
 
 ENV_FILE = "environments.yaml"  # in bioname
 ENV_TYPE_MODULE = "MODULE"
@@ -68,16 +68,16 @@ ENV_CONFIG = {
     "ngv": {
         "env_type": ENV_TYPE_MODULE,
         "modulepath": SPACK_MODULEPATH,
-        "modules": ["unstable", "py-archngv/2.0.1"],
+        "modules": ["archive/2022-05", "py-archngv/2.0.1"],
     },
     "synthesize-glia": {
         "env_type": ENV_TYPE_MODULE,
         "modulepath": SPACK_MODULEPATH,
-        "modules": ["unstable", "py-archngv/2.0.1", "py-mpi4py"],
+        "modules": ["archive/2022-05", "py-archngv/2.0.1", "py-mpi4py"],
     },
     "ngv-touchdetector": {
         "env_type": ENV_TYPE_MODULE,
         "modulepath": SPACK_MODULEPATH,
-        "modules": ["unstable", "py-archngv/2.0.1", "touchdetector/5.6.1"],
+        "modules": ["archive/2022-05", "py-archngv/2.0.1", "touchdetector/5.6.1"],
     },
 }

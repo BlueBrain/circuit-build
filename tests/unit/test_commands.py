@@ -1,6 +1,14 @@
 import pytest
 
 from circuit_build import commands as test_module
+from circuit_build.constants import (
+    APPTAINER_EXECUTABLE,
+    APPTAINER_IMAGEPATH,
+    APPTAINER_MODULEPATH,
+    APPTAINER_MODULES,
+    APPTAINER_OPTIONS,
+    SPACK_MODULEPATH,
+)
 
 
 @pytest.mark.parametrize("log_all_to_stderr", [True, False])
@@ -20,9 +28,9 @@ from circuit_build import commands as test_module
                 "set -ex; "
                 ". /etc/profile.d/modules.sh "
                 "&& module purge "
-                "&& export MODULEPATH=/gpfs/bbp.cscs.ch/ssd/apps/bsd/modules/_meta "
+                f"&& export MODULEPATH={SPACK_MODULEPATH} "
                 "&& module load archive/2022-03 brainbuilder/0.17.0 "
-                "&& echo MODULEPATH=/gpfs/bbp.cscs.ch/ssd/apps/bsd/modules/_meta "
+                f"&& echo MODULEPATH={SPACK_MODULEPATH} "
                 "&& module list "
                 "&& salloc -J brainbuilder -A ${{SALLOC_ACCOUNT}} -p prod_small --time 0:10:00 "
                 "srun sh -c 'echo mytest'"
@@ -42,9 +50,9 @@ from circuit_build import commands as test_module
                 "set -ex; "
                 ". /etc/profile.d/modules.sh "
                 "&& module purge "
-                "&& export MODULEPATH=/gpfs/bbp.cscs.ch/ssd/apps/bsd/modules/_meta "
+                f"&& export MODULEPATH={SPACK_MODULEPATH} "
                 "&& module load archive/2022-03 brainbuilder/0.17.0 "
-                "&& echo MODULEPATH=/gpfs/bbp.cscs.ch/ssd/apps/bsd/modules/_meta "
+                f"&& echo MODULEPATH={SPACK_MODULEPATH} "
                 "&& module list "
                 "&& export MYVAR1=VALUE1 MYVAR2=VALUE2 "
                 "&& salloc -J brainbuilder -A ${{SALLOC_ACCOUNT}} -p prod_small --time 0:10:00 "
@@ -65,9 +73,9 @@ from circuit_build import commands as test_module
                 "set -ex; "
                 ". /etc/profile.d/modules.sh "
                 "&& module purge "
-                "&& export MODULEPATH=/gpfs/bbp.cscs.ch/ssd/apps/bsd/modules/_meta "
+                f"&& export MODULEPATH={SPACK_MODULEPATH} "
                 "&& module load archive/2022-03 brainbuilder/0.17.0 "
-                "&& echo MODULEPATH=/gpfs/bbp.cscs.ch/ssd/apps/bsd/modules/_meta "
+                f"&& echo MODULEPATH={SPACK_MODULEPATH} "
                 "&& module list "
                 "&& echo mytest"
             ),
@@ -83,13 +91,13 @@ from circuit_build import commands as test_module
                 "set -ex; "
                 ". /etc/profile.d/modules.sh "
                 "&& module purge "
-                "&& module use /gpfs/bbp.cscs.ch/apps/hpc/singularity/modules/linux-rhel7-x86_64 "
-                "&& module load archive/2021-12 singularityce "
-                "&& singularity --version "
+                f"&& module use {APPTAINER_MODULEPATH} "
+                f"&& module load {' '.join(APPTAINER_MODULES)} "
+                f"&& {APPTAINER_EXECUTABLE} --version "
                 "&& salloc -J brainbuilder -A ${{SALLOC_ACCOUNT}} -p prod_small --time 0:10:00 "
                 "srun sh -c '"
-                "singularity exec --cleanenv --containall --bind $TMPDIR:/tmp,/gpfs/bbp.cscs.ch/project "
-                "/gpfs/bbp.cscs.ch/project/proj30/singularity-images/nse/brainbuilder_0.17.1.sif "
+                f"{APPTAINER_EXECUTABLE} exec {APPTAINER_OPTIONS} "
+                f"{APPTAINER_IMAGEPATH}/nse/brainbuilder_0.17.1.sif "
                 'bash <<EOF\ncd "$(pwd)" && echo mytest\nEOF\n\''
             ),
             id="apptainer",
@@ -104,11 +112,11 @@ from circuit_build import commands as test_module
                 "set -ex; "
                 ". /etc/profile.d/modules.sh "
                 "&& module purge "
-                "&& module use /gpfs/bbp.cscs.ch/apps/hpc/singularity/modules/linux-rhel7-x86_64 "
-                "&& module load archive/2021-12 singularityce "
-                "&& singularity --version "
-                "&& singularity exec --cleanenv --containall --bind $TMPDIR:/tmp,/gpfs/bbp.cscs.ch/project "
-                "/gpfs/bbp.cscs.ch/project/proj30/singularity-images/nse/brainbuilder_0.17.1.sif "
+                f"&& module use {APPTAINER_MODULEPATH} "
+                f"&& module load {' '.join(APPTAINER_MODULES)} "
+                f"&& {APPTAINER_EXECUTABLE} --version "
+                f"&& {APPTAINER_EXECUTABLE} exec {APPTAINER_OPTIONS} "
+                f"{APPTAINER_IMAGEPATH}/nse/brainbuilder_0.17.1.sif "
                 'bash <<EOF\ncd "$(pwd)" && echo mytest\nEOF\n'
             ),
             id="apptainer_without_slurm",
@@ -213,12 +221,12 @@ def test_build_command_raises_when_slurm_env_is_missing():
             {
                 "brainbuilder": {
                     "env_type": "MODULE",
-                    "modulepath": "/gpfs/bbp.cscs.ch/ssd/apps/bsd/modules/_meta",
+                    "modulepath": SPACK_MODULEPATH,
                     "modules": ["archive/2020-08", "brainbuilder/0.14.0"],
                 },
                 "touchdetector": {
                     "env_type": "MODULE",
-                    "modulepath": "/gpfs/bbp.cscs.ch/ssd/apps/bsd/modules/_meta",
+                    "modulepath": SPACK_MODULEPATH,
                     "modules": ["archive/2020-05", "touchdetector/5.4.0", "hpe-mpi"],
                 },
                 "spykfunc": {

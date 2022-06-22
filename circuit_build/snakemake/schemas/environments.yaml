@@ -65,28 +65,28 @@ $defs:
         description: Literal value APPTAINER.
         const: APPTAINER
       image:
-        description: Absolute or relative path to the Apptainer image to be run.
+        description: Absolute or relative path to the Apptainer/Singularity image to run.
         type: string
-        example: "nse/brainbuilder_0.17.1.dev0-singularity-notes.sif"
+        example: "nse/brainbuilder_0.17.1.sif"
       executable:
-        description: Apptainer executable.
+        description: Apptainer/Singularity executable.
         type: string
-        example: "apptainer"
+        example: "singularity"
       options:
-        description: Options to pass to Apptainer.
+        description: Options to pass to Apptainer/Singularity.
         type: string
         example: "--cleanenv --containall --bind $TMPDIR:/tmp,/gpfs/bbp.cscs.ch/project"
       modules:
-        description: Apptainer spack modules to be loaded.
+        description: Apptainer/Singularity spack modules to be loaded.
         type: array
         items:
           type: string
         uniqueItems: true
-        example: [ "archive/2021-12", "singularityce" ]
+        example: [ "archive/2022-06", "singularityce" ]
       modulepath:
-        description: Optional base path to the Apptainer spack module.
+        description: Optional base path to the Apptainer/Singularity spack module.
         type: string
-        example: "/gpfs/bbp.cscs.ch/apps/hpc/singularity/modules/linux-rhel7-x86_64"
+        example: "/gpfs/bbp.cscs.ch/ssd/apps/bsd/modules/_meta"
   venv_config:
     type: object
     additionalProperties: false
