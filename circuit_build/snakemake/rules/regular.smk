@@ -13,7 +13,13 @@ rule circuitconfig_base:
         ctx.log_path("circuitconfig_base"),
     run:
         with write_with_log(output[0], log[0]) as out:
-            out.write(ctx.build_circuit_config(nrn_path=".", cell_library_file="circuit.mvd3"))
+            out.write(
+                ctx.build_circuit_config(
+                    nrn_path=".",
+                    cell_library_file="circuit.mvd3",
+                    morphology_type=None,
+                )
+            )
 
 
 rule circuitconfig_functional:
@@ -28,7 +34,11 @@ rule circuitconfig_functional:
         ctx.log_path("circuitconfig_functional"),
     run:
         with write_with_log(output[0], log[0]) as out:
-            out.write(ctx.build_circuit_config(nrn_path=input.edges, cell_library_file=input.nodes))
+            out.write(
+                ctx.build_circuit_config(
+                    nrn_path=input.edges, cell_library_file=input.nodes, morphology_type="asc"
+                ),
+            )
 
 
 rule circuitconfig_structural:
@@ -43,7 +53,11 @@ rule circuitconfig_structural:
         ctx.log_path("circuitconfig_structural"),
     run:
         with write_with_log(output[0], log[0]) as out:
-            out.write(ctx.build_circuit_config(nrn_path=input.edges, cell_library_file=input.nodes))
+            out.write(
+                ctx.build_circuit_config(
+                    nrn_path=input.edges, cell_library_file=input.nodes, morphology_type="asc"
+                ),
+            )
 
 
 rule init_cells:

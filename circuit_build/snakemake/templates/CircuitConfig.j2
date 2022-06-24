@@ -3,10 +3,11 @@ Run Default
     CircuitPath {{ CIRCUIT_PATH }}
     nrnPath {{ NRN_PATH }}
     MorphologyPath {{ MORPH_PATH }}
-{%- if ME_TYPE_PATH is defined %}
-    METypePath {{ ME_TYPE_PATH }}
+{%- if MORPH_TYPE is not none %}
+    MorphologyType {{ MORPH_TYPE }}
 {%- endif %}
-{%- if ME_COMBO_INFO_PATH is defined %}
+    METypePath {{ ME_TYPE_PATH }}
+{%- if ME_COMBO_INFO_PATH is not none %}
     MEComboInfoFile {{ ME_COMBO_INFO_PATH }}
 {%- endif %}
     CellLibraryFile {{ CELL_LIBRARY_FILE }}

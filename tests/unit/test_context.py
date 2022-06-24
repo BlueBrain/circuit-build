@@ -6,7 +6,7 @@ import pytest
 from circuit_build import context as test_module
 from circuit_build.utils import load_yaml
 
-from utils import TEST_PROJ_TINY
+from utils import TEST_PROJ_TINY, TEST_PROJ_SYNTH
 
 
 @pytest.mark.parametrize(
@@ -88,3 +88,87 @@ def test_context_init(mocked_path_exists):
     assert ctx.EMODEL_RELEASE_HOC == expected_emodel_release_hoc
     assert ctx.paths.logs_dir == cwd / "logs"
     assert ctx.NODESETS_FILE == cwd / "sonata/node_sets.json"
+
+
+def test_build_circuit_config__release():
+
+    bioname = TEST_PROJ_TINY
+    ctx = _get_context(bioname)
+
+    res = ctx.build_circuit_config(
+        nrn_path="my-nrn-path",
+        cell_library_file="my-cell-library-file",
+        morphology_type="asc",
+    )
+
+    cwd = Path(".").resolve()
+
+    assert res == (
+        "Run Default\n"
+        "{\n"
+        f"    CircuitPath {cwd}\n"
+        f"    nrnPath {cwd}/my-nrn-path\n"
+        "    MorphologyPath /gpfs/bbp.cscs.ch/project/proj66/entities/morphologies/2018.02.16/ascii\n"
+        "    MorphologyType asc\n"
+        "    METypePath /gpfs/bbp.cscs.ch/project/proj66/entities/emodels/2018.02.26.dev0/hoc\n"
+        "    MEComboInfoFile /gpfs/bbp.cscs.ch/project/proj66/entities/emodels/2018.02.26.dev0/mecombo_emodel.tsv\n"
+        "    CellLibraryFile my-cell-library-file\n"
+        f"    BioName {bioname}\n"
+        "    Atlas /gpfs/bbp.cscs.ch/project/proj66/entities/dev/atlas/O1-152\n"
+        "}"
+    )
+
+
+def test_build_circuit_config__synthesis():
+
+    bioname = TEST_PROJ_SYNTH
+    ctx = _get_context(bioname)
+
+    res = ctx.build_circuit_config(
+        nrn_path="my-nrn-path",
+        cell_library_file="my-cell-library-file",
+        morphology_type="asc",
+    )
+
+    cwd = Path(".").resolve()
+    assert res == (
+        "Run Default\n"
+        "{\n"
+        f"    CircuitPath {cwd}\n"
+        f"    nrnPath {cwd}/my-nrn-path\n"
+        f"    MorphologyPath {cwd}/morphologies/neocortex_neurons\n"
+        "    MorphologyType asc\n"
+        "    METypePath SPECIFY_ME\n"
+        "    CellLibraryFile my-cell-library-file\n"
+        f"    BioName {bioname}\n"
+        "    Atlas /gpfs/bbp.cscs.ch/project/proj66/entities/dev/atlas/O1-152\n"
+        "}"
+    ), res
+
+
+def test_build_circuit_config__CircuitConfig_base():
+
+    bioname = TEST_PROJ_TINY
+    ctx = _get_context(bioname)
+
+    res = ctx.build_circuit_config(
+        nrn_path="my-nrn-path",
+        cell_library_file="circuit.mvd3",
+        morphology_type=None,
+    )
+
+    cwd = Path(".").resolve()
+
+    assert res == (
+        "Run Default\n"
+        "{\n"
+        f"    CircuitPath {cwd}\n"
+        f"    nrnPath {cwd}/my-nrn-path\n"
+        "    MorphologyPath /gpfs/bbp.cscs.ch/project/proj66/entities/morphologies/2018.02.16\n"
+        "    METypePath /gpfs/bbp.cscs.ch/project/proj66/entities/emodels/2018.02.26.dev0/hoc\n"
+        "    MEComboInfoFile /gpfs/bbp.cscs.ch/project/proj66/entities/emodels/2018.02.26.dev0/mecombo_emodel.tsv\n"
+        "    CellLibraryFile circuit.mvd3\n"
+        f"    BioName {bioname}\n"
+        "    Atlas /gpfs/bbp.cscs.ch/project/proj66/entities/dev/atlas/O1-152\n"
+        "}"
+    )

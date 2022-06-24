@@ -414,15 +414,32 @@ class Context:
         """Return the list of files used for spatial index."""
         return [f"{prefix}_{filename}" for filename in INDEX_FILES]
 
-    def build_circuit_config(self, nrn_path, cell_library_file):
+    def build_circuit_config(self, nrn_path, cell_library_file, morphology_type):
         """Return the BBP circuit configuration as a string."""
+        type_to_subdir = {
+            "asc": "ascii",
+            "swc": "swc",
+            "h5": "h5v1",
+        }
+
+        # morphology_type=None is used for the CircuitConfig_base which is needed for the
+        # spatial_index_segment, which results in omitting the MorphologyType entry and
+        # allow the index to implicity use the subdirectory it needs.
+        if self.SYNTHESIZE:
+            morphology_path = self.SYNTHESIZE_MORPH_DIR
+        elif morphology_type is None:
+            morphology_path = self.MORPH_RELEASE
+        else:
+            morphology_path = Path(self.MORPH_RELEASE, type_to_subdir[morphology_type])
+
         return render_template(
             "CircuitConfig.j2",
             CIRCUIT_PATH=self.paths.circuit_dir,
             NRN_PATH=os.path.abspath(nrn_path),
-            MORPH_PATH=self.if_synthesis(self.SYNTHESIZE_MORPH_DIR, self.MORPH_RELEASE),
+            MORPH_PATH=morphology_path,
+            MORPH_TYPE=morphology_type,
             ME_TYPE_PATH=self.EMODEL_RELEASE_HOC or "SPECIFY_ME",
-            ME_COMBO_INFO_PATH=self.EMODEL_RELEASE_MECOMBO if self.EMODEL_RELEASE_MECOMBO else None,
+            ME_COMBO_INFO_PATH=self.EMODEL_RELEASE_MECOMBO or None,
             BIONAME=self.paths.bioname_dir,
             ATLAS=self.ATLAS,
             CELL_LIBRARY_FILE=cell_library_file,
