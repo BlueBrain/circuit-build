@@ -194,9 +194,7 @@ class Context:
     @property
     def nodes_neurons_name(self):
         """Return neurons node population name."""
-        return validate_node_population_name(
-            self.conf.get(["common", "node_population_name"]),
-        )
+        return validate_node_population_name(self.conf.get(["common", "node_population_name"]))
 
     @property
     def nodes_astrocytes_name(self):
@@ -240,9 +238,7 @@ class Context:
     @property
     def edges_neurons_neurons_name(self):
         """Return edge population name for neuron-neuron chemical connections."""
-        return validate_edge_population_name(
-            self.conf.get(["common", "edge_population_name"]),
-        )
+        return validate_edge_population_name(self.conf.get(["common", "edge_population_name"]))
 
     @property
     def edges_neurons_astrocytes_name(self):
@@ -274,7 +270,7 @@ class Context:
 
     @property
     def edges_neurons_astrocytes_file(self):
-        """Return edges file for endfoot connections."""
+        """Return edges file for synapse_astrocyte connections."""
         return self.paths.edges_population_file(self.edges_neurons_astrocytes_name)
 
     @property
@@ -481,7 +477,9 @@ class Context:
                     {
                         "nodes_file": _make_abs(
                             self.paths.bioname_dir,
-                            self.conf.get(["ngv", "common", "base_circuit", "nodes_file"]),
+                            self.conf.get(
+                                ["ngv", "common", "base_circuit", "nodes_file"], default=""
+                            ),
                         ),
                         "population_type": "biophysical",
                         "population_name": self.conf.get(
@@ -489,7 +487,9 @@ class Context:
                         ),
                         "morphologies_dir": _make_abs(
                             self.paths.bioname_dir,
-                            self.conf.get(["ngv", "common", "base_circuit", "morphologies_dir"]),
+                            self.conf.get(
+                                ["ngv", "common", "base_circuit", "morphologies_dir"], default=""
+                            ),
                         ),
                         "biophysical_neuron_models_dir": "",
                     },
@@ -528,7 +528,9 @@ class Context:
                     {
                         "edges_file": _make_abs(
                             self.paths.bioname_dir,
-                            self.conf.get(["ngv", "common", "base_circuit", "edges_file"]),
+                            self.conf.get(
+                                ["ngv", "common", "base_circuit", "edges_file"], default=""
+                            ),
                         ),
                         "population_type": "chemical",
                         "population_name": self.conf.get(

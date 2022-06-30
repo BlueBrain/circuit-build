@@ -29,7 +29,7 @@ EXPECTED_DIR = TEST_DIR / "expected"
 
 
 @pytest.fixture(scope="module")
-def build_circuit(worker_id):
+def build_circuit():
     """Fixture to build the circuit"""
     assert BIONAME_DIR.exists()
     runner = CliRunner()
@@ -205,9 +205,12 @@ def test_build__config(build_circuit):
     assert build_sonata_config == expected_sonata_config
 
 
-'''
-
+@pytest.mark.skip(reason="Disable circuit integrity for now. No atlases in new configs")
 def test_integrity(circuit):
+
+    # TODO: remove the atlases checks from archngv
+    # the new config does not store the atlases and
+    # results in this failing
     archngv.testing.assert_circuit_integrity(circuit)
 
 
@@ -328,7 +331,9 @@ def test_integrity__vasculature_representations_consistency(circuit):
     c_vasc = circuit.vasculature
 
     morphio_vasculature = mVasculature(c_vasc.config["vasculature_file"])
-    sonata_vasculature = sVasculature.load_sonata(BUILD_DIR / "sonata/nodes/vasculature.h5")
+    sonata_vasculature = sVasculature.load_sonata(
+        BUILD_DIR / "sonata/networks/nodes/vasculature/nodes.h5"
+    )
 
     morphio_sections = morphio_vasculature.sections
 
@@ -355,5 +360,3 @@ def test_integrity__vasculature_representations_consistency(circuit):
 
     pdt.assert_frame_equal(v1.node_properties, v2.node_properties, check_dtype=False)
     pdt.assert_frame_equal(v1.edge_properties, v2.edge_properties, check_dtype=False)
-
-'''

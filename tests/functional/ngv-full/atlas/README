@@ -1,0 +1,5 @@
+Generated with:
+build_column_atlas.py -w1 -a 152.92 -l L6,L5,L4,L3,L2,L1 -t 436.22,362.26,185.25,175.84,96.49,122.71 -d 5 -o .
+
+See also:
+https://bbpteam.epfl.ch/project/issues/browse/MOUSSCX-8

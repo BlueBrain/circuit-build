@@ -1,3 +1,21 @@
+rule ngv:
+    input:
+        "ngv_config.json",
+        *ctx.if_ngv_standalone(
+            [],
+            [
+                ctx.nodes_neurons_file,
+                ctx.edges_neurons_neurons_file(connectome_type="functional"),
+            ],
+        ),
+        ctx.nodes_astrocytes_file,
+        ctx.nodes_vasculature_file,
+        ctx.nodes_astrocytes_microdomains_file,
+        ctx.edges_neurons_astrocytes_file,
+        ctx.edges_astrocytes_vasculature_file,
+        ctx.edges_astrocytes_vasculature_endfeet_meshes_file,
+        ctx.edges_astrocytes_astrocytes_file,
+        ctx.nodes_astrocytes_morphologies_dir,
 
 
 rule ngv_config:
@@ -43,6 +61,7 @@ rule place_glia:
                 f"--atlas {ctx.conf.get(['ngv', 'common', 'atlas'])}",
                 "--atlas-cache .atlas",
                 "--vasculature {input}",
+                f"--population-name {ctx.nodes_astrocytes_name}",
                 "--output {output}",
                 f"--seed {ctx.conf.get(['ngv', 'common', 'seed'])}",
             ],
@@ -129,6 +148,7 @@ rule build_gliovascular_connectivity:
                 "--microdomains {input[microdomains]}",
                 "--vasculature {input[vasculature]}",
                 f"--seed {ctx.conf.get(['ngv', 'common', 'seed'])}",
+                f"--population-name {ctx.edges_astrocytes_vasculature_name}",
                 "--output {output}",
             ],
         )
@@ -138,6 +158,14 @@ rule build_neuroglial_connectivity:
     input:
         astrocytes=ctx.nodes_astrocytes_file,
         microdomains=ctx.nodes_astrocytes_microdomains_file,
+        neurons=ctx.if_ngv_standalone(
+            ctx.conf.get(["ngv", "common", "base_circuit", "nodes_file"]),
+            ctx.nodes_neurons_file,
+        ),
+        neuronal_synapses=ctx.if_ngv_standalone(
+            ctx.conf.get(["ngv", "common", "base_circuit", "edges_file"]),
+            ctx.edges_neurons_neurons_file(connectome_type="functional"),
+        ),
     output:
         ctx.paths.auxiliary_path("neuroglial.connectivity.h5"),
     log:
@@ -147,10 +175,11 @@ rule build_neuroglial_connectivity:
             "ngv",
             [
                 "ngv neuroglial-connectivity",
-                f"--neurons-path {ctx.conf.get(['ngv', 'common', 'base_circuit', 'nodes_file'])}",
+                "--neurons-path {input[neurons]}",
                 "--astrocytes-path {input[astrocytes]}",
                 "--microdomains-path {input[microdomains]}",
-                f"--neuronal-connectivity-path {ctx.conf.get(['ngv', 'common', 'base_circuit', 'edges_file'])}",
+                "--neuronal-connectivity-path {input[neuronal_synapses]}",
+                "--population-name {ctx.edges_neurons_astrocytes_name}",
                 "--output-path {output}",
                 f"--seed {ctx.conf.get(['ngv', 'common', 'seed'])}",
             ],
@@ -185,6 +214,10 @@ rule synthesize_glia:
         gliovascular_connectivity=ctx.paths.auxiliary_path("gliovascular.connectivity.h5"),
         neuroglial_connectivity=ctx.paths.auxiliary_path("neuroglial.connectivity.h5"),
         endfeet_meshes=ctx.edges_astrocytes_vasculature_endfeet_meshes_file,
+        neuronal_synapses=ctx.if_ngv_standalone(
+            ctx.conf.get(["ngv", "common", "base_circuit", "edges_file"]),
+            ctx.edges_neurons_neurons_file(connectome_type="functional"),
+        ),
     output:
         morphologies_dir=directory(ctx.nodes_astrocytes_morphologies_dir),
     log:
@@ -204,8 +237,8 @@ rule synthesize_glia:
                 "--gliovascular-connectivity-path {input[gliovascular_connectivity]}",
                 "--neuroglial-connectivity-path {input[neuroglial_connectivity]}",
                 "--endfeet-meshes-path {input[endfeet_meshes]}",
-                f"--neuronal-connectivity-path {ctx.conf.get(['ngv', 'common', 'base_circuit', 'edges_file'])}",
                 "--out-morph-dir {output[morphologies_dir]}",
+                "--neuronal-connectivity-path {input[neuronal_synapses]}",
                 ("--parallel" if ctx.conf.get(["ngv", "common", "parallel"]) else ""),
                 f"--seed {ctx.conf.get(['ngv', 'common', 'seed'])}",
             ],
@@ -247,6 +280,10 @@ rule finalize_neuroglial_connectivity:
         microdomains=ctx.nodes_astrocytes_microdomains_file,
         connectivity=ctx.paths.auxiliary_path("neuroglial.connectivity.h5"),
         morphologies_dir=ctx.nodes_astrocytes_morphologies_dir,
+        neuronal_synapses=ctx.if_ngv_standalone(
+            ctx.conf.get(["ngv", "common", "base_circuit", "edges_file"]),
+            ctx.edges_neurons_neurons_file(connectome_type="functional"),
+        ),
     output:
         ctx.edges_neurons_astrocytes_file,
     log:
@@ -260,8 +297,8 @@ rule finalize_neuroglial_connectivity:
                 "--output-file-path {output}",
                 "--astrocytes-path {input[astrocytes]}",
                 "--microdomains-path {input[microdomains]}",
-                f"--synaptic-data-path {ctx.conf.get(['ngv', 'common', 'base_circuit', 'edges_file'])}",
                 "--morph-dir {input[morphologies_dir]}",
+                "--synaptic-data-path {input[neuronal_synapses]}",
                 ("--parallel" if ctx.conf.get(["ngv", "common", "parallel"]) else ""),
                 f"--seed {ctx.conf.get(['ngv', 'common', 'seed'])}",
             ],
@@ -302,26 +339,14 @@ rule glialglial_connectivity:
         ctx.log_path("glialglial_connectivity"),
     shell:
         ctx.bbp_env(
-            "ngv",
+            "ngv-pytouchreader",
             [
                 "ngv glialglial-connectivity",
                 "--astrocytes {input[astrocytes]}",
+                "--population-name {ctx.edges_astrocytes_astrocytes_name}",
                 "--touches-dir {input[touches_dir]}",
+                f"--population-name {ctx.edges_astrocytes_astrocytes_name}",
                 "--output-connectivity {output[glialglial_connectivity]}",
                 f"--seed {ctx.conf.get(['ngv', 'common', 'seed'])}",
             ],
         )
-
-
-rule ngv:
-    input:
-        "ngv_config.json",
-        ctx.nodes_vasculature_file,
-        ctx.nodes_astrocytes_file,
-        ctx.nodes_astrocytes_microdomains_file,
-        ctx.edges_neurons_astrocytes_file,
-        ctx.edges_astrocytes_vasculature_file,
-        ctx.edges_astrocytes_vasculature_endfeet_meshes_file,
-        ctx.edges_astrocytes_astrocytes_file,
-        ctx.nodes_astrocytes_morphologies_dir,
-        ctx.tmp_edges_astrocytes_glialglial_touches_dir,

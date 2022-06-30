@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE blueColumn [
+  <!ELEMENT blueColumn (column,NeuronTypes,Seeds?,SynapsesProperties,SynapsesClassification,DendriticMorphologyProbabilities,TouchRules,InterBoutonInterval?)>
+  <!ELEMENT column (layer*)>
+  <!ATTLIST column id CDATA #REQUIRED x CDATA #REQUIRED z CDATA #REQUIRED>
+  <!ELEMENT layer (#PCDATA)>
+  <!ATTLIST layer	id CDATA #REQUIRED height CDATA #REQUIRED>
+  <!ELEMENT NeuronTypes (Layer*)>
+  <!ATTLIST NeuronTypes totalNeurons CDATA #REQUIRED miniColumns CDATA #REQUIRED IntExtendedMinicolumnRadious CDATA #REQUIRED>
+  <!ATTLIST Layer id CDATA #REQUIRED percentage CDATA #REQUIRED>
+  <!ELEMENT ElectroType (#PCDATA)>
+  <!ATTLIST ElectroType id CDATA #REQUIRED percentage CDATA #REQUIRED>
+  <!ELEMENT Seeds (#PCDATA)>
+  <!ATTLIST Seeds recipeSeed CDATA #IMPLIED columnSeed CDATA #IMPLIED synapseSeed CDATA #IMPLIED>
+  <!ELEMENT InterBoutonInterval (#PCDATA)>
+  <!ATTLIST InterBoutonInterval minDistance CDATA #IMPLIED maxDistance CDATA #IMPLIED regionGap CDATA #IMPLIED>
+  <!ELEMENT SynapsesProperties (synapse*)>
+  <!ELEMENT synapse (#PCDATA)>
+  <!ATTLIST synapse id1 CDATA #REQUIRED id2 CDATA #REQUIRED id3 CDATA #REQUIRED id4 CDATA #REQUIRED GAB1 CDATA #REQUIRED GAB2 CDATA #REQUIRED>
+  <!ELEMENT SynapsesClassification (class*)>
+  <!ELEMENT class (#PCDATA)>
+  <!ATTLIST class id CDATA #REQUIRED gsyn CDATA #REQUIRED gsynVar CDATA #REQUIRED nsyn CDATA #REQUIRED nsynVar CDATA #REQUIRED dtc CDATA #REQUIRED dtcVar CDATA #REQUIRED u CDATA #REQUIRED uVar CDATA #REQUIRED d CDATA #REQUIRED dVar CDATA #REQUIRED f CDATA #REQUIRED fVar CDATA #REQUIRED ase CDATA #REQUIRED>
+  <!ELEMENT SynapsesReposition (shift*)>
+  <!ELEMENT shift (#PCDATA)>
+  <!ATTLIST shift fromMType CDATA #REQUIRED toMType CDATA #REQUIRED type CDATA #REQUIRED>
+  <!ELEMENT ConnectionRules (class*)>  
+  <!ELEMENT TouchRules (class*)>
+  <!ENTITY connectivityRecipe SYSTEM "builderConnectivityRecipeAllPathways.xml">
+]>
+
+
+<!-- @version: -->
+
+<blueColumn>
+<!-- use following line to modify inter-bouton interval algorithm parameters; defaults are min=3, max=7, gap=5
+        <InterBoutonInterval minDistance="5.0" maxDistance="9.0" regionGap="5.0"/> 
+-->
+    <InterBoutonInterval minDistance="5.0" maxDistance="7.0" regionGap="5.0"/> 
+
+		<StructuralType id="ASTROCYTE" percentage="16.9811320755" sigma="25" exclusionRadius="6.0" mClass="INT" sClass="INH" spineLength="0.0" maxHeightRestriction="-35"/>
+
+
+</blueColumn>
+

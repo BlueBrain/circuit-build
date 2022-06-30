@@ -1,0 +1,13 @@
+{
+  "field": {
+    "type": "logit",
+    "slope": 0.11832134,
+    "intercept": 0.36720545
+  },
+  "collision_handle": null,
+  "space_colonization": {
+    "point_cloud": null,
+    "kill_distance_factor": 15.0,
+    "influence_distance_factor": 45.0
+  }
+}

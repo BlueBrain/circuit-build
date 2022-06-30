@@ -1,0 +1,266 @@
+{
+  "id": 65535, 
+  "acronym": "O1", 
+  "name": "O1 mosaic", 
+  "children": [
+    {
+      "id": 1, 
+      "acronym": "mc0_Column", 
+      "name": "hypercolumn 0", 
+      "children": [
+        {
+          "id": 8, 
+          "acronym": "L6", 
+          "name": "hypercolumn 0, L6"
+        }, 
+        {
+          "id": 15, 
+          "acronym": "L5", 
+          "name": "hypercolumn 0, L5"
+        }, 
+        {
+          "id": 22, 
+          "acronym": "L4", 
+          "name": "hypercolumn 0, L4"
+        }, 
+        {
+          "id": 29, 
+          "acronym": "L3", 
+          "name": "hypercolumn 0, L3"
+        }, 
+        {
+          "id": 36, 
+          "acronym": "L2", 
+          "name": "hypercolumn 0, L2"
+        }, 
+        {
+          "id": 43, 
+          "acronym": "L1", 
+          "name": "hypercolumn 0, L1"
+        }
+      ]
+    }, 
+    {
+      "id": 2, 
+      "acronym": "mc1_Column", 
+      "name": "hypercolumn 1", 
+      "children": [
+        {
+          "id": 9, 
+          "acronym": "L6", 
+          "name": "hypercolumn 1, L6"
+        }, 
+        {
+          "id": 16, 
+          "acronym": "L5", 
+          "name": "hypercolumn 1, L5"
+        }, 
+        {
+          "id": 23, 
+          "acronym": "L4", 
+          "name": "hypercolumn 1, L4"
+        }, 
+        {
+          "id": 30, 
+          "acronym": "L3", 
+          "name": "hypercolumn 1, L3"
+        }, 
+        {
+          "id": 37, 
+          "acronym": "L2", 
+          "name": "hypercolumn 1, L2"
+        }, 
+        {
+          "id": 44, 
+          "acronym": "L1", 
+          "name": "hypercolumn 1, L1"
+        }
+      ]
+    }, 
+    {
+      "id": 3, 
+      "acronym": "mc2_Column", 
+      "name": "hypercolumn 2", 
+      "children": [
+        {
+          "id": 10, 
+          "acronym": "L6", 
+          "name": "hypercolumn 2, L6"
+        }, 
+        {
+          "id": 17, 
+          "acronym": "L5", 
+          "name": "hypercolumn 2, L5"
+        }, 
+        {
+          "id": 24, 
+          "acronym": "L4", 
+          "name": "hypercolumn 2, L4"
+        }, 
+        {
+          "id": 31, 
+          "acronym": "L3", 
+          "name": "hypercolumn 2, L3"
+        }, 
+        {
+          "id": 38, 
+          "acronym": "L2", 
+          "name": "hypercolumn 2, L2"
+        }, 
+        {
+          "id": 45, 
+          "acronym": "L1", 
+          "name": "hypercolumn 2, L1"
+        }
+      ]
+    }, 
+    {
+      "id": 4, 
+      "acronym": "mc3_Column", 
+      "name": "hypercolumn 3", 
+      "children": [
+        {
+          "id": 11, 
+          "acronym": "L6", 
+          "name": "hypercolumn 3, L6"
+        }, 
+        {
+          "id": 18, 
+          "acronym": "L5", 
+          "name": "hypercolumn 3, L5"
+        }, 
+        {
+          "id": 25, 
+          "acronym": "L4", 
+          "name": "hypercolumn 3, L4"
+        }, 
+        {
+          "id": 32, 
+          "acronym": "L3", 
+          "name": "hypercolumn 3, L3"
+        }, 
+        {
+          "id": 39, 
+          "acronym": "L2", 
+          "name": "hypercolumn 3, L2"
+        }, 
+        {
+          "id": 46, 
+          "acronym": "L1", 
+          "name": "hypercolumn 3, L1"
+        }
+      ]
+    }, 
+    {
+      "id": 5, 
+      "acronym": "mc4_Column", 
+      "name": "hypercolumn 4", 
+      "children": [
+        {
+          "id": 12, 
+          "acronym": "L6", 
+          "name": "hypercolumn 4, L6"
+        }, 
+        {
+          "id": 19, 
+          "acronym": "L5", 
+          "name": "hypercolumn 4, L5"
+        }, 
+        {
+          "id": 26, 
+          "acronym": "L4", 
+          "name": "hypercolumn 4, L4"
+        }, 
+        {
+          "id": 33, 
+          "acronym": "L3", 
+          "name": "hypercolumn 4, L3"
+        }, 
+        {
+          "id": 40, 
+          "acronym": "L2", 
+          "name": "hypercolumn 4, L2"
+        }, 
+        {
+          "id": 47, 
+          "acronym": "L1", 
+          "name": "hypercolumn 4, L1"
+        }
+      ]
+    }, 
+    {
+      "id": 6, 
+      "acronym": "mc5_Column", 
+      "name": "hypercolumn 5", 
+      "children": [
+        {
+          "id": 13, 
+          "acronym": "L6", 
+          "name": "hypercolumn 5, L6"
+        }, 
+        {
+          "id": 20, 
+          "acronym": "L5", 
+          "name": "hypercolumn 5, L5"
+        }, 
+        {
+          "id": 27, 
+          "acronym": "L4", 
+          "name": "hypercolumn 5, L4"
+        }, 
+        {
+          "id": 34, 
+          "acronym": "L3", 
+          "name": "hypercolumn 5, L3"
+        }, 
+        {
+          "id": 41, 
+          "acronym": "L2", 
+          "name": "hypercolumn 5, L2"
+        }, 
+        {
+          "id": 48, 
+          "acronym": "L1", 
+          "name": "hypercolumn 5, L1"
+        }
+      ]
+    }, 
+    {
+      "id": 7, 
+      "acronym": "mc6_Column", 
+      "name": "hypercolumn 6", 
+      "children": [
+        {
+          "id": 14, 
+          "acronym": "L6", 
+          "name": "hypercolumn 6, L6"
+        }, 
+        {
+          "id": 21, 
+          "acronym": "L5", 
+          "name": "hypercolumn 6, L5"
+        }, 
+        {
+          "id": 28, 
+          "acronym": "L4", 
+          "name": "hypercolumn 6, L4"
+        }, 
+        {
+          "id": 35, 
+          "acronym": "L3", 
+          "name": "hypercolumn 6, L3"
+        }, 
+        {
+          "id": 42, 
+          "acronym": "L2", 
+          "name": "hypercolumn 6, L2"
+        }, 
+        {
+          "id": 49, 
+          "acronym": "L1", 
+          "name": "hypercolumn 6, L1"
+        }
+      ]
+    }
+  ]
+}

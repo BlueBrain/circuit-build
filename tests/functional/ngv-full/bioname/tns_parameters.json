@@ -1,0 +1,74 @@
+{
+  "basal": {
+    "randomness": 0.3,
+    "targeting": 0.1,
+    "radius": 0.3,
+    "orientation": null,
+    "growth_method": "tmd_space_colonization",
+    "branching_method": "bio_oriented",
+    "modify": null,
+    "step_size": {
+      "norm": {
+        "mean": 5.0,
+        "std": 0.001
+      }
+    },
+    "metric": "path_distances",
+    "tree_type": 3,
+    "filtration_metric": "path_distance",
+    "barcode_scaling": true
+  },
+  "apical": {},
+  "axon": {
+    "randomness": 0.3,
+    "targeting": 0.1,
+    "radius": 0.3,
+    "orientation": null,
+    "growth_method": "tmd_space_colonization_target",
+    "branching_method": "bio_oriented",
+    "modify": null,
+    "step_size": {
+      "norm": {
+        "mean": 5.0,
+        "std": 0.001
+      }
+    },
+    "metric": "path_distances",
+    "tree_type": 2,
+    "filtration_metric": "path_distance",
+    "barcode_scaling": true,
+    "bias": 0.9
+  },
+  "origin": [
+    0.0,
+    0.0,
+    0.0
+  ],
+  "grow_types": [
+    "basal",
+    "axon"
+  ],
+  "diameter_params": {
+    "mtypes_file": null,
+    "models": [
+      "astrocyte"
+    ],
+    "neurite_types": [
+      "basal",
+      "axon"
+    ],
+    "terminal_threshold": 2.0,
+    "taper": {
+      "max": 1.1,
+      "min": -1.1
+    },
+    "asymmetry_threshold": {
+      "axon": 0.05,
+      "basal": 0.05
+    },
+    "n_samples": 1,
+    "trunk_max_tries": 100,
+    "n_cpu": 8,
+    "method": "external"
+  }
+}
