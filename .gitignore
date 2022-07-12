@@ -1,4 +1,6 @@
 doc/build
+tests/functional/ngv-standalone/build
+tests/functional/ngv-full/build
 coverage.xml
 .coverage
 .tox/

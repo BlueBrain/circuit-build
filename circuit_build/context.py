@@ -16,6 +16,7 @@ from circuit_build.utils import dump_yaml, load_yaml, redirect_to_file, render_t
 from circuit_build.validators import (
     validate_config,
     validate_edge_population_name,
+    validate_morphology_release,
     validate_node_population_name,
 )
 
@@ -171,7 +172,7 @@ class Context:
         self.ATLAS = self.conf.get(["common", "atlas"])
         self.ATLAS_CACHE_DIR = ".atlas"
 
-        self.MORPH_RELEASE = self.conf.get(["common", "morph_release"])
+        self.MORPH_RELEASE = validate_morphology_release(self.conf.get(["common", "morph_release"]))
         self.EMODEL_RELEASE = self.if_synthesis("", self.conf.get(["common", "emodel_release"]))
         self.SYNTHESIZE_EMODEL_RELEASE = self.if_synthesis(
             self.conf.get(["common", "synthesize_emodel_release"]), ""
@@ -443,6 +444,21 @@ class Context:
 
     def write_network_config(self, connectome_dir, output_file):
         """Return the SONATA circuit configuration for neurons."""
+        morphologies_entry = self.if_synthesis(
+            {
+                "alternate_morphologies": {
+                    "h5v1": self.SYNTHESIZE_MORPH_DIR,
+                    "neurolucida-asc": self.SYNTHESIZE_MORPH_DIR,
+                }
+            },
+            {
+                "alternate_morphologies": {
+                    "h5v1": Path(self.MORPH_RELEASE, "h5v1"),
+                    "neurolucida-asc": Path(self.MORPH_RELEASE, "ascii"),
+                }
+            },
+        )
+
         write_config(
             output_file=output_file,
             circuit_dir=self.paths.circuit_dir,
@@ -451,9 +467,7 @@ class Context:
                     "nodes_file": self.nodes_neurons_file,
                     "population_type": "biophysical",
                     "population_name": self.nodes_neurons_name,
-                    "morphologies_dir": self.if_synthesis(
-                        self.SYNTHESIZE_MORPH_DIR, self.MORPH_RELEASE
-                    ),
+                    **morphologies_entry,
                     "biophysical_neuron_models_dir": self.EMODEL_RELEASE_HOC or "",
                 },
             ],
@@ -485,22 +499,42 @@ class Context:
                         "population_name": self.conf.get(
                             ["ngv", "common", "base_circuit", "node_population_name"]
                         ),
-                        "morphologies_dir": _make_abs(
-                            self.paths.bioname_dir,
-                            self.conf.get(
-                                ["ngv", "common", "base_circuit", "morphologies_dir"], default=""
+                        "alternate_morphologies": {
+                            "h5v1": _make_abs(
+                                self.paths.bioname_dir,
+                                self.conf.get(
+                                    ["ngv", "common", "base_circuit", "morphologies_dir"],
+                                    default="",
+                                ),
                             ),
-                        ),
+                            "neurolucida-asc": _make_abs(
+                                self.paths.bioname_dir,
+                                self.conf.get(
+                                    ["ngv", "common", "base_circuit", "morphologies_dir"],
+                                    default="",
+                                ),
+                            ),
+                        },
                         "biophysical_neuron_models_dir": "",
                     },
                     {
                         "nodes_file": self.nodes_neurons_file,
                         "population_type": "biophysical",
                         "population_name": self.nodes_neurons_name,
-                        "morphologies_dir": self.if_synthesis(
-                            self.paths.nodes_population_morphologies_dir(self.nodes_neurons_name),
-                            self.MORPH_RELEASE,
-                        ),
+                        "alternate_morphologies": {
+                            "h5v1": self.if_synthesis(
+                                self.paths.nodes_population_morphologies_dir(
+                                    self.nodes_neurons_name
+                                ),
+                                Path(self.MORPH_RELEASE, "h5v1"),
+                            ),
+                            "neurolucida-asc": self.if_synthesis(
+                                self.paths.nodes_population_morphologies_dir(
+                                    self.nodes_neurons_name
+                                ),
+                                Path(self.MORPH_RELEASE, "ascii"),
+                            ),
+                        },
                         "biophysical_neuron_models_dir": self.EMODEL_RELEASE_HOC or "",
                     },
                 ),
@@ -594,7 +628,7 @@ class Context:
                 "--recipe",
                 self.BUILDER_RECIPE,
                 "--morphologies",
-                self.if_synthesis(self.SYNTHESIZE_MORPH_DIR, self.MORPH_RELEASE + "/h5v1/"),
+                self.if_synthesis(self.SYNTHESIZE_MORPH_DIR, Path(self.MORPH_RELEASE, "h5v1")),
             ] + self.if_partition(
                 [
                     f"--from-nodeset {'{input.nodesets}'} {{wildcards.partition}}",

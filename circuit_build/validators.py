@@ -1,6 +1,8 @@
 """Validators."""
 import logging
+import os
 import warnings
+from pathlib import Path
 
 import jsonschema
 
@@ -85,3 +87,52 @@ def validate_edge_population_name(name):
         warnings.warn(msg)
 
     return name
+
+
+def validate_morphology_release(directory):
+    """Validate the directory of morphology release.
+
+    Notes:
+        Checks that are performed:
+            - sub-directories ascii/ and h5v1/ exist.
+            - sub-directories are not empty.
+            - sub-directories have matching file names.
+
+    """
+    doc_url = "https://bbpteam.epfl.ch/documentation/projects/circuit-build/latest/bioname.html#manifest-yaml"
+
+    subdir_to_extension = {"ascii": "asc", "h5v1": "h5"}
+
+    def get_morphology_names(path):
+
+        suffix = f".{subdir_to_extension[path.stem]}"
+        filenames = {f.removesuffix(suffix) for f in os.listdir(path) if f.endswith(suffix)}
+
+        if not filenames:
+            raise ValidationError(
+                f"Morphology release at {directory} has no morphologies with extension {suffix} "
+                f"in the {path.stem}/ sub-directory."
+            )
+        return filenames
+
+    directory = Path(directory)
+    subdir_paths = [Path(directory, name) for name in subdir_to_extension]
+
+    missing_subdirs = [path.stem for path in subdir_paths if not path.is_dir()]
+    if missing_subdirs:
+        missing = ", ".join(f"{name}/" for name in missing_subdirs)
+        raise ValidationError(
+            f"Morphology release at {directory} is missing: {missing}\n"
+            f"See {doc_url} for more details on the mandatory sub-directories."
+        )
+
+    target_filenames = get_morphology_names(subdir_paths[0])
+    for subdir in subdir_paths[1:]:
+
+        if target_filenames != get_morphology_names(subdir):
+            raise ValidationError(
+                f"Morphology release at {directory} has mismatching files "
+                f"between {subdir_paths[0].stem}/ and {subdir.stem}/."
+            )
+
+    return directory

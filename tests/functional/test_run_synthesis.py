@@ -3,9 +3,11 @@ import shutil
 from pathlib import Path
 
 import h5py
+import bluepysnap
 from click.testing import CliRunner
-from utils import TEST_PROJ_SYNTH, cwd, load_yaml
 
+from utils import TEST_PROJ_SYNTH, cwd, load_yaml
+from assertions import assert_node_population_morphologies_accessible
 from circuit_build.cli import run
 
 
@@ -70,3 +72,9 @@ def test_synthesis(tmp_path):
                 config["networks"]["edges"][0]["edges_file"]
                 == f"$BASE_DIR/networks/edges/functional/{edge_population_name}/edges.h5"
             )
+
+        assert_node_population_morphologies_accessible(
+            circuit=bluepysnap.Circuit(tmp_path / "sonata/circuit_config.json"),
+            population_name=node_population_name,
+            extensions=["asc", "h5"],
+        )

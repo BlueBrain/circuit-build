@@ -454,7 +454,7 @@ rule touchdetector:
                     [],
                 ),
                 ctx.BUILDER_RECIPE,
-                ctx.if_synthesis(ctx.SYNTHESIZE_MORPH_DIR, ctx.MORPH_RELEASE + "/h5v1/"),
+                ctx.if_synthesis(ctx.SYNTHESIZE_MORPH_DIR, Path(ctx.MORPH_RELEASE, "h5v1")),
             ],
             slurm_env="touchdetector",
         )

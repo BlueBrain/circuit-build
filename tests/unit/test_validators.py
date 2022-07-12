@@ -1,3 +1,4 @@
+import re
 import warnings
 
 import pytest
@@ -99,3 +100,48 @@ def test_validate_edge_population_name_raises():
     match = '"edge_population_name" in MANIFEST.yaml must exist and should fit the pattern'
     with pytest.raises(ValidationError, match=match):
         test_module.validate_edge_population_name(name)
+
+
+def test_validate_morphology_release(tmp_path):
+
+    path = tmp_path / "morphology-release"
+    path.mkdir()
+
+    match = f"Morphology release at {path} is missing: ascii/, h5v1/"
+    with pytest.raises(ValidationError, match=match):
+        test_module.validate_morphology_release(path)
+
+    ascii_subdir = path / "ascii"
+    ascii_subdir.mkdir()
+
+    match = f"Morphology release at {path} is missing: h5v1/"
+    with pytest.raises(ValidationError, match=match):
+        test_module.validate_morphology_release(path)
+
+    h5v1_subdir = path / "h5v1"
+    h5v1_subdir.mkdir()
+
+    for filename in ["m1.h5", "m2.h5"]:
+        p = h5v1_subdir / filename
+        p.touch()
+
+    for filename in ["m1.swc", "m2.swc"]:
+        p = ascii_subdir / filename
+        p.touch()
+
+    match = f"Morphology release at {path} has no morphologies with extension .asc in the ascii/ sub-directory."
+    with pytest.raises(ValidationError, match=match):
+        test_module.validate_morphology_release(path)
+
+    for filename in ["m2.asc"]:
+        p = ascii_subdir / filename
+        p.touch()
+
+    match = f"Morphology release at {path} has mismatching files between ascii/ and h5v1/."
+    with pytest.raises(ValidationError, match=match):
+        test_module.validate_morphology_release(path)
+
+    p = ascii_subdir / "m1.asc"
+    p.touch()
+
+    assert test_module.validate_morphology_release(path) == path

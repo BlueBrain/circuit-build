@@ -101,15 +101,26 @@ def _nodes_biophysical(
     nodes_file,
     population_name,
     population_type,
-    morphologies_dir,
     biophysical_neuron_models_dir,
+    morphologies_dir=None,
+    alternate_morphologies=None,
 ):
+    morphology_entries = {}
+
+    if morphologies_dir is not None:
+        morphology_entries["morphologies_dir"] = morphologies_dir
+
+    if alternate_morphologies is not None:
+        morphology_entries["alternate_morphologies"] = alternate_morphologies
+
+    assert morphology_entries, "No morphology entry for biophysical cells."
+
     return _nodes_config_template(
         nodes_file=nodes_file,
         population_name=population_name,
         population_type=population_type,
-        morphologies_dir=morphologies_dir,
         biophysical_neuron_models_dir=biophysical_neuron_models_dir,
+        **morphology_entries,
     )
 
 

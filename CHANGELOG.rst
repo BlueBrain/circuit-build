@@ -18,6 +18,8 @@ New Features
 
 Improvements
 ~~~~~~~~~~~~
+- Fix sonata config's neuronal morphology directory entries and add a validator for the morphology
+  release directory [NSETM-1920]
 - Add missing MorphologyType to CircuitConfig [NSETM-1946]
 - Convert functional tests into independent gitlab jobs [NSETM-1938]
 - Move tests/ to tests/unit and add tests/functional for ngv-standalone [NSETM-1896]

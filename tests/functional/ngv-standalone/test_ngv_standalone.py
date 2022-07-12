@@ -144,7 +144,10 @@ def test_build__config(build_circuit):
                     "populations": {
                         "All": {
                             "type": "biophysical",
-                            "morphologies_dir": f"{DATA_DIR}/circuit/morphologies",
+                            "alternate_morphologies": {
+                                "neurolucida-asc": f"{DATA_DIR}/circuit/morphologies",
+                                "h5v1": f"{DATA_DIR}/circuit/morphologies",
+                            },
                             "biophysical_neuron_models_dir": "",
                         },
                     },

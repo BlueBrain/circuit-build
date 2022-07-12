@@ -1,11 +1,13 @@
 from pathlib import Path
 import pytest
 
+import bluepysnap
 from click.testing import CliRunner
 
 from archngv.app.utils import load_json
 
 from circuit_build.cli import run
+from assertions import assert_node_population_morphologies_accessible
 
 
 TEST_DIR = Path(__file__).resolve().parent
@@ -38,7 +40,23 @@ def build_circuit_full():
     assert result.exit_code == 0
 
 
-def test_build__full_config(build_circuit_full):
+@pytest.fixture
+def ngv_full_circuit(build_circuit_full, scope="module"):
+    return bluepysnap.Circuit(BUILD_DIR / "ngv_config.json")
+
+
+@pytest.mark.parametrize(
+    "population_name, extensions",
+    [
+        ["neocortex_neurons", ["asc", "h5"]],
+        ["astrocytes", ["h5"]],
+    ],
+)
+def test_ngv_full__valid_morpholgies(ngv_full_circuit, population_name, extensions):
+    assert_node_population_morphologies_accessible(ngv_full_circuit, population_name, extensions)
+
+
+def test_ngv_full___config(build_circuit_full):
 
     expected_sonata_config = {
         "manifest": {
@@ -53,7 +71,10 @@ def test_build__full_config(build_circuit_full):
                     "populations": {
                         "neocortex_neurons": {
                             "type": "biophysical",
-                            "morphologies_dir": "$BASE_DIR/morphologies/neocortex_neurons",
+                            "alternate_morphologies": {
+                                "neurolucida-asc": "$BASE_DIR/morphologies/neocortex_neurons",
+                                "h5v1": "$BASE_DIR/morphologies/neocortex_neurons",
+                            },
                             "biophysical_neuron_models_dir": "",
                         },
                     },

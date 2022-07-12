@@ -12,6 +12,8 @@ UNIT_TESTS_DATA = TESTS_DIR / "unit" / "data"
 FUNC_TESTS_DATA = TESTS_DIR / "functional" / "data"
 TEST_PROJ_TINY = FUNC_TESTS_DATA / "proj66-tiny"
 TEST_PROJ_SYNTH = FUNC_TESTS_DATA / "proj66-tiny-synth"
+TEST_NGV_STANDALONE = TESTS_DIR / "functional/ngv-standalone/bioname"
+TEST_NGV_FULL = TESTS_DIR / "functional/ngv-full/bioname"
 
 SNAKEFILE = pkg_resources.resource_filename(circuit_build.__name__, "snakemake/Snakefile")
 SNAKEMAKE_ARGS = [
