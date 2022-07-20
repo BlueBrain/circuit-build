@@ -26,6 +26,10 @@ Improvements
 - Internal change, split ``utils.py`` into separate modules.
 - Generalize snakemake rules to allow for multiple workflows [NSETM-1878].
 
+Bug Fixes
+~~~~~~~~~
+- Fix ``check_git`` to consider valid a bioname directory initialized with ``git init``.
+
 Removed
 ~~~~~~~
 - Drop support for Python 3.8, the minimum supported version is Python 3.9.

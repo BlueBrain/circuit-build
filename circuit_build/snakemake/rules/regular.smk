@@ -309,22 +309,18 @@ rule assign_emodels_per_type:
     wildcard_constraints:
         ext="h5|mvd3",
     shell:
-        ctx.if_synthesis(
-            # FIXME: temporary workaround to skip assign_emodels in synthesis
-            "ln -sf {input} {output}",
-            ctx.bbp_env(
-                "brainbuilder",
-                [
-                    "brainbuilder cells assign-emodels",
-                    "--morphdb",
-                    ctx.MORPHDB,
-                    "--output {output}",
-                    "--seed",
-                    ctx.conf.get(["assign_emodels", "seed"], default=0),
-                    "{input}",
-                ],
-                slurm_env="assign_emodels",
-            ),
+        ctx.bbp_env(
+            "brainbuilder",
+            [
+                "brainbuilder cells assign-emodels",
+                "--morphdb",
+                ctx.MORPHDB,
+                "--output {output}",
+                "--seed",
+                ctx.conf.get(["assign_emodels", "seed"], default=0),
+                "{input}",
+            ],
+            slurm_env="assign_emodels",
         )
 
 

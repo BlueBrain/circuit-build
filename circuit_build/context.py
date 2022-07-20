@@ -352,15 +352,17 @@ class Context:
             echo "host: $(hostname)"
             echo "circuit-build version: $(circuit-build --version)"
             echo "snakemake version: $(snakemake --version)"
+            echo "git version: $(git --version)"
             echo "bioname path: $(realpath .)"
             MD5SUM=$(which md5sum 2>/dev/null || which md5 2>/dev/null)
             [[ -n $MD5SUM ]] && find . -maxdepth 1 -type f | xargs $MD5SUM
             echo "### Git info"
             set -x
+            git status
             git remote get-url origin | sed 's#://[^/@]*@#://#' || true
-            git rev-parse --abbrev-ref HEAD
-            git rev-parse HEAD
-            git describe --abbrev --dirty --always --tags
+            git rev-parse --abbrev-ref HEAD || true
+            git rev-parse HEAD || true
+            git describe --abbrev --dirty --always --tags || true
             git --no-pager diff
             git --no-pager diff --staged
             """

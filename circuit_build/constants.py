@@ -68,21 +68,21 @@ ENV_CONFIG = {
     "ngv": {
         "env_type": ENV_TYPE_MODULE,
         "modulepath": SPACK_MODULEPATH,
-        "modules": ["unstable", "py-archngv/2.0.2"],
+        "modules": ["archive/2022-06", "py-archngv/2.0.2"],
     },
     "synthesize-glia": {
         "env_type": ENV_TYPE_MODULE,
         "modulepath": SPACK_MODULEPATH,
-        "modules": ["unstable", "py-archngv/2.0.2", "py-mpi4py"],
+        "modules": ["archive/2022-06", "py-archngv/2.0.2", "py-mpi4py"],
     },
     "ngv-touchdetector": {
         "env_type": ENV_TYPE_MODULE,
         "modulepath": SPACK_MODULEPATH,
-        "modules": ["unstable", "py-archngv/2.0.2", "touchdetector/5.6.1"],
+        "modules": ["archive/2022-06", "py-archngv/2.0.2", "touchdetector/5.6.1"],
     },
     "ngv-pytouchreader": {
         "env_type": ENV_TYPE_MODULE,
         "modulepath": SPACK_MODULEPATH,
-        "modules": ["unstable", "py-archngv/2.0.2"],
+        "modules": ["archive/2022-06", "py-archngv/2.0.2"],
     },
 }

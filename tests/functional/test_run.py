@@ -14,6 +14,21 @@ from assertions import assert_node_population_morphologies_accessible
 from circuit_build.cli import run
 
 
+def _assert_git_initialized(path):
+    result = subprocess.run(["git", "status"], cwd=path, capture_output=True, text=True)
+    assert result.returncode == 0, result.stderr
+
+
+def _assert_git_not_initialized(path):
+    result = subprocess.run(["git", "status"], cwd=path, capture_output=True, text=True)
+    assert result.returncode != 0
+    assert "not a git repository" in result.stderr
+
+
+def _initialize_git(path):
+    subprocess.run(["git", "init"], cwd=path, capture_output=True, text=True, check=True)
+
+
 def test_functional_all(tmp_path):
 
     data_dir = TEST_PROJ_TINY
@@ -119,7 +134,7 @@ def test_custom_module(tmp_path, caplog, capfd):
         assert "Unable to locate a modulefile for 'invalid_module1'" in captured.err
 
 
-def test_no_git_bioname(tmp_path, caplog, capfd):
+def test_bioname_no_git(tmp_path, caplog, capfd):
     """This test verifies that bioname is checked to be under git."""
 
     data_dir = TEST_PROJ_TINY
@@ -128,10 +143,12 @@ def test_no_git_bioname(tmp_path, caplog, capfd):
         # data_copy_dir must not be under git control
         data_copy_dir = Path(data_copy_dir) / data_dir.name
         shutil.copytree(data_dir, data_copy_dir)
+        _assert_git_not_initialized(path=data_copy_dir)
+
         args = ["--bioname", str(data_copy_dir), "-u", str(data_copy_dir / "cluster.yaml")]
         runner = CliRunner(mix_stderr=False)
 
-        result = runner.invoke(run, args, catch_exceptions=False)
+        result = runner.invoke(run, args + ["init_cells"], catch_exceptions=False)
 
         captured = capfd.readouterr()
         assert result.exit_code == 1
@@ -139,6 +156,27 @@ def test_no_git_bioname(tmp_path, caplog, capfd):
         assert "Snakemake process failed" in caplog.text
         # the stderr of the subprocess is available in captured.err and not result.stderr
         assert f"{str(data_copy_dir)} must be under git" in captured.err
+
+
+def test_bioname_with_git(tmp_path):
+    """This test verifies that bioname is valid when initialized with ``git init``."""
+
+    data_dir = TEST_PROJ_TINY
+
+    with cwd(tmp_path), tempfile.TemporaryDirectory() as data_copy_dir:
+        # data_copy_dir must not be under git control
+        data_copy_dir = Path(data_copy_dir) / data_dir.name
+        shutil.copytree(data_dir, data_copy_dir)
+        _assert_git_not_initialized(path=data_copy_dir)
+        _initialize_git(path=data_copy_dir)
+        _assert_git_initialized(path=data_copy_dir)
+
+        args = ["--bioname", str(data_copy_dir), "-u", str(data_copy_dir / "cluster.yaml")]
+        runner = CliRunner(mix_stderr=False)
+
+        result = runner.invoke(run, args + ["init_cells"], catch_exceptions=False)
+
+        assert result.exit_code == 0
 
 
 def test_snakemake_circuit_config(tmp_path):
@@ -165,7 +203,7 @@ def test_snakemake_circuit_config(tmp_path):
         assert f"CellLibraryFile circuit.mvd3" in (tmp_path / "CircuitConfig_base").open().read()
 
 
-def test_snakemake_no_git_bioname(tmp_path):
+def test_snakemake_bioname_no_git(tmp_path):
     """This test verifies that bioname is checked to be under git when called via `snakemake`."""
 
     data_dir = TEST_PROJ_TINY
@@ -174,6 +212,8 @@ def test_snakemake_no_git_bioname(tmp_path):
         # data_copy_dir must not be under git control
         data_copy_dir = Path(data_copy_dir) / data_dir.name
         shutil.copytree(data_dir, data_copy_dir)
+        _assert_git_not_initialized(path=data_copy_dir)
+
         args = [
             "--jobs",
             "8",
@@ -189,3 +229,32 @@ def test_snakemake_no_git_bioname(tmp_path):
             subprocess.run(cmd, capture_output=True, text=True, check=True)
         # the expected message is not contained in str(exception), but it's found in the stderr
         assert f"{str(data_copy_dir)} must be under git" in exc_info.value.stderr
+
+
+def test_snakemake_bioname_with_git(tmp_path):
+    """This test verifies that bioname is valid when initialized with ``git init``."""
+
+    data_dir = TEST_PROJ_TINY
+
+    with cwd(tmp_path), tempfile.TemporaryDirectory() as data_copy_dir:
+        # data_copy_dir must not be under git control
+        data_copy_dir = Path(data_copy_dir) / data_dir.name
+        shutil.copytree(data_dir, data_copy_dir)
+        _assert_git_not_initialized(path=data_copy_dir)
+        _initialize_git(path=data_copy_dir)
+        _assert_git_initialized(path=data_copy_dir)
+
+        args = [
+            "--jobs",
+            "8",
+            "-p",
+            "--config",
+            f"bioname={data_copy_dir}",
+            "-u",
+            str(data_dir / "cluster.yaml"),
+        ]
+        cmd = ["snakemake", "--snakefile", SNAKEFILE] + args + ["CircuitConfig_base"]
+
+        result = subprocess.run(cmd, capture_output=True, text=True)
+
+        assert result.returncode == 0, result.stderr
