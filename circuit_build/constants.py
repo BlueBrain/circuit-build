@@ -33,7 +33,7 @@ ENV_CONFIG = {
     "parquet-converters": {
         "env_type": ENV_TYPE_MODULE,
         "modulepath": SPACK_MODULEPATH,
-        "modules": ["archive/2022-03", "parquet-converters/0.7.0"],
+        "modules": ["archive/2022-07", "parquet-converters/0.8.0"],
     },
     "placement-algorithm": {
         "env_type": ENV_TYPE_MODULE,
@@ -43,12 +43,12 @@ ENV_CONFIG = {
     "spykfunc": {
         "env_type": ENV_TYPE_MODULE,
         "modulepath": SPACK_MODULEPATH,
-        "modules": ["archive/2022-03", "spykfunc/0.17.1"],
+        "modules": ["archive/2022-07", "spykfunc/0.17.2"],
     },
     "touchdetector": {
         "env_type": ENV_TYPE_MODULE,
         "modulepath": SPACK_MODULEPATH,
-        "modules": ["archive/2022-03", "touchdetector/5.6.1"],
+        "modules": ["archive/2022-07", "touchdetector/5.7.0"],
     },
     "region-grower": {
         "env_type": ENV_TYPE_MODULE,

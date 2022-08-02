@@ -26,6 +26,12 @@ Improvements
 - Internal change, split ``utils.py`` into separate modules.
 - Generalize snakemake rules to allow for multiple workflows [NSETM-1878].
 
+Used modules
+~~~~~~~~~~~~
+- archive/2022-07/parquet-converters/0.8.0
+- archive/2022-07/spykfunc/0.17.2
+- archive/2022-07/touchdetector/5.7.0
+
 Bug Fixes
 ~~~~~~~~~
 - Fix ``check_git`` to consider valid a bioname directory initialized with ``git init``.

@@ -657,6 +657,7 @@ class Context:
                 "--output-dir {params.output_dir}",
                 *[f"--spark-property {p}" for p in spark_properties],
                 *extra_args,
+                "--",
                 "{params.parquet_dirs}",
             ],
             slurm_env=rule,
