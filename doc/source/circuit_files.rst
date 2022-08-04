@@ -149,6 +149,6 @@ For instance, one row from ``/cells`` table can look like:
 Please refer to :ref:`subcellular phase <ref-phase-subcellular>` for the description of ``/library`` content.
 
 
-.. _BlueConfig: https://bbpteam.epfl.ch/documentation/Circuit%20Documentation-0.0.1/blueconfig.html
+.. _BlueConfig: https://sonata-extension.readthedocs.io/en/latest/blueconfig.html
 .. _SONATA: https://github.com/AllenInstitute/sonata/blob/master/docs/SONATA_DEVELOPER_GUIDE.md
-.. _Node Sets: https://bbpteam.epfl.ch/documentation/projects/Circuit%20Documentation/latest/sonata_nodeset.html
+.. _Node Sets: https://sonata-extension.readthedocs.io/en/latest/sonata_nodeset.html

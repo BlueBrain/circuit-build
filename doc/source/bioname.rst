@@ -193,7 +193,7 @@ This pair used to fully defined the circuit composition; now it is still relevan
     We apologize for this inconvenience that is due to ongoing transition from column-based circuit building to atlas-based one.
 
 Used in :ref:`ref-phase-touchdetector`, :ref:`ref-phase-spykfunc_s2f` and :ref:`ref-phase-spykfunc_s2s` phases.
-Further documentation of the recipe is available in `Circuit Documentation <https://bbpteam.epfl.ch/documentation/projects/Circuit%20Documentation/latest/recipe.html>`_
+Further documentation of the recipe is available in `Circuit Documentation <https://sonata-extension.readthedocs.io/en/latest/recipe.html>`_
 
 
 .. _ref-bioname-targets:

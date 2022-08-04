@@ -71,7 +71,7 @@ properties:
       node_population_name:
         description: |
           Name of Sonata nodes population to produce. It *should* follow the naming guidelines in the
-          `documentation <https://bbpteam.epfl.ch/documentation/projects/Circuit%20Documentation/latest/sonata_population.html#nodes>`_.
+          `documentation <https://sonata-extension.readthedocs.io/en/latest/sonata_population.html#nodes>`_.
           Additionally this name will be used for the parent folder of the produced Sonata nodes file under
           `sonata/networks/nodes/` folder.
         type: string
@@ -79,7 +79,7 @@ properties:
       edge_population_name:
         description: |
           Name of Sonata edges population to produce. It *should* follow the naming guidelines in the
-          `documentation. <https://bbpteam.epfl.ch/documentation/projects/Circuit%20Documentation/latest/sonata_population.html#edges>`_.
+          `documentation. <https://sonata-extension.readthedocs.io/en/latest/sonata_population.html#edges>`_.
           Additionally this name will be used for the parent folder of the produced Sonata nodes file under
           `sonata/networks/edges/` folder.
         type: string
