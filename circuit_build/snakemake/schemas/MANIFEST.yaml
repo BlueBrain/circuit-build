@@ -562,3 +562,246 @@ properties:
   ngv:
     description: Configuration entries for the NGV workflow.
     type: object
+    properties:
+      common:
+        type: object
+        properties:
+
+          parallel:
+            description: Enable parallelization.
+            type: boolean
+            default: true
+
+          seed:
+            description: Global seed for random generators.
+            type: integer
+            default: 0
+
+          atlas:
+            description: Atlas folder path.
+            type: string
+
+          vasculature:
+            description: Path to vasculature skeleton.
+            type: string
+
+          vasculature_mesh:
+            description: Path to vasculature mesh.
+            type: string
+
+      assign_emodels:
+        type: object
+        properties:
+
+          templated_dir:
+            description: Path to directory with hoc templates.
+            type: string
+
+          hoc_template:
+            description: Template to choose from directory.
+            type: string
+
+      cell_placement:
+        type: object
+
+        properties:
+          density:
+            description: Filename of nrrd density dataset in atlas dir to use for placement.
+            type: string
+            example: '[density]astrocytes'
+
+          soma_radius:
+            description: |
+              Somata radius truncated normal distribution to sample while placing.
+
+              There are 4 values in the list corresponding to mean, sdev, min, max.
+            type: array
+            example: [5.6, 0.74, 0.1, 20.0]
+
+          Energy:
+            description: Section corresponding to the energy estimation.
+            type: object
+            properties:
+              potentials:
+                description: Section for listing energy potentials.
+                type: object
+                properties:
+                  spring:
+                    description: |
+                        Spring potential of the form k * (x - x0)^2.
+
+                        Two values are provided as a list, k and x0.
+                    type: array
+                    example: [32.0, 1.0]
+
+          MetropolisHastings:
+            properties:
+
+              n_initial:
+                description: Initial number of cells to be placed without repulsion.
+                type: number
+
+              beta:
+                description: Scaling factor for the 1/temperature in the energy calculation.
+                type: number
+                example: 0.01
+
+              ntrials:
+                description: Number of trials before giving up placing a cell.
+                type: integer
+                example: 3
+
+              cutoff_radius:
+                description: Radius beyond which pairwise repulsion is not considered.
+                type: number
+                example: 60.0
+
+      microdomains:
+        type: object
+        properties:
+
+          overlap_distribution:
+            descrption: The distribution of the overlapping microdomains.
+            type: object
+            properties:
+
+              type:
+                description: Type of overlap distribution (e.g. normal).
+                type: string
+
+              values:
+                description: Parameters passed into the chosen distribution (e.g. [0.1, 1e-7]).
+                type: array
+                items:
+                  type: number
+
+      gliovascular_connectivity:
+          type: object
+          properties:
+
+            graph_targeting:
+              properties:
+
+                linear_density:
+                  description: |
+                    Frequency of points to distribution on the vascular skeleton.
+
+                    Units in points per micron.
+                  type: number
+                  example: 0.17
+
+                connection:
+                  type: object
+                  properties:
+
+                    reachout_strategy:
+                      description: Strategy for connecting to neighboring vascular branches.
+                      type: string
+                      example: maximum_reachout
+
+                    endfeet_distribution:
+                      description: |
+                        Number of endfeet per astrocyte truncanted normal (mean, sdev, min, max).
+                      type: array
+                      items:
+                        type: number
+                      example: [2, 2, 0, 15]
+
+      endfeet_surface_meshes:
+        type: object
+        properties:
+
+          fmm_cutoff_radius:
+            description: |
+              Fast marching method maximum radius of growth for a single seed in microns.
+            type: number
+            example: 60
+
+          area_distribution:
+            description: |
+              Target endfeet surface mesh distribution (mean, sdev, min, max).
+
+              The algorithm first grows meshes until converges and then prunes them to
+              match the target distribution.
+
+              Units in microns squared.
+            type: array
+            example: [200, 10, 0, 1000]
+
+          thickness_distribution:
+            description: |
+              Thickness distribution for endfeet meshes.
+
+              Units in microns.
+            type: array
+            example: [1.0, 0.1, 0.01, 2.0]
+
+      synthesis:
+        type: object
+        properties:
+
+          perimeter_distribution:
+
+            description: Distribute perimeters on the astrocytic morphologies.
+            type: object
+            properties:
+
+              enabled:
+                description: If true the distribution of perimeters is activated.
+                type: boolean
+                default: false
+
+              statistical_model:
+                description: |
+                  Linear regression model of the form Yi = slope * Xi + intercept + epsilon_i
+                  where epsilon_i is an iid following N(0.0, standard_deviation).
+                properties:
+
+                  slope:
+                    description: Slope of the regression model.
+                    type: number
+
+                  intercept:
+                    description: Intercept of the regression model.
+                    type: number
+
+                  standard_deviation:
+                    description: Standard deviation of the noise distribution.
+                    type: number
+
+              smoothing:
+                type: object
+                description: Smoothing of perimeters maintaing the total perimeter of the cell.
+                properties:
+
+                  window:
+                    description: |
+                      The convolution window for smoothing the perimeters of the morphology.
+
+                      For example [1.0, 1.0, 1.0] is a window where each point's perimeter is
+                      updated by also considering the two adjacent neighbors.
+
+                      Note that the window is normalized.
+                    type: array
+                    items:
+                      type: number
+
+          resampling:
+            description: |
+              Resampling of the morphology points.
+
+              Astrocytes have very short branching points, resulting to a small segment length
+              used in synthesis. After synthesis, morphologies can be resampled so that longer
+              branches do not have a large number of points.
+            type: object
+            properties:
+
+              enabled:
+                description: If true, resampling is activated after synthesizing morphology.
+                type: boolean
+
+              linear-density:
+                description: |
+                  Number of points per micron that are considered to resample the points on
+                  the morphology.
+                type: number

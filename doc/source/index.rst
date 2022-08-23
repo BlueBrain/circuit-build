@@ -12,6 +12,7 @@ This documentation outline the Blue Brain Project circuit building pipeline.
    atlas
    tutorial
    phases
+   ngv
    environments
    faq
    changelog
