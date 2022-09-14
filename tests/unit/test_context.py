@@ -7,7 +7,13 @@ import pytest
 from circuit_build import context as test_module
 from circuit_build.utils import load_yaml
 
-from utils import TEST_PROJ_TINY, TEST_PROJ_SYNTH, TEST_NGV_STANDALONE, TEST_NGV_FULL, cwd
+from utils import (
+    TEST_PROJ_TINY,
+    TEST_PROJ_SYNTH,
+    TEST_NGV_STANDALONE,
+    TEST_NGV_FULL,
+    cwd,
+)
 
 
 @pytest.mark.parametrize(
@@ -91,6 +97,17 @@ def test_context_init(mocked_path_exists):
     assert ctx.EMODEL_RELEASE_HOC == expected_emodel_release_hoc
     assert ctx.paths.logs_dir == cwd / "logs"
     assert ctx.NODESETS_FILE == cwd / "sonata/node_sets.json"
+
+
+def test_context_is_isolated_phase():
+
+    bioname = TEST_PROJ_TINY
+    ctx = _get_context(bioname)
+
+    assert not ctx.is_isolated_phase()
+
+    with patch.dict("os.environ", ISOLATED_PHASE="True"):
+        assert ctx.is_isolated_phase()
 
 
 def test_build_circuit_config__release():

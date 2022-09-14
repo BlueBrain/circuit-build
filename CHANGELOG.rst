@@ -6,6 +6,7 @@ Version 4.1.0
 
 New Features
 ~~~~~~~~~~~~
+- Env var ISOLATED_PHASE="True" allows bypassing git check and validation. [NSETM-1994]
 - A dynamic config is added to circuit-build [NSETM-1905]
     * The config is generated based on the node and edges passed
     * Absolute paths are used throughout the workflow

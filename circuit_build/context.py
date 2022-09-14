@@ -155,8 +155,10 @@ class Context:
         # Load MANIFEST.yaml into workflow config
         self.workflow.configfile(self.paths.bioname_path("MANIFEST.yaml"))
         # Validate the merged configuration and the cluster configuration
-        validate_config(config, "MANIFEST.yaml")
-        validate_config(cluster_config, "cluster.yaml")
+
+        if not self.is_isolated_phase():
+            validate_config(config, "MANIFEST.yaml")
+            validate_config(cluster_config, "cluster.yaml")
 
         self.BUILDER_RECIPE = self.paths.bioname_path("builderRecipeAllPathways.xml")
         self.MORPHDB = self.paths.bioname_path("extNeuronDB.dat")
@@ -172,7 +174,11 @@ class Context:
         self.ATLAS = self.conf.get(["common", "atlas"])
         self.ATLAS_CACHE_DIR = ".atlas"
 
-        self.MORPH_RELEASE = validate_morphology_release(self.conf.get(["common", "morph_release"]))
+        self.MORPH_RELEASE = self.conf.get(["common", "morph_release"], default="")
+
+        if not self.is_isolated_phase():
+            self.MORPH_RELEASE = validate_morphology_release(Path(self.MORPH_RELEASE))
+
         self.EMODEL_RELEASE = self.if_synthesis("", self.conf.get(["common", "emodel_release"]))
         self.SYNTHESIZE_EMODEL_RELEASE = self.if_synthesis(
             self.conf.get(["common", "synthesize_emodel_release"]), ""
@@ -311,6 +317,10 @@ class Context:
             population_name=self.edges_astrocytes_vasculature_name
         )
 
+    def is_isolated_phase(self):
+        """Return True if there is an env var 'ISOLATED_PHASE' set to 'True'."""
+        return os.getenv("ISOLATED_PHASE", "False").lower() == "true"
+
     def if_synthesis(self, true_value, false_value):
         """Return ``true_value`` if synthesis is enabled, else ``false_value``."""
         return true_value if self.SYNTHESIZE else false_value
@@ -340,7 +350,7 @@ class Context:
 
     def check_git(self, path):
         """Log some information and raise an exception if bioname is not under git control."""
-        if self.conf.get("skip_check_git"):
+        if self.conf.get("skip_check_git") or self.is_isolated_phase():
             # should be skipped when circuit-build is run with --with-summary or --with-report
             return
         # strip away any git credentials added by the CI from `git remote get-url origin`

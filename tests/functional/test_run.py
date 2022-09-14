@@ -5,11 +5,19 @@ import bluepysnap
 import tempfile
 from pathlib import Path
 from subprocess import CalledProcessError
+from unittest.mock import patch
 
 import h5py
 import pytest
 from click.testing import CliRunner
-from utils import SNAKEFILE, SNAKEMAKE_ARGS, TEST_PROJ_TINY, cwd, edit_yaml, load_yaml
+from utils import (
+    SNAKEFILE,
+    SNAKEMAKE_ARGS,
+    TEST_PROJ_TINY,
+    cwd,
+    edit_yaml,
+    load_yaml,
+)
 from assertions import assert_node_population_morphologies_accessible
 from circuit_build.cli import run
 
@@ -22,7 +30,7 @@ def _assert_git_initialized(path):
 def _assert_git_not_initialized(path):
     result = subprocess.run(["git", "status"], cwd=path, capture_output=True, text=True)
     assert result.returncode != 0
-    assert "not a git repository" in result.stderr
+    assert "not a git repository" in result.stderr.lower()
 
 
 def _initialize_git(path):
@@ -158,6 +166,26 @@ def test_bioname_no_git(tmp_path, caplog, capfd):
         assert f"{str(data_copy_dir)} must be under git" in captured.err
 
 
+def test_bioname_ignore_git_if_isolated_phase(tmp_path):
+    """This test verifies that the git check is disabled if env var ISOLATED_PHASE=True"""
+
+    data_dir = TEST_PROJ_TINY
+
+    with cwd(tmp_path), tempfile.TemporaryDirectory() as data_copy_dir:
+        # data_copy_dir must not be under git control
+        data_copy_dir = Path(data_copy_dir) / data_dir.name
+        shutil.copytree(data_dir, data_copy_dir)
+        _assert_git_not_initialized(path=data_copy_dir)
+
+        with patch.dict("os.environ", ISOLATED_PHASE="True"):
+
+            args = ["--bioname", str(data_copy_dir), "-u", str(data_copy_dir / "cluster.yaml")]
+            runner = CliRunner(mix_stderr=False)
+
+            result = runner.invoke(run, args + ["init_cells"], catch_exceptions=False)
+            assert result.exit_code == 0
+
+
 def test_bioname_with_git(tmp_path):
     """This test verifies that bioname is valid when initialized with ``git init``."""
 
@@ -258,3 +286,33 @@ def test_snakemake_bioname_with_git(tmp_path):
         result = subprocess.run(cmd, capture_output=True, text=True)
 
         assert result.returncode == 0, result.stderr
+
+
+def test_isolated_phase(tmp_path):
+
+    data_dir = TEST_PROJ_TINY
+
+    with cwd(tmp_path):
+
+        data_copy_dir = Path(tmp_path) / data_dir.name
+        shutil.copytree(data_dir, data_copy_dir)
+
+        with edit_yaml(data_copy_dir / "MANIFEST.yaml") as manifest:
+            del manifest["common"]["morph_release"]
+
+        with patch.dict("os.environ", ISOLATED_PHASE="True"):
+
+            args = [
+                "--jobs",
+                "8",
+                "-p",
+                "--config",
+                f"bioname={data_copy_dir}",
+                "-u",
+                str(data_dir / "cluster.yaml"),
+            ]
+            cmd = ["snakemake", "--snakefile", SNAKEFILE] + args + ["place_cells"]
+
+            result = subprocess.run(cmd, capture_output=False, text=True)
+
+            assert result.returncode == 0, result.stderr
