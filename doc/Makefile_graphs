@@ -16,10 +16,10 @@ graphs:
 	mkdir -p $(OUT_DIR)
 	mkdir -p subcellular  # needed for subcellular rule
 	for target in $(TARGETS); do \
-	    $(SM) --$(GRAPH) -- $${target} > $(OUT_DIR)/$${target}.dot ; \
+	    $(SM) --$(GRAPH) -- $${target} | sed 's#>/[^<]*/doc/#>#g' > $(OUT_DIR)/$${target}.dot ; \
 	done
-	$(SM_SYNTH) --$(GRAPH) -- functional > $(OUT_DIR)/functional_synth.dot
-	$(SM_SYNTH) --$(GRAPH) -- structural > $(OUT_DIR)/structural_synth.dot
+	$(SM_SYNTH) --$(GRAPH) -- functional | sed 's#>/[^<]*/doc/#>#g' > $(OUT_DIR)/functional_synth.dot
+	$(SM_SYNTH) --$(GRAPH) -- structural | sed 's#>/[^<]*/doc/#>#g' > $(OUT_DIR)/structural_synth.dot
 	rmdir -p subcellular
 	# convert all the dot files to svg
 	for var in $(OUT_DIR)/*.dot; do dot -Tsvg -o$${var%.dot}.svg $$var; done
