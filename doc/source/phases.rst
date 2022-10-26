@@ -223,14 +223,14 @@ Prune touches and convert them into synapses (S2F) using the `Spark Functionaliz
 
         -A <proj> -p prod --constraint=nvme -N <nodes> -c 36--exclusive --mem 0 --time <time>
 
-To provide additional arguments to ``sm_run``, put those to the :ref:`cluster config <ref-cluster-config>`.
+To provide additional arguments to ``functionalizer``, put those to the :ref:`cluster config <ref-cluster-config>`.
 For instance, to disable HDFS mode:
 
 ::
 
     spykfunc_s2f:
         salloc: ...
-        sm_run: '-H'
+        functionalizer: '-H'
 
 Please refer to the `Spykfunc`_ documentation for the details.
 

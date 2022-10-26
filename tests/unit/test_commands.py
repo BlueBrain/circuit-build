@@ -177,14 +177,12 @@ def test_build_command(env_name, slurm_env, env_config, expected, log_all_to_std
             "env_vars": {"MYVAR1": "VALUE1", "MYVAR2": "VALUE2"},
         },
     }
-    skip_run = False
     result = test_module.build_command(
         cmd=cmd,
         env_config=env_config,
         env_name=env_name,
         cluster_config=cluster_config,
         slurm_env=slurm_env,
-        skip_srun=skip_run,
     )
     assert result == expected
 
@@ -204,7 +202,6 @@ def test_build_command_raises_when_slurm_env_is_missing():
             env_name=env_name,
             cluster_config=cluster_config,
             slurm_env=slurm_env,
-            skip_srun=skip_run,
         )
 
 

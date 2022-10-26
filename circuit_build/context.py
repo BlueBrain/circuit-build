@@ -407,7 +407,7 @@ class Context:
         """Write the environment configuration into the log directory."""
         dump_yaml(self.log_path("environments"), data=self.ENV_CONFIG)
 
-    def bbp_env(self, module_env, command, slurm_env=None, skip_srun=False):
+    def bbp_env(self, module_env, command, slurm_env=None):
         """Wrap and return the command string to be executed."""
         return build_command(
             cmd=command,
@@ -415,7 +415,6 @@ class Context:
             env_name=module_env,
             cluster_config=self.cluster_config,
             slurm_env=slurm_env,
-            skip_srun=skip_srun,
         )
 
     @staticmethod
@@ -660,10 +659,9 @@ class Context:
                 "env",
                 "USER=$(whoami)",
                 "SPARK_USER=$(whoami)",
-                "sm_run",
-                self.cluster_config.get(rule, {}).get("sm_run", ""),
-                "-w {params.output_dir}/.sm_run",
-                "spykfunc",
+                "functionalizer",
+                self.cluster_config.get(rule, {}).get("functionalizer", ""),
+                "--work-dir {params.output_dir}/.fz",
                 "--output-dir {params.output_dir}",
                 *[f"--spark-property {p}" for p in spark_properties],
                 *extra_args,
@@ -671,6 +669,5 @@ class Context:
                 "{params.parquet_dirs}",
             ],
             slurm_env=rule,
-            skip_srun=True,
         )
         return cmd

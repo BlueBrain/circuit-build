@@ -30,13 +30,13 @@ def _get_slurm_config(cluster_config, slurm_env):
     raise Exception(f"{slurm_env} or __default__ must be defined in cluster configuration")
 
 
-def _with_slurm(cmd, cluster_config, slurm_env, skip_srun=False):
+def _with_slurm(cmd, cluster_config, slurm_env):
     """Wrap the command with slurm/salloc."""
     slurm_config = _get_slurm_config(cluster_config, slurm_env)
     jobname = slurm_config.get("jobname", slurm_env)
     salloc = slurm_config["salloc"]
     cmd = _escape_single_quotes(cmd)
-    cmd = f"salloc -J {jobname} {salloc} {'' if skip_srun else 'srun'} sh -c '{cmd}'"
+    cmd = f"salloc -J {jobname} {salloc} srun sh -c '{cmd}'"
     # set the environment variables if needed
     env_vars = slurm_config.get("env_vars")
     if env_vars:
@@ -45,12 +45,12 @@ def _with_slurm(cmd, cluster_config, slurm_env, skip_srun=False):
     return cmd
 
 
-def build_module_cmd(cmd, config, cluster_config, slurm_env=None, skip_srun=False):
+def build_module_cmd(cmd, config, cluster_config, slurm_env=None):
     """Wrap the command with modules."""
     modulepath = config.get("modulepath", SPACK_MODULEPATH)
     modules = config["modules"]
     if slurm_env and cluster_config:
-        cmd = _with_slurm(cmd, cluster_config, slurm_env, skip_srun=skip_srun)
+        cmd = _with_slurm(cmd, cluster_config, slurm_env)
     return " && ".join(
         [
             ". /etc/profile.d/modules.sh",
@@ -64,7 +64,7 @@ def build_module_cmd(cmd, config, cluster_config, slurm_env=None, skip_srun=Fals
     )
 
 
-def build_apptainer_cmd(cmd, config, cluster_config, slurm_env=None, skip_srun=False):
+def build_apptainer_cmd(cmd, config, cluster_config, slurm_env=None):
     """Wrap the command with apptainer/singularity."""
     modulepath = config.get("modulepath", APPTAINER_MODULEPATH)
     modules = config.get("modules", APPTAINER_MODULES)
@@ -74,7 +74,7 @@ def build_apptainer_cmd(cmd, config, cluster_config, slurm_env=None, skip_srun=F
     # the current working directory is used also inside the container
     cmd = f'{executable} exec {options} {image} bash <<EOF\ncd "$(pwd)" && {cmd}\nEOF\n'
     if slurm_env and cluster_config:
-        cmd = _with_slurm(cmd, cluster_config, slurm_env, skip_srun=skip_srun)
+        cmd = _with_slurm(cmd, cluster_config, slurm_env)
     cmd = " && ".join(
         [
             ". /etc/profile.d/modules.sh",
@@ -88,16 +88,16 @@ def build_apptainer_cmd(cmd, config, cluster_config, slurm_env=None, skip_srun=F
     return cmd
 
 
-def build_venv_cmd(cmd, config, cluster_config, slurm_env=None, skip_srun=False):
+def build_venv_cmd(cmd, config, cluster_config, slurm_env=None):
     """Wrap the command with an existing virtual environment."""
     path = config["path"]
     if slurm_env and cluster_config:
-        cmd = _with_slurm(cmd, cluster_config, slurm_env, skip_srun=skip_srun)
+        cmd = _with_slurm(cmd, cluster_config, slurm_env)
     cmd = f". {path}/bin/activate && {cmd}"
     return cmd
 
 
-def build_command(cmd, env_config, env_name, cluster_config, slurm_env=None, skip_srun=False):
+def build_command(cmd, env_config, env_name, cluster_config, slurm_env=None):
     """Wrap and return the command string to be executed.
 
     Args:
@@ -106,7 +106,6 @@ def build_command(cmd, env_config, env_name, cluster_config, slurm_env=None, ski
         env_name (str): key in env_config.
         cluster_config (dict): cluster configuration.
         slurm_env (str): key in cluster_config.
-        skip_srun (bool): if False, the command is executed with srun. If True, srun is omitted.
     """
     env_mapping = {
         ENV_TYPE_MODULE: build_module_cmd,
@@ -121,7 +120,6 @@ def build_command(cmd, env_config, env_name, cluster_config, slurm_env=None, ski
         config=config,
         cluster_config=cluster_config,
         slurm_env=slurm_env,
-        skip_srun=skip_srun,
     )
     cmd = redirect_to_file(cmd)
     return cmd
