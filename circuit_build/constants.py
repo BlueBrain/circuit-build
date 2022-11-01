@@ -43,7 +43,7 @@ ENV_CONFIG = {
     "spykfunc": {
         "env_type": ENV_TYPE_MODULE,
         "modulepath": SPACK_MODULEPATH,
-        "modules": ["unstable", "spykfunc/0.17.4"],
+        "modules": ["archive/2022-10", "spykfunc/0.17.4"],
     },
     "touchdetector": {
         "env_type": ENV_TYPE_MODULE,
