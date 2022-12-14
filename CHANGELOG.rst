@@ -1,7 +1,7 @@
 Changelog
 =========
 
-Version 4.1.0
+Version 4.1.0 (2022-12-14)
 --------------------------
 
 New Features
@@ -27,10 +27,11 @@ Improvements
 - Internal change, split ``utils.py`` into separate modules.
 - Generalize snakemake rules to allow for multiple workflows [NSETM-1878].
 
-Used modules
-~~~~~~~~~~~~
+Updated modules
+~~~~~~~~~~~~~~~
+- archive/2022-06/py-archngv/2.0.2
 - archive/2022-07/parquet-converters/0.8.0
-- archive/2022-07/spykfunc/0.17.2
+- archive/2022-10/spykfunc/0.17.4
 - archive/2022-07/touchdetector/5.7.0
 
 Bug Fixes
