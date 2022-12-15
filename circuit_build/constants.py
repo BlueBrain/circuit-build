@@ -9,7 +9,7 @@ NIX_MODULEPATH = (
     "/nix/var/nix/profiles/per-user/modules/bb5-x86_64/modules-all/release/share/modulefiles/"
 )
 APPTAINER_MODULEPATH = SPACK_MODULEPATH
-APPTAINER_MODULES = ["unstable", "singularityce"]
+APPTAINER_MODULES = ["archive/2022-11", "singularityce/3.10.0"]
 APPTAINER_EXECUTABLE = "singularity"
 APPTAINER_OPTIONS = "--cleanenv --containall --bind $TMPDIR:/tmp,/gpfs/bbp.cscs.ch/project"
 APPTAINER_IMAGEPATH = "/gpfs/bbp.cscs.ch/ssd/containers"

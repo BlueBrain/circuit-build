@@ -1,7 +1,7 @@
 Changelog
 =========
 
-Version 4.1.0 (2022-12-14)
+Version 4.1.0 (2022-12-15)
 --------------------------
 
 New Features
@@ -29,6 +29,7 @@ Improvements
 
 Updated modules
 ~~~~~~~~~~~~~~~
+- archive/2022-11/singularityce/3.10.0
 - archive/2022-06/py-archngv/2.0.2
 - archive/2022-07/parquet-converters/0.8.0
 - archive/2022-10/spykfunc/0.17.4
