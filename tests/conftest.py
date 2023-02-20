@@ -1,33 +1,4 @@
-import os
-
-import pytest
 from xdist.scheduler.loadscope import LoadScopeScheduling
-
-
-def pytest_addoption(parser):
-    parser.addoption(
-        "--basetemp-permissions",
-        action="store",
-        help=(
-            "Permissions of the base temporary directory used by tmp_path, "
-            "as octal value. Examples: 700 (default), 750, 770"
-        ),
-    )
-
-
-@pytest.fixture
-def tmp_path(tmp_path, request):
-    permissions = request.config.getoption("--basetemp-permissions")
-    if permissions:
-        permissions = int(permissions, 8)
-        # enforce the permissions according to the temp directory layout:
-        # - <basetemp>/test_<name>, when running without pytest-xdist
-        # - <basetemp>/popen-gw<num>/test_<name>, when running with pytest-xdist
-        tmp_path.chmod(permissions)
-        tmp_path.parent.chmod(permissions)
-        if os.getenv("PYTEST_XDIST_WORKER_COUNT"):
-            tmp_path.parent.parent.chmod(permissions)
-    return tmp_path
 
 
 # tests that should not be grouped together, even when they belong to the same module

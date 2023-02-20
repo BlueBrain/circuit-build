@@ -27,7 +27,7 @@ def _get_slurm_config(cluster_config, slurm_env):
         return cluster_config[slurm_env]
     if "__default__" in cluster_config:
         return cluster_config["__default__"]
-    raise Exception(f"{slurm_env} or __default__ must be defined in cluster configuration")
+    raise ValueError(f"{slurm_env} or __default__ must be defined in cluster configuration")
 
 
 def _with_slurm(cmd, cluster_config, slurm_env):
@@ -141,10 +141,10 @@ def load_legacy_env_config(custom_modules):
     for module in custom_modules:
         parts = module.split(":")
         if len(parts) not in (2, 3):
-            raise Exception(f"Invalid custom spack module format: {module}")
+            raise ValueError(f"Invalid custom spack module format: {module}")
         module_env = parts[0]
         if module_env not in ENV_CONFIG:
-            raise Exception(
+            raise ValueError(
                 f"Unknown environment: {module_env}, known environments are: {','.join(ENV_CONFIG)}"
             )
         module_list = parts[1].split(",")

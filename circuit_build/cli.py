@@ -85,7 +85,7 @@ def cli(verbose):
     logging.basicConfig(level=level, format=logformat)
 
 
-@cli.command(context_settings=dict(ignore_unknown_options=True, allow_extra_args=True))
+@cli.command(context_settings={"ignore_unknown_options": True, "allow_extra_args": True})
 @click.option(
     "-u",
     "--cluster-config",

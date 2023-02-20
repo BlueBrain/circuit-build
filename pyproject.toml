@@ -14,7 +14,3 @@ line_length = 100
 [tool.snakefmt]
 include = '(\.smk$|^Snakefile)'
 exclude = '(gs|\.git|\.hg|\.mypy_cache|\.nox|\.tox|\.venv|\.svn|buck-out|dist|tests)'
-
-[tool.pytest.ini_options]
-minversion = "6.0"
-addopts = "-vvs --basetemp tmptestdir --basetemp-permissions 750"
