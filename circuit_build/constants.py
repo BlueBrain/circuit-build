@@ -1,9 +1,8 @@
 """Constants."""
 PACKAGE_NAME = "circuit_build"
-TEMPLATES_DIR = "snakemake/templates"
 SCHEMAS_DIR = "snakemake/schemas"
 
-INDEX_FILES = ["index.dat", "index.idx", "payload.dat"]
+INDEX_FILES = ["index.spi", "meta_data.json"]
 SPACK_MODULEPATH = "/gpfs/bbp.cscs.ch/ssd/apps/bsd/modules/_meta"
 NIX_MODULEPATH = (
     "/nix/var/nix/profiles/per-user/modules/bb5-x86_64/modules-all/release/share/modulefiles/"
@@ -25,10 +24,10 @@ ENV_CONFIG = {
         "modulepath": SPACK_MODULEPATH,
         "modules": ["archive/2022-03", "brainbuilder/0.17.0"],
     },
-    "flatindexer": {
+    "spatialindexer": {
         "env_type": ENV_TYPE_MODULE,
-        "modulepath": NIX_MODULEPATH,
-        "modules": ["nix/hpc/flatindexer/1.8.12"],
+        "modulepath": SPACK_MODULEPATH,
+        "modules": ["archive/2022-12", "spatial-index/1.1.0"],
     },
     "parquet-converters": {
         "env_type": ENV_TYPE_MODULE,

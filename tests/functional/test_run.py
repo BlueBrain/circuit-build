@@ -1,25 +1,20 @@
 import json
 import shutil
 import subprocess
-import bluepysnap
 import tempfile
 from pathlib import Path
 from subprocess import CalledProcessError
 from unittest.mock import patch
 
+import bluepysnap
 import h5py
 import pytest
-from click.testing import CliRunner
-from utils import (
-    SNAKEFILE,
-    SNAKEMAKE_ARGS,
-    TEST_PROJ_TINY,
-    cwd,
-    edit_yaml,
-    load_yaml,
-)
 from assertions import assert_node_population_morphologies_accessible
+from click.testing import CliRunner
+from utils import SNAKEFILE, SNAKEMAKE_ARGS, TEST_PROJ_TINY, cwd, edit_yaml, load_yaml
+
 from circuit_build.cli import run
+from circuit_build.constants import INDEX_FILES
 
 
 def _assert_git_initialized(path):
@@ -54,19 +49,22 @@ def test_functional_all(tmp_path):
         runner = CliRunner()
         result = runner.invoke(
             run,
-            args + ["functional", "spatial_index_segment"],
+            args + ["functional", "spatial_index_segment", "spatial_index_synapse"],
             catch_exceptions=False,
         )
         assert result.exit_code == 0
 
-        assert tmp_path.joinpath("CircuitConfig").stat().st_size > 100
-        assert tmp_path.joinpath("circuit.mvd3").stat().st_size > 100
         assert tmp_path.joinpath("sonata/node_sets.json").stat().st_size > 100
         assert tmp_path.joinpath("sonata/circuit_config.json").stat().st_size > 100
         assert tmp_path.joinpath("start.target").stat().st_size > 100
 
+        for index_file in INDEX_FILES:
+            index_file_path = (
+                f"sonata/networks/nodes/{node_population_name}/spatial_index/{index_file}"
+            )
+            assert tmp_path.joinpath(index_file_path).stat().st_size > 100
+
         nodes_file = (tmp_path / f"sonata/networks/nodes/{node_population_name}/nodes.h5").resolve()
-        assert f"CellLibraryFile {nodes_file}" in (tmp_path / "CircuitConfig").open().read()
         assert nodes_file.stat().st_size > 100
         with h5py.File(nodes_file, "r") as h5f:
             assert f"/nodes/{node_population_name}" in h5f
@@ -207,30 +205,6 @@ def test_bioname_with_git(tmp_path):
         assert result.exit_code == 0
 
 
-def test_snakemake_circuit_config(tmp_path):
-    """This test verifies that building can happen via `snakemake`,
-    and `CircuitConfig.j2` is accessible in this case."""
-
-    data_dir = TEST_PROJ_TINY
-
-    with cwd(tmp_path):
-        args = [
-            "--jobs",
-            "8",
-            "-p",
-            "--config",
-            f"bioname={data_dir}",
-            "-u",
-            str(data_dir / "cluster.yaml"),
-        ]
-        cmd = ["snakemake", "--snakefile", SNAKEFILE] + args + ["CircuitConfig_base"]
-        result = subprocess.run(cmd, check=True)
-
-        assert result.returncode == 0
-        assert tmp_path.joinpath("CircuitConfig_base").stat().st_size > 100
-        assert f"CellLibraryFile circuit.mvd3" in (tmp_path / "CircuitConfig_base").open().read()
-
-
 def test_snakemake_bioname_no_git(tmp_path):
     """This test verifies that bioname is checked to be under git when called via `snakemake`."""
 
@@ -251,7 +225,7 @@ def test_snakemake_bioname_no_git(tmp_path):
             "-u",
             str(data_dir / "cluster.yaml"),
         ]
-        cmd = ["snakemake", "--snakefile", SNAKEFILE] + args + ["CircuitConfig_base"]
+        cmd = ["snakemake", "--snakefile", SNAKEFILE] + args
 
         with pytest.raises(CalledProcessError) as exc_info:
             subprocess.run(cmd, capture_output=True, text=True, check=True)
@@ -281,7 +255,7 @@ def test_snakemake_bioname_with_git(tmp_path):
             "-u",
             str(data_dir / "cluster.yaml"),
         ]
-        cmd = ["snakemake", "--snakefile", SNAKEFILE] + args + ["CircuitConfig_base"]
+        cmd = ["snakemake", "--snakefile", SNAKEFILE] + args
 
         result = subprocess.run(cmd, capture_output=True, text=True)
 

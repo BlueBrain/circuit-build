@@ -5,6 +5,7 @@ coverage.xml
 .coverage
 .tox/
 .idea
+.vscode
 .snakemake
 .coverage
 coverage.xml

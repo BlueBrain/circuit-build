@@ -52,9 +52,15 @@ def test_nodes_config_template():
 
 def test_nodes_default():
     result = tested._nodes_default(
-        nodes_file="file", population_name="name", population_type="type"
+        nodes_file="file",
+        population_name="name",
+        population_type="type",
+        spatial_segment_index_dir="path/to/index",
     )
-    assert result == {"nodes_file": "file", "populations": {"name": {"type": "type"}}}
+    assert result == {
+        "nodes_file": "file",
+        "populations": {"name": {"spatial_segment_index_dir": "path/to/index", "type": "type"}},
+    }
 
 
 def test_nodes_biophysical():
@@ -64,12 +70,14 @@ def test_nodes_biophysical():
         population_type="type",
         morphologies_dir="morphdir",
         biophysical_neuron_models_dir="biomodir",
+        spatial_segment_index_dir="path/to/index",
     )
     assert result == {
         "nodes_file": "file",
         "populations": {
             "name": {
                 "type": "type",
+                "spatial_segment_index_dir": "path/to/index",
                 "morphologies_dir": "morphdir",
                 "biophysical_neuron_models_dir": "biomodir",
             }
@@ -140,8 +148,12 @@ def tested_edges_default():
         edges_file="file",
         population_name="name",
         population_type="type",
+        spatial_synapse_index_dir="path/to/index",
     )
-    assert result == {"edges_file": "file", "populations": {"name": {"type": "type"}}}
+    assert result == {
+        "edges_file": "file",
+        "populations": {"name": {"type": "type", "spatial_synapse_index_dir": "path/to/index"}},
+    }
 
 
 def tested_edges_endfoot():
@@ -186,6 +198,7 @@ def _node_population(circuit_dir, name, kind):
             "nodes_file": f"{circuit_dir}/sonata/networks/nodes/{name}/nodes.h5",
             "population_name": name,
             "population_type": "virtual",
+            "spatial_segment_index_dir": "path/to/index",
         }
     if kind == "biophysical":
         return {
@@ -194,6 +207,7 @@ def _node_population(circuit_dir, name, kind):
             "population_type": "biophysical",
             "morphologies_dir": f"{circuit_dir}/morphologies/{name}/swc",
             "biophysical_neuron_models_dir": "/path/to/hoc",
+            "spatial_segment_index_dir": "path/to/index",
         }
     if kind == "astrocyte":
         return {
@@ -218,7 +232,9 @@ def _node_population_expected(name, kind):
     if kind == "virtual":
         return {
             "nodes_file": f"$BASE_DIR/networks/nodes/{name}/nodes.h5",
-            "populations": {name: {"type": kind}},
+            "populations": {
+                name: {"type": kind, "spatial_segment_index_dir": "$BASE_DIR/path/to/index"}
+            },
         }
     if kind == "biophysical":
         return {
@@ -228,6 +244,7 @@ def _node_population_expected(name, kind):
                     "type": kind,
                     "morphologies_dir": f"$BASE_DIR/../morphologies/{name}/swc",
                     "biophysical_neuron_models_dir": "/path/to/hoc",
+                    "spatial_segment_index_dir": "$BASE_DIR/path/to/index",
                 },
             },
         }
@@ -263,6 +280,7 @@ def _edge_population(circuit_dir, name, kind):
             "edges_file": f"{circuit_dir}/sonata/networks/edges/functional/{name}/edges.h5",
             "population_name": name,
             "population_type": kind,
+            "spatial_synapse_index_dir": "path/to/index",
         }
     if kind == "synapse_astrocyte":
         return {
@@ -292,7 +310,12 @@ def _edge_population_expected(name, kind):
     if kind == "chemical":
         return {
             "edges_file": f"$BASE_DIR/networks/edges/functional/{name}/edges.h5",
-            "populations": {name: {"type": kind}},
+            "populations": {
+                name: {
+                    "type": kind,
+                    "spatial_synapse_index_dir": "$BASE_DIR/path/to/index",
+                }
+            },
         }
     if kind == "synapse_astrocyte":
         return {

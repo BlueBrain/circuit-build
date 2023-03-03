@@ -10,7 +10,6 @@ A typical circuit release folder would look like:
 
 ::
 
-    CircuitConfig
     sonata/
       circuit_config.json
       node_sets.json
@@ -39,25 +38,6 @@ A typical circuit release folder would look like:
 
   We'd recommend to avoid modifying them manually unless REALLY required.
 
-**CircuitConfig**
-
-`BlueConfig`_ file defining "static" part of the circuit (path to cell / synapse collection,
-morphology release etc). An example:
-
-  ::
-
-    Run Default
-    {
-      CircuitPath /gpfs/bbp.cscs.ch/project/proj64/circuits/test3
-      nrnPath /gpfs/bbp.cscs.ch/project/proj64/circuits/test3/sonata/networks/edges/functional/neocortex_neurons__chemical_synapse/edges.h5
-      MorphologyPath /gpfs/bbp.cscs.ch/project/proj59/entities/morphologies/2017.10.31
-      METypePath /gpfs/bbp.cscs.ch/project/proj64/entities/emodels/2017.11.03/hoc
-      MEComboInfoFile /gpfs/bbp.cscs.ch/project/proj64/entities/emodels/2017.11.03/mecombo_emodel.tsv
-      CellLibraryFile /gpfs/bbp.cscs.ch/project/proj64/circuits/test3/sonata/networks/nodes/neocortex_neurons/nodes.h5
-      BioName /gpfs/bbp.cscs.ch/project/proj64/circuits/test3/bioname/
-      Atlas http://voxels.nexus.apps.bbp.epfl.ch/api/analytics/atlas/releases/77831ACA-6198-4AA0-82EF-D0475A4E0647
-    }
-
 **nodes.h5**
 
 File with cell properties in `SONATA`_ format including morpho-electrical data
@@ -69,7 +49,7 @@ File with synapse properties in `SONATA`_ format
 **circuit_config.json**
 
 The `SONATA`_ file describing the location of the circuit files.
-Roughly equivalent to the CircuitConfig file.
+Roughly equivalent to the legacy CircuitConfig file.
 
 **node_sets.json**
 Generated `Node Sets`_ for the `SONATA`_ circuit.

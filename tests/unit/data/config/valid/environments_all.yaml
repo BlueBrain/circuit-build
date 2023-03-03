@@ -2,7 +2,7 @@ env_config:
   brainbuilder:
     env_type: MODULE
     modules: [ archive/2022-03, testmodule/0.17.1 ]
-  flatindexer:
+  spatialindexer:
     env_type: MODULE
     modules: [ archive/2022-03, testmodule/0.17.1 ]
   parquet-converters:

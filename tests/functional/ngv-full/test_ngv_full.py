@@ -71,6 +71,7 @@ def test_ngv_full___config(build_circuit_full):
                     "populations": {
                         "neocortex_neurons": {
                             "type": "biophysical",
+                            "spatial_segment_index_dir": "$BASE_DIR/sonata/networks/nodes/neocortex_neurons/spatial_index",
                             "alternate_morphologies": {
                                 "neurolucida-asc": "$BASE_DIR/morphologies/neocortex_neurons",
                                 "h5v1": "$BASE_DIR/morphologies/neocortex_neurons",
@@ -106,7 +107,10 @@ def test_ngv_full___config(build_circuit_full):
                 {
                     "edges_file": "$BASE_DIR/sonata/networks/edges/functional/neocortex_neurons__chemical_synapse/edges.h5",
                     "populations": {
-                        "neocortex_neurons__chemical_synapse": {"type": "chemical"},
+                        "neocortex_neurons__chemical_synapse": {
+                            "spatial_synapse_index_dir": "$BASE_DIR/sonata/networks/edges/neocortex_neurons__chemical_synapse/spatial_index",
+                            "type": "chemical",
+                        },
                     },
                 },
                 {

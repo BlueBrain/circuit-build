@@ -1,6 +1,18 @@
 Changelog
 =========
 
+Version 5.0.0.dev0
+------------------
+
+Improvements
+~~~~~~~~~~~~
+- Spatial index built by SpatialIndex [NSETM-2101]
+
+Removed
+~~~~~~~
+- output of CircuitConfig
+
+
 Version 4.1.0 (2022-12-15)
 --------------------------
 

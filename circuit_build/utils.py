@@ -5,9 +5,8 @@ import traceback
 from contextlib import contextmanager
 
 import yaml
-from jinja2 import Environment, PackageLoader, StrictUndefined, select_autoescape
 
-from circuit_build.constants import PACKAGE_NAME, SCHEMAS_DIR, TEMPLATES_DIR
+from circuit_build.constants import PACKAGE_NAME, SCHEMAS_DIR
 
 
 def load_yaml(filepath):
@@ -57,14 +56,3 @@ def read_schema(schema_name):
     resource = importlib.resources.files(PACKAGE_NAME) / SCHEMAS_DIR / schema_name
     content = resource.read_text()
     return yaml.safe_load(content)
-
-
-def render_template(template_name, *args, **kwargs):
-    """Render a template and return the result as a string."""
-    env = Environment(
-        loader=PackageLoader(PACKAGE_NAME, TEMPLATES_DIR),
-        autoescape=select_autoescape(),
-        undefined=StrictUndefined,
-    )
-    template = env.get_template(template_name)
-    return template.render(*args, **kwargs)

@@ -136,7 +136,6 @@ After the command above has completed, the following files could be found in cir
 
 ::
 
-    CircuitConfig_base
     circuit.h5
     start.target
 
@@ -223,8 +222,7 @@ instead of:
 
     You can also build structural circuit *in addition* to the functional one.
     They do not conflict with each other, but share the common files (`circuit.h5`, `start.target` etc).
-    Structural circuit would be available via `CircuitConfig_struct` file.
-
+    Structural circuit would be available via `struct_circuit_config.json` file.
 
 .. raw:: html
 

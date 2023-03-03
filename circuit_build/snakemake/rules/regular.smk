@@ -3,63 +3,6 @@ from pathlib import Path
 from circuit_build.utils import format_if, write_with_log
 
 
-rule circuitconfig_base:
-    # needed only by spatial_index_segment
-    message:
-        "Generate CircuitConfig w/o connectome"
-    output:
-        "CircuitConfig_base",
-    log:
-        ctx.log_path("circuitconfig_base"),
-    run:
-        with write_with_log(output[0], log[0]) as out:
-            out.write(
-                ctx.build_circuit_config(
-                    nrn_path=".",
-                    cell_library_file="circuit.mvd3",
-                    morphology_type=None,
-                )
-            )
-
-
-rule circuitconfig_functional:
-    message:
-        "Generate CircuitConfig for functional circuit"
-    input:
-        nodes=ctx.nodes_neurons_file,
-        edges=ctx.edges_neurons_neurons_file(connectome_type="functional"),
-    output:
-        "CircuitConfig",
-    log:
-        ctx.log_path("circuitconfig_functional"),
-    run:
-        with write_with_log(output[0], log[0]) as out:
-            out.write(
-                ctx.build_circuit_config(
-                    nrn_path=input.edges, cell_library_file=input.nodes, morphology_type="asc"
-                ),
-            )
-
-
-rule circuitconfig_structural:
-    message:
-        "Generate CircuitConfig for structural circuit"
-    input:
-        nodes=ctx.nodes_neurons_file,
-        edges=ctx.edges_neurons_neurons_file(connectome_type="structural"),
-    output:
-        "CircuitConfig_struct",
-    log:
-        ctx.log_path("circuitconfig_structural"),
-    run:
-        with write_with_log(output[0], log[0]) as out:
-            out.write(
-                ctx.build_circuit_config(
-                    nrn_path=input.edges, cell_library_file=input.nodes, morphology_type="asc"
-                ),
-            )
-
-
 rule init_cells:
     message:
         "Create an empty cell collection with a correct population name. This collection will be populated further."
@@ -630,20 +573,48 @@ rule spatial_index_segment:
     message:
         "Generate segment spatial index"
     input:
-        "CircuitConfig_base",
-        "circuit.mvd3",
-        "start.target",
+        ctx.nodes_neurons_file,
     output:
-        ctx.spatial_index_files("SEGMENT"),
+        ctx.nodes_spatial_index_files,
     log:
         ctx.log_path("spatial_index_segment"),
     shell:
         ctx.bbp_env(
-            "flatindexer",
+            "spatialindexer",
             [
-                "SDKGenerator CircuitConfig_base segment All SEGMENT",
+                "spatial-index-nodes",
+                "{input}",
+                ctx.morphology_path(morphology_type="asc"),
+                "-o",
+                ctx.nodes_spatial_index_dir,
+                "--population",
+                ctx.nodes_neurons_name,
             ],
             slurm_env="spatial_index_segment",
+        )
+
+
+rule spatial_index_synapse:
+    message:
+        "Generate synapse spatial index"
+    input:
+        ctx.edges_neurons_neurons_file(connectome_type="functional"),
+    output:
+        ctx.edges_spatial_index_files,
+    log:
+        ctx.log_path("spatial_index_synapse"),
+    shell:
+        ctx.bbp_env(
+            "spatialindexer",
+            [
+                "spatial-index-synapses",
+                "{input}",
+                "-o",
+                ctx.edges_spatial_index_dir,
+                "--population",
+                ctx.edges_neurons_neurons_name,
+            ],
+            slurm_env="spatial_index_synapse",
         )
 
 
@@ -726,15 +697,14 @@ rule circuitconfig_struct_sonata:
 
 
 rule functional:
-    # Note: creating both BlueConfig & circuit_config.json until we're fully transitioned to SONATA
     input:
         "sonata/circuit_config.json",
         ctx.nodes_neurons_file,
         ctx.NODESETS_FILE,
         ctx.edges_neurons_neurons_file(connectome_type="functional"),
-        # for backwards compatibility
-        "CircuitConfig",
         "start.target",
+        ctx.nodes_spatial_index_files,
+        ctx.edges_spatial_index_files,
 
 
 rule structural:
@@ -743,5 +713,6 @@ rule structural:
         ctx.NODESETS_FILE,
         ctx.nodes_neurons_file,
         ctx.edges_neurons_neurons_file(connectome_type="structural"),
-        "CircuitConfig_struct",
         "start.target",
+        ctx.nodes_spatial_index_files,
+        ctx.edges_spatial_index_files,

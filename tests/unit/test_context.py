@@ -110,90 +110,6 @@ def test_context_is_isolated_phase():
         assert ctx.is_isolated_phase()
 
 
-def test_build_circuit_config__release():
-
-    bioname = TEST_PROJ_TINY
-    ctx = _get_context(bioname)
-
-    res = ctx.build_circuit_config(
-        nrn_path="my-nrn-path",
-        cell_library_file="my-cell-library-file",
-        morphology_type="asc",
-    )
-
-    cwd = Path(".").resolve()
-
-    assert res == (
-        "Run Default\n"
-        "{\n"
-        f"    CircuitPath {cwd}\n"
-        f"    nrnPath {cwd}/my-nrn-path\n"
-        "    MorphologyPath /gpfs/bbp.cscs.ch/project/proj66/entities/morphologies/2018.02.16/ascii\n"
-        "    MorphologyType asc\n"
-        "    METypePath /gpfs/bbp.cscs.ch/project/proj66/entities/emodels/2018.02.26.dev0/hoc\n"
-        "    MEComboInfoFile /gpfs/bbp.cscs.ch/project/proj66/entities/emodels/2018.02.26.dev0/mecombo_emodel.tsv\n"
-        "    CellLibraryFile my-cell-library-file\n"
-        f"    BioName {bioname}\n"
-        "    Atlas /gpfs/bbp.cscs.ch/project/proj66/entities/dev/atlas/O1-152\n"
-        "}"
-    )
-
-
-def test_build_circuit_config__synthesis():
-
-    bioname = TEST_PROJ_SYNTH
-    ctx = _get_context(bioname)
-
-    res = ctx.build_circuit_config(
-        nrn_path="my-nrn-path",
-        cell_library_file="my-cell-library-file",
-        morphology_type="asc",
-    )
-
-    cwd = Path(".").resolve()
-    assert res == (
-        "Run Default\n"
-        "{\n"
-        f"    CircuitPath {cwd}\n"
-        f"    nrnPath {cwd}/my-nrn-path\n"
-        f"    MorphologyPath {cwd}/morphologies/neocortex_neurons\n"
-        "    MorphologyType asc\n"
-        "    METypePath SPECIFY_ME\n"
-        "    CellLibraryFile my-cell-library-file\n"
-        f"    BioName {bioname}\n"
-        "    Atlas /gpfs/bbp.cscs.ch/project/proj66/entities/dev/atlas/O1-152\n"
-        "}"
-    ), res
-
-
-def test_build_circuit_config__CircuitConfig_base():
-
-    bioname = TEST_PROJ_TINY
-    ctx = _get_context(bioname)
-
-    res = ctx.build_circuit_config(
-        nrn_path="my-nrn-path",
-        cell_library_file="circuit.mvd3",
-        morphology_type=None,
-    )
-
-    cwd = Path(".").resolve()
-
-    assert res == (
-        "Run Default\n"
-        "{\n"
-        f"    CircuitPath {cwd}\n"
-        f"    nrnPath {cwd}/my-nrn-path\n"
-        "    MorphologyPath /gpfs/bbp.cscs.ch/project/proj66/entities/morphologies/2018.02.16\n"
-        "    METypePath /gpfs/bbp.cscs.ch/project/proj66/entities/emodels/2018.02.26.dev0/hoc\n"
-        "    MEComboInfoFile /gpfs/bbp.cscs.ch/project/proj66/entities/emodels/2018.02.26.dev0/mecombo_emodel.tsv\n"
-        "    CellLibraryFile circuit.mvd3\n"
-        f"    BioName {bioname}\n"
-        "    Atlas /gpfs/bbp.cscs.ch/project/proj66/entities/dev/atlas/O1-152\n"
-        "}"
-    )
-
-
 import json
 
 
@@ -225,6 +141,7 @@ def test_write_network_config__release(tmp_path):
                     "nodes_file": "$BASE_DIR/sonata/networks/nodes/neocortex_neurons/nodes.h5",
                     "populations": {
                         "neocortex_neurons": {
+                            "spatial_segment_index_dir": "$BASE_DIR/sonata/networks/nodes/neocortex_neurons/spatial_index",
                             "type": "biophysical",
                             "alternate_morphologies": {
                                 "h5v1": "/gpfs/bbp.cscs.ch/project/proj66/entities/morphologies/2018.02.16/h5v1",
@@ -238,7 +155,12 @@ def test_write_network_config__release(tmp_path):
             "edges": [
                 {
                     "edges_file": "$BASE_DIR/sonata/networks/edges/functional/neocortex_neurons__chemical_synapse/edges.h5",
-                    "populations": {"neocortex_neurons__chemical_synapse": {"type": "chemical"}},
+                    "populations": {
+                        "neocortex_neurons__chemical_synapse": {
+                            "spatial_synapse_index_dir": "$BASE_DIR/sonata/networks/edges/neocortex_neurons__chemical_synapse/spatial_index",
+                            "type": "chemical",
+                        }
+                    },
                 }
             ],
         },
@@ -273,6 +195,7 @@ def test_write_network_config__synthesis(tmp_path):
                     "nodes_file": "$BASE_DIR/sonata/networks/nodes/neocortex_neurons/nodes.h5",
                     "populations": {
                         "neocortex_neurons": {
+                            "spatial_segment_index_dir": "$BASE_DIR/sonata/networks/nodes/neocortex_neurons/spatial_index",
                             "type": "biophysical",
                             "alternate_morphologies": {
                                 "h5v1": "$BASE_DIR/morphologies/neocortex_neurons",
@@ -286,7 +209,12 @@ def test_write_network_config__synthesis(tmp_path):
             "edges": [
                 {
                     "edges_file": "$BASE_DIR/sonata/networks/edges/functional/neocortex_neurons__chemical_synapse/edges.h5",
-                    "populations": {"neocortex_neurons__chemical_synapse": {"type": "chemical"}},
+                    "populations": {
+                        "neocortex_neurons__chemical_synapse": {
+                            "spatial_synapse_index_dir": "$BASE_DIR/sonata/networks/edges/neocortex_neurons__chemical_synapse/spatial_index",
+                            "type": "chemical",
+                        }
+                    },
                 }
             ],
         },
@@ -321,6 +249,7 @@ def test_write_network_config__ngv_standalone(tmp_path):
                 "All": {
                     "type": "biophysical",
                     "biophysical_neuron_models_dir": "",
+                    "spatial_segment_index_dir": "$BASE_DIR/sonata/networks/nodes/neocortex_neurons/spatial_index",
                     "alternate_morphologies": {
                         "neurolucida-asc": f"{data}/circuit/morphologies",
                         "h5v1": f"{data}/circuit/morphologies",
@@ -352,7 +281,12 @@ def test_write_network_config__ngv_standalone(tmp_path):
     assert config["networks"]["edges"] == [
         {
             "edges_file": f"{data}/circuit/edges.h5",
-            "populations": {"All": {"type": "chemical"}},
+            "populations": {
+                "All": {
+                    "type": "chemical",
+                    "spatial_synapse_index_dir": "$BASE_DIR/sonata/networks/edges/neocortex_neurons__chemical_synapse/spatial_index",
+                }
+            },
         },
         {
             "edges_file": "$BASE_DIR/sonata/networks/edges/neuroglial/edges.h5",
@@ -402,6 +336,7 @@ def test_write_network_config__ngv_full(tmp_path):
                 "neocortex_neurons": {
                     "type": "biophysical",
                     "biophysical_neuron_models_dir": "",
+                    "spatial_segment_index_dir": "$BASE_DIR/sonata/networks/nodes/neocortex_neurons/spatial_index",
                     "alternate_morphologies": {
                         "neurolucida-asc": "$BASE_DIR/morphologies/neocortex_neurons",
                         "h5v1": "$BASE_DIR/morphologies/neocortex_neurons",
@@ -433,7 +368,12 @@ def test_write_network_config__ngv_full(tmp_path):
     assert config["networks"]["edges"] == [
         {
             "edges_file": "$BASE_DIR/sonata/networks/edges/functional/neocortex_neurons__chemical_synapse/edges.h5",
-            "populations": {"neocortex_neurons__chemical_synapse": {"type": "chemical"}},
+            "populations": {
+                "neocortex_neurons__chemical_synapse": {
+                    "type": "chemical",
+                    "spatial_synapse_index_dir": "$BASE_DIR/sonata/networks/edges/neocortex_neurons__chemical_synapse/spatial_index",
+                }
+            },
         },
         {
             "edges_file": "$BASE_DIR/sonata/networks/edges/neuroglial/edges.h5",

@@ -12,7 +12,7 @@ import snakemake
 from circuit_build.commands import build_command, load_legacy_env_config
 from circuit_build.constants import ENV_CONFIG, ENV_FILE, INDEX_FILES
 from circuit_build.sonata_config import write_config
-from circuit_build.utils import dump_yaml, load_yaml, redirect_to_file, render_template
+from circuit_build.utils import dump_yaml, load_yaml, redirect_to_file
 from circuit_build.validators import (
     validate_config,
     validate_edge_population_name,
@@ -243,6 +243,16 @@ class Context:
         return self.paths.nodes_path(self.nodes_astrocytes_name, "microdomains.h5")
 
     @property
+    def nodes_spatial_index_dir(self):
+        """Return directory of nodes spatial index files."""
+        return self.paths.nodes_path(self.nodes_neurons_name, "spatial_index")
+
+    @property
+    def nodes_spatial_index_files(self):
+        """Return the list of paths to spatial index files."""
+        return [self.nodes_spatial_index_dir / filename for filename in INDEX_FILES]
+
+    @property
     def edges_neurons_neurons_name(self):
         """Return edge population name for neuron-neuron chemical connections."""
         return validate_edge_population_name(self.conf.get(["common", "edge_population_name"]))
@@ -295,6 +305,16 @@ class Context:
         """Return endfeet meshes file for endfoot connections."""
         return self.paths.edges_path(self.edges_astrocytes_vasculature_name, "endfeet_meshes.h5")
 
+    @property
+    def edges_spatial_index_dir(self):
+        """Return directory of edges spatial index files."""
+        return self.paths.edges_path(self.edges_neurons_neurons_name, "spatial_index")
+
+    @property
+    def edges_spatial_index_files(self):
+        """Return the list of paths to spatial index files."""
+        return [self.edges_spatial_index_dir / filename for filename in INDEX_FILES]
+
     def tmp_edges_neurons_chemical_connectome_path(self, path):
         """Return path relative to the neuronal chemical connectome directory."""
         return self.paths.edges_population_connectome_path(
@@ -316,6 +336,18 @@ class Context:
         return self.paths.edges_population_touches_dir(
             population_name=self.edges_astrocytes_vasculature_name
         )
+
+    def morphology_path(self, morphology_type: str):
+        """Return path to the morphology."""
+        if self.SYNTHESIZE:
+            return self.SYNTHESIZE_MORPH_DIR
+
+        type_to_subdir = {
+            "asc": "ascii",
+            "swc": "swc",
+            "h5": "h5v1",
+        }
+        return Path(self.MORPH_RELEASE, type_to_subdir[morphology_type])
 
     def is_isolated_phase(self):
         """Return True if there is an env var 'ISOLATED_PHASE' set to 'True'."""
@@ -417,42 +449,6 @@ class Context:
             slurm_env=slurm_env,
         )
 
-    @staticmethod
-    def spatial_index_files(prefix):
-        """Return the list of files used for spatial index."""
-        return [f"{prefix}_{filename}" for filename in INDEX_FILES]
-
-    def build_circuit_config(self, nrn_path, cell_library_file, morphology_type):
-        """Return the BBP circuit configuration as a string."""
-        type_to_subdir = {
-            "asc": "ascii",
-            "swc": "swc",
-            "h5": "h5v1",
-        }
-
-        # morphology_type=None is used for the CircuitConfig_base which is needed for the
-        # spatial_index_segment, which results in omitting the MorphologyType entry and
-        # allow the index to implicity use the subdirectory it needs.
-        if self.SYNTHESIZE:
-            morphology_path = self.SYNTHESIZE_MORPH_DIR
-        elif morphology_type is None:
-            morphology_path = self.MORPH_RELEASE
-        else:
-            morphology_path = Path(self.MORPH_RELEASE, type_to_subdir[morphology_type])
-
-        return render_template(
-            "CircuitConfig.j2",
-            CIRCUIT_PATH=self.paths.circuit_dir,
-            NRN_PATH=os.path.abspath(nrn_path),
-            MORPH_PATH=morphology_path,
-            MORPH_TYPE=morphology_type,
-            ME_TYPE_PATH=self.EMODEL_RELEASE_HOC or "SPECIFY_ME",
-            ME_COMBO_INFO_PATH=self.EMODEL_RELEASE_MECOMBO or None,
-            BIONAME=self.paths.bioname_dir,
-            ATLAS=self.ATLAS,
-            CELL_LIBRARY_FILE=cell_library_file,
-        )
-
     def write_network_config(self, connectome_dir, output_file):
         """Return the SONATA circuit configuration for neurons."""
         morphologies_entry = self.if_synthesis(
@@ -480,6 +476,7 @@ class Context:
                     "population_name": self.nodes_neurons_name,
                     **morphologies_entry,
                     "biophysical_neuron_models_dir": self.EMODEL_RELEASE_HOC or "",
+                    "spatial_segment_index_dir": self.nodes_spatial_index_dir,
                 },
             ],
             edges=[
@@ -487,6 +484,7 @@ class Context:
                     "edges_file": self.edges_neurons_neurons_file(connectome_type=connectome_dir),
                     "population_type": "chemical",
                     "population_name": self.edges_neurons_neurons_name,
+                    "spatial_synapse_index_dir": self.edges_spatial_index_dir,
                 },
             ],
             node_sets_file=self.NODESETS_FILE,
@@ -510,6 +508,7 @@ class Context:
                         "population_name": self.conf.get(
                             ["ngv", "common", "base_circuit", "node_population_name"]
                         ),
+                        "spatial_segment_index_dir": self.nodes_spatial_index_dir,
                         "alternate_morphologies": {
                             "h5v1": _make_abs(
                                 self.paths.bioname_dir,
@@ -532,6 +531,7 @@ class Context:
                         "nodes_file": self.nodes_neurons_file,
                         "population_type": "biophysical",
                         "population_name": self.nodes_neurons_name,
+                        "spatial_segment_index_dir": self.nodes_spatial_index_dir,
                         "alternate_morphologies": {
                             "h5v1": self.if_synthesis(
                                 self.paths.nodes_population_morphologies_dir(
@@ -581,11 +581,13 @@ class Context:
                         "population_name": self.conf.get(
                             ["ngv", "common", "base_circuit", "edge_population_name"]
                         ),
+                        "spatial_synapse_index_dir": self.edges_spatial_index_dir,
                     },
                     {
                         "edges_file": self.edges_neurons_neurons_file(connectome_type="functional"),
                         "population_type": "chemical",
                         "population_name": self.edges_neurons_neurons_name,
+                        "spatial_synapse_index_dir": self.edges_spatial_index_dir,
                     },
                 ),
                 {

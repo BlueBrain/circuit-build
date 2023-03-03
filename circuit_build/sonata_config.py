@@ -89,12 +89,20 @@ def _nodes_config_template(nodes_file, population_name, population_type, **kwarg
     }
 
 
-def _nodes_default(nodes_file, population_name, population_type):
-    return _nodes_config_template(
-        nodes_file=nodes_file,
-        population_name=population_name,
-        population_type=population_type,
-    )
+def _nodes_default(
+    nodes_file,
+    population_name,
+    population_type,
+    spatial_segment_index_dir=None,
+):
+    kwargs = {
+        "nodes_file": nodes_file,
+        "population_name": population_name,
+        "population_type": population_type,
+    }
+    if spatial_segment_index_dir is not None:
+        kwargs["spatial_segment_index_dir"] = spatial_segment_index_dir
+    return _nodes_config_template(**kwargs)
 
 
 def _nodes_biophysical(
@@ -102,6 +110,7 @@ def _nodes_biophysical(
     population_name,
     population_type,
     biophysical_neuron_models_dir,
+    spatial_segment_index_dir,
     morphologies_dir=None,
     alternate_morphologies=None,
 ):
@@ -120,12 +129,17 @@ def _nodes_biophysical(
         population_name=population_name,
         population_type=population_type,
         biophysical_neuron_models_dir=biophysical_neuron_models_dir,
+        spatial_segment_index_dir=spatial_segment_index_dir,
         **morphology_entries,
     )
 
 
 def _nodes_astrocyte(
-    nodes_file, population_name, population_type, morphologies_dir, microdomains_file
+    nodes_file,
+    population_name,
+    population_type,
+    morphologies_dir,
+    microdomains_file,
 ):
     return _nodes_config_template(
         nodes_file=nodes_file,
@@ -137,7 +151,11 @@ def _nodes_astrocyte(
 
 
 def _nodes_vasculature(
-    nodes_file, population_name, population_type, vasculature_file, vasculature_mesh
+    nodes_file,
+    population_name,
+    population_type,
+    vasculature_file,
+    vasculature_mesh,
 ):
     return _nodes_config_template(
         nodes_file=nodes_file,
@@ -155,12 +173,15 @@ def _edges_config_template(edges_file, population_name, population_type, **kwarg
     }
 
 
-def _edges_default(edges_file, population_name, population_type):
-    return _edges_config_template(
-        edges_file=edges_file,
-        population_name=population_name,
-        population_type=population_type,
-    )
+def _edges_default(edges_file, population_name, population_type, spatial_synapse_index_dir=None):
+    kwargs = {
+        "edges_file": edges_file,
+        "population_name": population_name,
+        "population_type": population_type,
+    }
+    if spatial_synapse_index_dir is not None:
+        kwargs["spatial_synapse_index_dir"] = spatial_synapse_index_dir
+    return _edges_config_template(**kwargs)
 
 
 def _edges_endfoot(edges_file, population_name, population_type, endfeet_meshes_file):
