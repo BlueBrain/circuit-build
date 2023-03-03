@@ -22,6 +22,8 @@ In some exceptional cases, it may be desirable to override the modules:
 - with a custom Python virtual environment already existing,
 - with a custom Apptainer/Singularity image already existing.
 
+You can also specify the key ``env_vars`` to add or override environment variables to be set before running the job.
+
 The environments can be overridden adding an ``environments.yaml`` file in the bioname directory, containing only the environments to be overridden.
 
 The configuration file is validated using this :download:`schema <../../circuit_build/snakemake/schemas/environments.yaml>`.

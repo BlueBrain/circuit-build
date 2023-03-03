@@ -334,6 +334,11 @@ like:
         env_vars:
             NEURON_MODULE_OPTIONS: "-nogui"
 
+.. warning::
+
+    Custom environment variables can be set in `environments.yaml` or `cluster.yaml`.
+    The latter has higher precedence, but it can be used only when requiring a slurm allocation.
+
 
 The `YAML` file *must* also contain a `__default__` section which will be used for phases
 without a corresponding section, for instance:

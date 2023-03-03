@@ -443,7 +443,15 @@ class Context:
             custom_env = load_yaml(custom_env_file)
             # validate the custom configuration
             validate_config(custom_env, "environments.yaml")
-            config.update(custom_env["env_config"])
+            for key, partial_conf in custom_env["env_config"].items():
+                env_vars = {
+                    **config[key].pop("env_vars", {}),
+                    **partial_conf.pop("env_vars", {}),
+                }
+                if partial_conf:
+                    config[key] = partial_conf
+                # update env_vars, using the default values if not specified in the custom config
+                config[key]["env_vars"] = env_vars
         # validate the final configuration
         validate_config({"env_config": config}, "environments.yaml")
         return config

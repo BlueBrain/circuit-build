@@ -23,34 +23,45 @@ def _escape_single_quotes(value):
 
 def _get_slurm_config(cluster_config, slurm_env):
     """Return the slurm configuration corresponding to slurm_env."""
+    if not slurm_env or not cluster_config:
+        return {}
     if slurm_env in cluster_config:
-        return cluster_config[slurm_env]
-    if "__default__" in cluster_config:
-        return cluster_config["__default__"]
-    raise ValueError(f"{slurm_env} or __default__ must be defined in cluster configuration")
+        selected = cluster_config[slurm_env]
+    elif "__default__" in cluster_config:
+        selected = cluster_config["__default__"]
+    else:
+        raise ValueError(f"{slurm_env} or __default__ must be defined in cluster configuration")
+    return {"jobname": slurm_env, **selected}
 
 
-def _with_slurm(cmd, cluster_config, slurm_env):
+def _with_slurm(cmd, cluster_config):
     """Wrap the command with slurm/salloc."""
-    slurm_config = _get_slurm_config(cluster_config, slurm_env)
-    jobname = slurm_config.get("jobname", slurm_env)
-    salloc = slurm_config["salloc"]
-    cmd = _escape_single_quotes(cmd)
-    cmd = f"salloc -J {jobname} {salloc} srun sh -c '{cmd}'"
-    # set the environment variables if needed
-    env_vars = slurm_config.get("env_vars")
+    if cluster_config:
+        jobname = cluster_config["jobname"]
+        salloc = cluster_config["salloc"]
+        cmd = _escape_single_quotes(cmd)
+        cmd = f"salloc -J {jobname} {salloc} srun sh -c '{cmd}'"
+    return cmd
+
+
+def _with_env_vars(cmd, env_config, cluster_config):
+    """Wrap the command with exporting the environment variables if needed."""
+    env_vars = {
+        **env_config.get("env_vars", {}),
+        **cluster_config.get("env_vars", {}),
+    }
     if env_vars:
         variables = " ".join(f"{k}={v}" for k, v in env_vars.items())
         cmd = f"export {variables} && {cmd}"
     return cmd
 
 
-def build_module_cmd(cmd, config, cluster_config, slurm_env=None):
+def build_module_cmd(cmd, env_config, cluster_config):
     """Wrap the command with modules."""
-    modulepath = config.get("modulepath", SPACK_MODULEPATH)
-    modules = config["modules"]
-    if slurm_env and cluster_config:
-        cmd = _with_slurm(cmd, cluster_config, slurm_env)
+    modulepath = env_config.get("modulepath", SPACK_MODULEPATH)
+    modules = env_config["modules"]
+    cmd = _with_env_vars(cmd, env_config, cluster_config)
+    cmd = _with_slurm(cmd, cluster_config)
     return " && ".join(
         [
             ". /etc/profile.d/modules.sh",
@@ -64,17 +75,17 @@ def build_module_cmd(cmd, config, cluster_config, slurm_env=None):
     )
 
 
-def build_apptainer_cmd(cmd, config, cluster_config, slurm_env=None):
+def build_apptainer_cmd(cmd, env_config, cluster_config):
     """Wrap the command with apptainer/singularity."""
-    modulepath = config.get("modulepath", APPTAINER_MODULEPATH)
-    modules = config.get("modules", APPTAINER_MODULES)
-    options = config.get("options", APPTAINER_OPTIONS)
-    executable = config.get("executable", APPTAINER_EXECUTABLE)
-    image = Path(APPTAINER_IMAGEPATH, config["image"])
+    modulepath = env_config.get("modulepath", APPTAINER_MODULEPATH)
+    modules = env_config.get("modules", APPTAINER_MODULES)
+    options = env_config.get("options", APPTAINER_OPTIONS)
+    executable = env_config.get("executable", APPTAINER_EXECUTABLE)
+    image = Path(APPTAINER_IMAGEPATH, env_config["image"])
     # the current working directory is used also inside the container
     cmd = f'{executable} exec {options} {image} bash <<EOF\ncd "$(pwd)" && {cmd}\nEOF\n'
-    if slurm_env and cluster_config:
-        cmd = _with_slurm(cmd, cluster_config, slurm_env)
+    cmd = _with_env_vars(cmd, env_config, cluster_config)
+    cmd = _with_slurm(cmd, cluster_config)
     cmd = " && ".join(
         [
             ". /etc/profile.d/modules.sh",
@@ -88,11 +99,11 @@ def build_apptainer_cmd(cmd, config, cluster_config, slurm_env=None):
     return cmd
 
 
-def build_venv_cmd(cmd, config, cluster_config, slurm_env=None):
+def build_venv_cmd(cmd, env_config, cluster_config):
     """Wrap the command with an existing virtual environment."""
-    path = config["path"]
-    if slurm_env and cluster_config:
-        cmd = _with_slurm(cmd, cluster_config, slurm_env)
+    path = env_config["path"]
+    cmd = _with_env_vars(cmd, env_config, cluster_config)
+    cmd = _with_slurm(cmd, cluster_config)
     cmd = f". {path}/bin/activate && {cmd}"
     return cmd
 
@@ -107,19 +118,18 @@ def build_command(cmd, env_config, env_name, cluster_config, slurm_env=None):
         cluster_config (dict): cluster configuration.
         slurm_env (str): key in cluster_config.
     """
-    env_mapping = {
+    selected_env_config = env_config[env_name]
+    selected_cluster_config = _get_slurm_config(cluster_config, slurm_env)
+    func = {
         ENV_TYPE_MODULE: build_module_cmd,
         ENV_TYPE_APPTAINER: build_apptainer_cmd,
         ENV_TYPE_VENV: build_venv_cmd,
-    }
-    config = env_config[env_name]
-    func = env_mapping[config["env_type"]]
+    }[selected_env_config["env_type"]]
     cmd = " ".join(map(str, cmd))
     cmd = func(
         cmd=cmd,
-        config=config,
-        cluster_config=cluster_config,
-        slurm_env=slurm_env,
+        env_config=selected_env_config,
+        cluster_config=selected_cluster_config,
     )
     cmd = redirect_to_file(cmd)
     return cmd

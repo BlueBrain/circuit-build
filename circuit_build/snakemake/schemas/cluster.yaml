@@ -42,7 +42,9 @@ $defs:
         description: Parameters to be passed to ``salloc`` as a string (required).
         type: string
       env_vars:
-        description: Environment variables that should be set before running ``salloc`` (optional).
+        description: |
+          Environment variables that should be set after creating a Slurm allocation with ``salloc`` (optional).
+          If defined, these variables may override the variables with the same names defined in ``environments.yaml``.
         type: object
         propertyNames:
           pattern: "^[A-Za-z_][A-Za-z0-9_]*$"

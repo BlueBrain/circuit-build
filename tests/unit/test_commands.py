@@ -44,6 +44,7 @@ from circuit_build.constants import (
                 "brainbuilder": {
                     "env_type": "MODULE",
                     "modules": ["archive/2022-03", "brainbuilder/0.17.0"],
+                    "env_vars": {"MYVAR2": "VALUE3", "MYVAR3": "VALUE4"},
                 },
             },
             (
@@ -54,11 +55,36 @@ from circuit_build.constants import (
                 "&& module load archive/2022-03 brainbuilder/0.17.0 "
                 f"&& echo MODULEPATH={SPACK_MODULEPATH} "
                 "&& module list "
-                "&& export MYVAR1=VALUE1 MYVAR2=VALUE2 "
                 "&& salloc -J brainbuilder -A ${{SALLOC_ACCOUNT}} -p prod_small --time 0:10:00 "
-                "srun sh -c 'echo mytest'"
+                "srun sh -c '"
+                "export MYVAR2=VALUE2 MYVAR3=VALUE4 MYVAR1=VALUE1 "
+                "&& echo mytest"
+                "'"
             ),
             id="module_with_env_vars",
+        ),
+        pytest.param(
+            "brainbuilder",
+            None,
+            {
+                "brainbuilder": {
+                    "env_type": "MODULE",
+                    "modules": ["archive/2022-03", "brainbuilder/0.17.0"],
+                    "env_vars": {"MYVAR2": "VALUE3", "MYVAR3": "VALUE4"},
+                },
+            },
+            (
+                "set -ex; "
+                ". /etc/profile.d/modules.sh "
+                "&& module purge "
+                f"&& export MODULEPATH={SPACK_MODULEPATH} "
+                "&& module load archive/2022-03 brainbuilder/0.17.0 "
+                f"&& echo MODULEPATH={SPACK_MODULEPATH} "
+                "&& module list "
+                "&& export MYVAR2=VALUE3 MYVAR3=VALUE4 "
+                "&& echo mytest"
+            ),
+            id="module_with_env_vars_without_slurm",
         ),
         pytest.param(
             "brainbuilder",

@@ -13,6 +13,10 @@ Improvements
 ~~~~~~~~~~~~
 - Build segment and synapse indexes using SpatialIndex [NSETM-2101]
 - The `node_sets` rule requires its own configuration section.
+- Some environment variables for Dask and NEURON are set by default in jobs requiring them.
+  See https://bbpteam.epfl.ch/documentation/projects/circuit-build/latest/environments.html for the complete list.
+- Custom environment variables can be set in `environments.yaml` or `cluster.yaml`.
+  The latter has higher precedence, but it can be used only when requiring a slurm allocation.
 
 Removed
 ~~~~~~~

@@ -2,6 +2,9 @@ env_config:
   brainbuilder:
     env_type: MODULE
     modules: [ archive/2022-03, testmodule/0.17.1 ]
+    env_vars:
+      MY_VAR2: "2"
+      MY_VAR3: "3"
   spatialindexer:
     env_type: MODULE
     modules: [ archive/2022-03, testmodule/0.17.1 ]

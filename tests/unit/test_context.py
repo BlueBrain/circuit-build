@@ -1,19 +1,22 @@
-import tempfile
+import json
+import shutil
+from copy import deepcopy
 from pathlib import Path
 from unittest.mock import Mock, patch
 
 import pytest
+from utils import (
+    TEST_NGV_FULL,
+    TEST_NGV_STANDALONE,
+    TEST_PROJ_SYNTH,
+    TEST_PROJ_TINY,
+    cwd,
+    edit_yaml,
+)
 
 from circuit_build import context as test_module
-from circuit_build.utils import load_yaml
-
-from utils import (
-    TEST_PROJ_TINY,
-    TEST_PROJ_SYNTH,
-    TEST_NGV_STANDALONE,
-    TEST_NGV_FULL,
-    cwd,
-)
+from circuit_build.constants import ENV_CONFIG
+from circuit_build.utils import dump_yaml, load_yaml
 
 
 @pytest.mark.parametrize(
@@ -98,6 +101,52 @@ def test_context_init(mocked_path_exists):
     assert ctx.NODESETS_FILE == cwd / "sonata/node_sets.json"
 
 
+def test_context_load_env_config_default():
+    bioname = TEST_PROJ_TINY
+    ctx = _get_context(bioname)
+    result = ctx.load_env_config()
+    expected = ENV_CONFIG
+    assert result == expected
+
+
+def test_context_load_env_config_with_custom_modules(tmp_path):
+    bioname = shutil.copytree(TEST_PROJ_TINY, tmp_path / "bioname")
+    with edit_yaml(bioname / "MANIFEST.yaml") as manifest:
+        del manifest["common"]["emodel_release"]
+        manifest["modules"] = ["brainbuilder:archive/2020-08,brainbuilder/0.14.0"]
+
+    ctx = _get_context(bioname)
+    result = ctx.load_env_config()
+    expected = deepcopy(ENV_CONFIG)
+    expected["brainbuilder"]["modules"] = ["archive/2020-08", "brainbuilder/0.14.0"]
+    assert result == expected
+
+
+def test_context_load_env_config_with_custom_env_vars(tmp_path):
+    bioname = shutil.copytree(TEST_PROJ_TINY, tmp_path / "bioname")
+    environments = {
+        "version": 1,
+        "env_config": {
+            "bluepyemodel": {
+                "env_vars": {
+                    "MY_NEW_VAR": "MY_NEW_VALUE",
+                    "NEURON_MODULE_OPTIONS": "OVERRIDDEN",
+                }
+            },
+        },
+    }
+    dump_yaml(bioname / "environments.yaml", environments)
+
+    ctx = _get_context(bioname)
+    result = ctx.load_env_config()
+    expected = deepcopy(ENV_CONFIG)
+    assert "MY_NEW_VAR" not in expected["bluepyemodel"]["env_vars"]
+    assert expected["bluepyemodel"]["env_vars"]["NEURON_MODULE_OPTIONS"] != "OVERRIDDEN"
+    expected["bluepyemodel"]["env_vars"]["MY_NEW_VAR"] = "MY_NEW_VALUE"
+    expected["bluepyemodel"]["env_vars"]["NEURON_MODULE_OPTIONS"] = "OVERRIDDEN"
+    assert result == expected
+
+
 def test_context_is_isolated_phase():
     bioname = TEST_PROJ_TINY
     ctx = _get_context(bioname)
@@ -106,9 +155,6 @@ def test_context_is_isolated_phase():
 
     with patch.dict("os.environ", ISOLATED_PHASE="True"):
         assert ctx.is_isolated_phase()
-
-
-import json
 
 
 def test_write_network_config__release(tmp_path):

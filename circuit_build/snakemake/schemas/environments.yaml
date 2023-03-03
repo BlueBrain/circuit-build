@@ -31,6 +31,7 @@ properties:
           - $ref: '#/$defs/module_config'
           - $ref: '#/$defs/apptainer_config'
           - $ref: '#/$defs/venv_config'
+          - $ref: '#/$defs/env_vars'
 
 $defs:
   module_config:
@@ -54,6 +55,9 @@ $defs:
         description: Optional base path to the spack modules.
         type: string
         example: "/gpfs/bbp.cscs.ch/ssd/apps/bsd/modules/_meta"
+      env_vars:
+        description: Custom environment variables.
+        type: object
   apptainer_config:
     type: object
     additionalProperties: false
@@ -87,6 +91,9 @@ $defs:
         description: Optional base path to the Apptainer/Singularity spack module.
         type: string
         example: "/gpfs/bbp.cscs.ch/ssd/apps/bsd/modules/_meta"
+      env_vars:
+        description: Custom environment variables.
+        type: object
   venv_config:
     type: object
     additionalProperties: false
@@ -101,3 +108,15 @@ $defs:
         description: Absolute path to the python virtual environment.
         type: string
         example: "/path/to/venv"
+      env_vars:
+        description: Custom environment variables.
+        type: object
+  env_vars:
+    type: object
+    additionalProperties: false
+    required:
+      - env_vars
+    properties:
+      env_vars:
+        description: Custom environment variables.
+        type: object

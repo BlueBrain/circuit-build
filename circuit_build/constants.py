@@ -18,6 +18,27 @@ ENV_TYPE_MODULE = "MODULE"
 ENV_TYPE_APPTAINER = "APPTAINER"
 ENV_TYPE_VENV = "VENV"
 
+ENV_VARS_NEURON_DEFAULT = {
+    "NEURON_MODULE_OPTIONS": "-nogui",
+}
+ENV_VARS_DASK_DEFAULT = {
+    "DASK_TEMPORARY_DIRECTORY": "${{TMPDIR:-/tmp/$USER}}",  # Temporary directory for local storage
+    "DASK_DISTRIBUTED__LOGGING__DISTRIBUTED": "info",
+    "DASK_DISTRIBUTED__WORKER__USE_FILE_LOCKING": "False",
+    "DASK_DISTRIBUTED__WORKER__MEMORY__TARGET": "False",  # don't spill to disk
+    "DASK_DISTRIBUTED__WORKER__MEMORY__SPILL": "False",  # don't spill to disk
+    "DASK_DISTRIBUTED__WORKER__MEMORY__PAUSE": "0.80",  # pause execution at 80% memory use
+    "DASK_DISTRIBUTED__WORKER__MEMORY__TERMINATE": "0.95",  # restart the worker at 95% use
+    "DASK_DISTRIBUTED__WORKER__MULTIPROCESSING_METHOD": "spawn",
+    "DASK_DISTRIBUTED__WORKER__DAEMON": "True",
+    "DASK_DISTRIBUTED__ADMIN__TICK__LIMIT": "3h",  # Time allowed before triggering a warning
+    # Reduce dask profile memory usage/leak (see https://github.com/dask/distributed/issues/4091)
+    "DASK_DISTRIBUTED__WORKER__PROFILE__INTERVAL": "10000ms",  # Time between profiling queries
+    "DASK_DISTRIBUTED__WORKER__PROFILE__CYCLE": "1000000ms",  # Time between starting new profile
+    "DASK_DISTRIBUTED__COMM__TIMEOUTS__TCP": "200000ms",  # Time for handshake
+    "DASK_DISTRIBUTED__COMM__TIMEOUTS__CONNECT": "200000ms",  # Time for handshake
+}
+
 ENV_CONFIG = {
     "brainbuilder": {
         "env_type": ENV_TYPE_MODULE,
@@ -53,6 +74,10 @@ ENV_CONFIG = {
         "env_type": ENV_TYPE_MODULE,
         "modulepath": SPACK_MODULEPATH,
         "modules": ["archive/2022-03", "py-region-grower/0.3.0"],
+        "env_vars": {
+            **ENV_VARS_NEURON_DEFAULT,
+            **ENV_VARS_DASK_DEFAULT,
+        },
     },
     "bluepyemodel": {
         "env_type": ENV_TYPE_MODULE,
@@ -63,6 +88,10 @@ ENV_CONFIG = {
             "py-bglibpy/4.4.36",
             "neurodamus-neocortex/1.4-3.3.2",
         ],
+        "env_vars": {
+            **ENV_VARS_NEURON_DEFAULT,
+            **ENV_VARS_DASK_DEFAULT,
+        },
     },
     "ngv": {
         "env_type": ENV_TYPE_MODULE,
@@ -73,6 +102,10 @@ ENV_CONFIG = {
         "env_type": ENV_TYPE_MODULE,
         "modulepath": SPACK_MODULEPATH,
         "modules": ["archive/2022-06", "py-archngv/2.0.2", "py-mpi4py"],
+        "env_vars": {
+            **ENV_VARS_DASK_DEFAULT,
+            "DASK_DISTRIBUTED__ADMIN__TICK__LIMIT": "1h",
+        },
     },
     "ngv-touchdetector": {
         "env_type": ENV_TYPE_MODULE,
