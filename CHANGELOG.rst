@@ -4,6 +4,10 @@ Changelog
 Version 5.0.0.dev0
 ------------------
 
+New Features
+~~~~~~~~~~~~
+- support for python 3.10
+
 Improvements
 ~~~~~~~~~~~~
 - Spatial index built by SpatialIndex [NSETM-2101]
