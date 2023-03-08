@@ -1,14 +1,11 @@
-doc/build
-tests/functional/ngv-standalone/build
-tests/functional/ngv-full/build
+build
+dist
 coverage.xml
 .coverage
-.tox/
+.tox
 .idea
 .vscode
 .snakemake
-.coverage
-coverage.xml
 *.egg-info
 *.pyc
 __pycache__

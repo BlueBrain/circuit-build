@@ -2,7 +2,7 @@
 
 import importlib.util
 
-from setuptools import setup, find_packages
+from setuptools import find_namespace_packages, setup
 
 with open("README.rst", encoding="utf-8") as f:
     README = f.read()
@@ -40,11 +40,8 @@ setup(
     extras_require={
         "reports": ["snakemake[reports]"],
     },
-    packages=find_packages(),
+    packages=find_namespace_packages(include=["circuit_build*"]),
     include_package_data=True,
-    package_data={
-        "circuit_build": ["circuit_build/snakemake/**/*"],
-    },
     classifiers=[
         "Development Status :: 2 - Pre-Alpha",
         "Programming Language :: Python",
