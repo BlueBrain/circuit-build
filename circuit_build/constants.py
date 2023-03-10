@@ -22,7 +22,7 @@ ENV_CONFIG = {
     "brainbuilder": {
         "env_type": ENV_TYPE_MODULE,
         "modulepath": SPACK_MODULEPATH,
-        "modules": ["archive/2022-03", "brainbuilder/0.17.0"],
+        "modules": ["archive/2023-02", "brainbuilder/0.18.3"],
     },
     "spatialindexer": {
         "env_type": ENV_TYPE_MODULE,
