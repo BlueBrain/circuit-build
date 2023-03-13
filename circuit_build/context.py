@@ -349,6 +349,14 @@ class Context:
         }
         return Path(self.MORPH_RELEASE, type_to_subdir[morphology_type])
 
+    def provenance(self):
+        """Return the provenance part of the population."""
+        return {
+            "provenance": {
+                "bioname_dir": self.paths.bioname_dir,
+            },
+        }
+
     def is_isolated_phase(self):
         """Return True if there is an env var 'ISOLATED_PHASE' set to 'True'."""
         return os.getenv("ISOLATED_PHASE", "False").lower() == "true"
@@ -477,6 +485,7 @@ class Context:
                     **morphologies_entry,
                     "biophysical_neuron_models_dir": self.EMODEL_RELEASE_HOC or "",
                     "spatial_segment_index_dir": self.nodes_spatial_index_dir,
+                    **self.provenance(),
                 },
             ],
             edges=[
@@ -485,6 +494,7 @@ class Context:
                     "population_type": "chemical",
                     "population_name": self.edges_neurons_neurons_name,
                     "spatial_synapse_index_dir": self.edges_spatial_index_dir,
+                    **self.provenance(),
                 },
             ],
             node_sets_file=self.NODESETS_FILE,
@@ -526,6 +536,7 @@ class Context:
                             ),
                         },
                         "biophysical_neuron_models_dir": "",
+                        **self.provenance(),
                     },
                     {
                         "nodes_file": self.nodes_neurons_file,
@@ -547,6 +558,7 @@ class Context:
                             ),
                         },
                         "biophysical_neuron_models_dir": self.EMODEL_RELEASE_HOC or "",
+                        **self.provenance(),
                     },
                 ),
                 {
@@ -555,6 +567,7 @@ class Context:
                     "population_name": self.nodes_astrocytes_name,
                     "morphologies_dir": self.nodes_astrocytes_morphologies_dir,
                     "microdomains_file": self.nodes_astrocytes_microdomains_file,
+                    **self.provenance(),
                 },
                 {
                     "nodes_file": self.nodes_vasculature_file,
@@ -566,6 +579,7 @@ class Context:
                     "vasculature_mesh": _make_abs(
                         self.paths.bioname_dir, self.conf.get(["ngv", "common", "vasculature_mesh"])
                     ),
+                    **self.provenance(),
                 },
             ],
             edges=[
@@ -582,29 +596,34 @@ class Context:
                             ["ngv", "common", "base_circuit", "edge_population_name"]
                         ),
                         "spatial_synapse_index_dir": self.edges_spatial_index_dir,
+                        **self.provenance(),
                     },
                     {
                         "edges_file": self.edges_neurons_neurons_file(connectome_type="functional"),
                         "population_type": "chemical",
                         "population_name": self.edges_neurons_neurons_name,
                         "spatial_synapse_index_dir": self.edges_spatial_index_dir,
+                        **self.provenance(),
                     },
                 ),
                 {
                     "edges_file": self.edges_neurons_astrocytes_file,
                     "population_type": "synapse_astrocyte",
                     "population_name": self.edges_neurons_astrocytes_name,
+                    **self.provenance(),
                 },
                 {
                     "edges_file": self.edges_astrocytes_astrocytes_file,
                     "population_type": "glialglial",
                     "population_name": self.edges_astrocytes_astrocytes_name,
+                    **self.provenance(),
                 },
                 {
                     "edges_file": self.edges_astrocytes_vasculature_file,
                     "population_type": "endfoot",
                     "population_name": self.edges_astrocytes_vasculature_name,
                     "endfeet_meshes_file": self.edges_astrocytes_vasculature_endfeet_meshes_file,
+                    **self.provenance(),
                 },
             ],
             node_sets_file=self.NODESETS_FILE,

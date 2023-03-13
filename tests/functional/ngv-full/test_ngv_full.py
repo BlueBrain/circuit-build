@@ -57,7 +57,6 @@ def test_ngv_full__valid_morpholgies(ngv_full_circuit, population_name, extensio
 
 
 def test_ngv_full___config(build_circuit_full):
-
     expected_sonata_config = {
         "manifest": {
             "$BASE_DIR": ".",
@@ -77,6 +76,7 @@ def test_ngv_full___config(build_circuit_full):
                                 "h5v1": "$BASE_DIR/morphologies/neocortex_neurons",
                             },
                             "biophysical_neuron_models_dir": "",
+                            "provenance": {"bioname_dir": f"{BIONAME_DIR}"},
                         },
                     },
                 },
@@ -89,6 +89,7 @@ def test_ngv_full___config(build_circuit_full):
                                 "h5v1": "$BASE_DIR/morphologies/astrocytes/h5"
                             },
                             "microdomains_file": "$BASE_DIR/sonata/networks/nodes/astrocytes/microdomains.h5",
+                            "provenance": {"bioname_dir": f"{BIONAME_DIR}"},
                         },
                     },
                 },
@@ -99,6 +100,7 @@ def test_ngv_full___config(build_circuit_full):
                             "type": "vasculature",
                             "vasculature_file": f"{ATLAS_DIR}/vasculature.h5",
                             "vasculature_mesh": f"{ATLAS_DIR}/vasculature.obj",
+                            "provenance": {"bioname_dir": f"{BIONAME_DIR}"},
                         },
                     },
                 },
@@ -110,16 +112,27 @@ def test_ngv_full___config(build_circuit_full):
                         "neocortex_neurons__chemical_synapse": {
                             "spatial_synapse_index_dir": "$BASE_DIR/sonata/networks/edges/neocortex_neurons__chemical_synapse/spatial_index",
                             "type": "chemical",
+                            "provenance": {"bioname_dir": f"{BIONAME_DIR}"},
                         },
                     },
                 },
                 {
                     "edges_file": "$BASE_DIR/sonata/networks/edges/neuroglial/edges.h5",
-                    "populations": {"neuroglial": {"type": "synapse_astrocyte"}},
+                    "populations": {
+                        "neuroglial": {
+                            "type": "synapse_astrocyte",
+                            "provenance": {"bioname_dir": f"{BIONAME_DIR}"},
+                        }
+                    },
                 },
                 {
                     "edges_file": "$BASE_DIR/sonata/networks/edges/glialglial/edges.h5",
-                    "populations": {"glialglial": {"type": "glialglial"}},
+                    "populations": {
+                        "glialglial": {
+                            "type": "glialglial",
+                            "provenance": {"bioname_dir": f"{BIONAME_DIR}"},
+                        }
+                    },
                 },
                 {
                     "edges_file": "$BASE_DIR/sonata/networks/edges/gliovascular/edges.h5",
@@ -127,6 +140,7 @@ def test_ngv_full___config(build_circuit_full):
                         "gliovascular": {
                             "type": "endfoot",
                             "endfeet_meshes_file": "$BASE_DIR/sonata/networks/edges/gliovascular/endfeet_meshes.h5",
+                            "provenance": {"bioname_dir": f"{BIONAME_DIR}"},
                         }
                     },
                 },

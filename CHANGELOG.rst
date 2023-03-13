@@ -7,6 +7,7 @@ Version 5.0.0.dev0
 New Features
 ~~~~~~~~~~~~
 - support for python 3.10
+- bioname added to provenance [NSETM-2137]
 
 Improvements
 ~~~~~~~~~~~~

@@ -2,6 +2,7 @@
 import inspect
 import json
 from pathlib import Path
+from typing import Any
 
 
 def build_config(nodes, edges, node_sets_file=None):
@@ -93,12 +94,14 @@ def _nodes_default(
     nodes_file,
     population_name,
     population_type,
+    provenance,
     spatial_segment_index_dir=None,
 ):
     kwargs = {
         "nodes_file": nodes_file,
         "population_name": population_name,
         "population_type": population_type,
+        "provenance": provenance,
     }
     if spatial_segment_index_dir is not None:
         kwargs["spatial_segment_index_dir"] = spatial_segment_index_dir
@@ -111,6 +114,7 @@ def _nodes_biophysical(
     population_type,
     biophysical_neuron_models_dir,
     spatial_segment_index_dir,
+    provenance,
     morphologies_dir=None,
     alternate_morphologies=None,
 ):
@@ -130,6 +134,7 @@ def _nodes_biophysical(
         population_type=population_type,
         biophysical_neuron_models_dir=biophysical_neuron_models_dir,
         spatial_segment_index_dir=spatial_segment_index_dir,
+        provenance=provenance,
         **morphology_entries,
     )
 
@@ -140,6 +145,7 @@ def _nodes_astrocyte(
     population_type,
     morphologies_dir,
     microdomains_file,
+    provenance,
 ):
     return _nodes_config_template(
         nodes_file=nodes_file,
@@ -147,6 +153,7 @@ def _nodes_astrocyte(
         population_type=population_type,
         alternate_morphologies={"h5v1": morphologies_dir},
         microdomains_file=microdomains_file,
+        provenance=provenance,
     )
 
 
@@ -156,6 +163,7 @@ def _nodes_vasculature(
     population_type,
     vasculature_file,
     vasculature_mesh,
+    provenance,
 ):
     return _nodes_config_template(
         nodes_file=nodes_file,
@@ -163,6 +171,7 @@ def _nodes_vasculature(
         population_type=population_type,
         vasculature_file=vasculature_file,
         vasculature_mesh=vasculature_mesh,
+        provenance=provenance,
     )
 
 
@@ -173,23 +182,27 @@ def _edges_config_template(edges_file, population_name, population_type, **kwarg
     }
 
 
-def _edges_default(edges_file, population_name, population_type, spatial_synapse_index_dir=None):
+def _edges_default(
+    edges_file, population_name, population_type, provenance, spatial_synapse_index_dir=None
+):
     kwargs = {
         "edges_file": edges_file,
         "population_name": population_name,
         "population_type": population_type,
+        "provenance": provenance,
     }
     if spatial_synapse_index_dir is not None:
         kwargs["spatial_synapse_index_dir"] = spatial_synapse_index_dir
     return _edges_config_template(**kwargs)
 
 
-def _edges_endfoot(edges_file, population_name, population_type, endfeet_meshes_file):
+def _edges_endfoot(edges_file, population_name, population_type, endfeet_meshes_file, provenance):
     return _edges_config_template(
         edges_file=edges_file,
         population_name=population_name,
         population_type=population_type,
         endfeet_meshes_file=endfeet_meshes_file,
+        provenance=provenance,
     )
 
 
@@ -241,7 +254,6 @@ def resolve_config_paths(config, circuit_dir, base_dir):
 
 
 def _resolve_path(path, circuit_dir, base_dir):
-
     path = str(path)
 
     if path.startswith("$") or path == "":
@@ -250,7 +262,6 @@ def _resolve_path(path, circuit_dir, base_dir):
     path = Path(path)
 
     if path.is_absolute():
-
         if path.is_relative_to(base_dir):
             return str(Path("$BASE_DIR", path.relative_to(base_dir)))
 
@@ -262,8 +273,10 @@ def _resolve_path(path, circuit_dir, base_dir):
 
 
 def _resolve_populations(populations_dict, circuit_dir, base_dir):
-    def resolve_entry(key, value):
+    def resolve_dictionary(data: dict[str, Any]) -> dict[str, Any]:
+        return {key: resolve_entry(key, value) for key, value in data.items()}
 
+    def resolve_entry(key: str, value: Any) -> Any:
         if key.endswith(("file", "dir", "mesh")):
             return _resolve_path(value, circuit_dir, base_dir)
 
@@ -273,11 +286,13 @@ def _resolve_populations(populations_dict, circuit_dir, base_dir):
                 for alt_key, alt_path in value.items()
             }
 
+        if isinstance(value, dict):
+            return resolve_dictionary(value)
+
         return value
 
     return {
-        pop_name: {key: resolve_entry(key, value) for key, value in pop_dict.items()}
-        for pop_name, pop_dict in populations_dict.items()
+        pop_name: resolve_dictionary(pop_dict) for pop_name, pop_dict in populations_dict.items()
     }
 
 

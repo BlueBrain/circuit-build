@@ -29,7 +29,6 @@ from utils import (
     ],
 )
 def test_make_abs(parent_dir, path, expected):
-
     path = test_module._make_abs(parent_dir, path)
     assert path == expected
 
@@ -100,7 +99,6 @@ def test_context_init(mocked_path_exists):
 
 
 def test_context_is_isolated_phase():
-
     bioname = TEST_PROJ_TINY
     ctx = _get_context(bioname)
 
@@ -114,14 +112,12 @@ import json
 
 
 def test_write_network_config__release(tmp_path):
-
     circuit_dir = tmp_path / "test_write_network_config__release"
     circuit_dir.mkdir()
 
     bioname = TEST_PROJ_TINY
 
     with cwd(circuit_dir):
-
         ctx = _get_context(bioname)
 
         filepath = circuit_dir / "circuit_config.json"
@@ -148,6 +144,9 @@ def test_write_network_config__release(tmp_path):
                                 "neurolucida-asc": "/gpfs/bbp.cscs.ch/project/proj66/entities/morphologies/2018.02.16/ascii",
                             },
                             "biophysical_neuron_models_dir": "/gpfs/bbp.cscs.ch/project/proj66/entities/emodels/2018.02.26.dev0/hoc",
+                            "provenance": {
+                                "bioname_dir": f"{bioname}",
+                            },
                         }
                     },
                 }
@@ -159,6 +158,9 @@ def test_write_network_config__release(tmp_path):
                         "neocortex_neurons__chemical_synapse": {
                             "spatial_synapse_index_dir": "$BASE_DIR/sonata/networks/edges/neocortex_neurons__chemical_synapse/spatial_index",
                             "type": "chemical",
+                            "provenance": {
+                                "bioname_dir": f"{bioname}",
+                            },
                         }
                     },
                 }
@@ -168,14 +170,12 @@ def test_write_network_config__release(tmp_path):
 
 
 def test_write_network_config__synthesis(tmp_path):
-
     circuit_dir = tmp_path / "test_write_network_config__synthesis"
     circuit_dir.mkdir()
 
     bioname = TEST_PROJ_SYNTH
 
     with cwd(circuit_dir):
-
         ctx = _get_context(bioname)
 
         filepath = circuit_dir / "circuit_config.json"
@@ -202,6 +202,9 @@ def test_write_network_config__synthesis(tmp_path):
                                 "neurolucida-asc": "$BASE_DIR/morphologies/neocortex_neurons",
                             },
                             "biophysical_neuron_models_dir": "",
+                            "provenance": {
+                                "bioname_dir": f"{bioname}",
+                            },
                         }
                     },
                 }
@@ -213,6 +216,9 @@ def test_write_network_config__synthesis(tmp_path):
                         "neocortex_neurons__chemical_synapse": {
                             "spatial_synapse_index_dir": "$BASE_DIR/sonata/networks/edges/neocortex_neurons__chemical_synapse/spatial_index",
                             "type": "chemical",
+                            "provenance": {
+                                "bioname_dir": f"{bioname}",
+                            },
                         }
                     },
                 }
@@ -222,7 +228,6 @@ def test_write_network_config__synthesis(tmp_path):
 
 
 def test_write_network_config__ngv_standalone(tmp_path):
-
     circuit_dir = tmp_path / "test_write_network_config__ngv_standalone"
     circuit_dir.mkdir()
 
@@ -230,7 +235,6 @@ def test_write_network_config__ngv_standalone(tmp_path):
     data = TEST_NGV_STANDALONE.parent / "data"
 
     with cwd(circuit_dir):
-
         ctx = _get_context(bioname)
 
         filepath = circuit_dir / "circuit_config.json"
@@ -254,6 +258,9 @@ def test_write_network_config__ngv_standalone(tmp_path):
                         "neurolucida-asc": f"{data}/circuit/morphologies",
                         "h5v1": f"{data}/circuit/morphologies",
                     },
+                    "provenance": {
+                        "bioname_dir": f"{bioname}",
+                    },
                 }
             },
         },
@@ -264,6 +271,9 @@ def test_write_network_config__ngv_standalone(tmp_path):
                     "type": "astrocyte",
                     "alternate_morphologies": {"h5v1": "$BASE_DIR/morphologies/astrocytes/h5"},
                     "microdomains_file": "$BASE_DIR/sonata/networks/nodes/astrocytes/microdomains.h5",
+                    "provenance": {
+                        "bioname_dir": f"{bioname}",
+                    },
                 }
             },
         },
@@ -274,6 +284,9 @@ def test_write_network_config__ngv_standalone(tmp_path):
                     "type": "vasculature",
                     "vasculature_file": f"{data}/atlas/vasculature.h5",
                     "vasculature_mesh": f"{data}/atlas/vasculature.obj",
+                    "provenance": {
+                        "bioname_dir": f"{bioname}",
+                    },
                 }
             },
         },
@@ -285,16 +298,33 @@ def test_write_network_config__ngv_standalone(tmp_path):
                 "All": {
                     "type": "chemical",
                     "spatial_synapse_index_dir": "$BASE_DIR/sonata/networks/edges/neocortex_neurons__chemical_synapse/spatial_index",
+                    "provenance": {
+                        "bioname_dir": f"{bioname}",
+                    },
                 }
             },
         },
         {
             "edges_file": "$BASE_DIR/sonata/networks/edges/neuroglial/edges.h5",
-            "populations": {"neuroglial": {"type": "synapse_astrocyte"}},
+            "populations": {
+                "neuroglial": {
+                    "type": "synapse_astrocyte",
+                    "provenance": {
+                        "bioname_dir": f"{bioname}",
+                    },
+                },
+            },
         },
         {
             "edges_file": "$BASE_DIR/sonata/networks/edges/glialglial/edges.h5",
-            "populations": {"glialglial": {"type": "glialglial"}},
+            "populations": {
+                "glialglial": {
+                    "type": "glialglial",
+                    "provenance": {
+                        "bioname_dir": f"{bioname}",
+                    },
+                },
+            },
         },
         {
             "edges_file": "$BASE_DIR/sonata/networks/edges/gliovascular/edges.h5",
@@ -302,6 +332,9 @@ def test_write_network_config__ngv_standalone(tmp_path):
                 "gliovascular": {
                     "type": "endfoot",
                     "endfeet_meshes_file": "$BASE_DIR/sonata/networks/edges/gliovascular/endfeet_meshes.h5",
+                    "provenance": {
+                        "bioname_dir": f"{bioname}",
+                    },
                 }
             },
         },
@@ -309,7 +342,6 @@ def test_write_network_config__ngv_standalone(tmp_path):
 
 
 def test_write_network_config__ngv_full(tmp_path):
-
     circuit_dir = tmp_path / "test_write_network_config"
     circuit_dir.mkdir()
 
@@ -317,12 +349,11 @@ def test_write_network_config__ngv_full(tmp_path):
     atlas = TEST_NGV_FULL.parent / "atlas"
 
     with cwd(circuit_dir):
-
         ctx = _get_context(bioname)
 
         filepath = circuit_dir / "circuit_config.json"
 
-        res = ctx.write_network_ngv_config(output_file=filepath)
+        ctx.write_network_ngv_config(output_file=filepath)
 
         with open(filepath, "r", encoding="utf-8") as fd:
             config = json.load(fd)
@@ -341,7 +372,10 @@ def test_write_network_config__ngv_full(tmp_path):
                         "neurolucida-asc": "$BASE_DIR/morphologies/neocortex_neurons",
                         "h5v1": "$BASE_DIR/morphologies/neocortex_neurons",
                     },
-                }
+                    "provenance": {
+                        "bioname_dir": f"{bioname}",
+                    },
+                },
             },
         },
         {
@@ -351,6 +385,9 @@ def test_write_network_config__ngv_full(tmp_path):
                     "type": "astrocyte",
                     "alternate_morphologies": {"h5v1": "$BASE_DIR/morphologies/astrocytes/h5"},
                     "microdomains_file": "$BASE_DIR/sonata/networks/nodes/astrocytes/microdomains.h5",
+                    "provenance": {
+                        "bioname_dir": f"{bioname}",
+                    },
                 }
             },
         },
@@ -361,6 +398,9 @@ def test_write_network_config__ngv_full(tmp_path):
                     "type": "vasculature",
                     "vasculature_file": f"{atlas}/vasculature.h5",
                     "vasculature_mesh": f"{atlas}/vasculature.obj",
+                    "provenance": {
+                        "bioname_dir": f"{bioname}",
+                    },
                 }
             },
         },
@@ -372,16 +412,33 @@ def test_write_network_config__ngv_full(tmp_path):
                 "neocortex_neurons__chemical_synapse": {
                     "type": "chemical",
                     "spatial_synapse_index_dir": "$BASE_DIR/sonata/networks/edges/neocortex_neurons__chemical_synapse/spatial_index",
+                    "provenance": {
+                        "bioname_dir": f"{bioname}",
+                    },
                 }
             },
         },
         {
             "edges_file": "$BASE_DIR/sonata/networks/edges/neuroglial/edges.h5",
-            "populations": {"neuroglial": {"type": "synapse_astrocyte"}},
+            "populations": {
+                "neuroglial": {
+                    "type": "synapse_astrocyte",
+                    "provenance": {
+                        "bioname_dir": f"{bioname}",
+                    },
+                },
+            },
         },
         {
             "edges_file": "$BASE_DIR/sonata/networks/edges/glialglial/edges.h5",
-            "populations": {"glialglial": {"type": "glialglial"}},
+            "populations": {
+                "glialglial": {
+                    "type": "glialglial",
+                    "provenance": {
+                        "bioname_dir": f"{bioname}",
+                    },
+                },
+            },
         },
         {
             "edges_file": "$BASE_DIR/sonata/networks/edges/gliovascular/edges.h5",
@@ -389,7 +446,15 @@ def test_write_network_config__ngv_full(tmp_path):
                 "gliovascular": {
                     "type": "endfoot",
                     "endfeet_meshes_file": "$BASE_DIR/sonata/networks/edges/gliovascular/endfeet_meshes.h5",
+                    "provenance": {
+                        "bioname_dir": f"{bioname}",
+                    },
                 }
             },
         },
     ]
+
+
+def test_provenance():
+    context = _get_context(TEST_PROJ_TINY)
+    assert context.provenance() == {"provenance": {"bioname_dir": context.paths.bioname_dir}}

@@ -78,12 +78,10 @@ def _filenames_verify_cardinality(actual_directory, expected_directory):
 
 
 def test_build__glia_morphologies(build_circuit):
-
     filenames = _filenames_verify_cardinality(
         BUILD_DIR / "morphologies/astrocytes/h5", EXPECTED_DIR / "morphologies"
     )
     for filename in filenames:
-
         diff_result = morphio_diff.diff(
             BUILD_DIR / "morphologies/astrocytes/h5" / filename,
             EXPECTED_DIR / "morphologies" / filename,
@@ -92,7 +90,6 @@ def test_build__glia_morphologies(build_circuit):
 
 
 def _h5_compare(actual_filepath, expected_filepath):
-
     assert actual_filepath.exists()
     assert expected_filepath.exists()
 
@@ -104,7 +101,6 @@ def _h5_compare(actual_filepath, expected_filepath):
 
 
 def test_build__sonata_nodes(build_circuit):
-
     actual_files = sorted(Path(BUILD_DIR / "sonata/networks/nodes").rglob("**/*.h5"))
     expected_files = sorted(Path(EXPECTED_DIR / "sonata/networks/nodes").rglob("**/*.h5"))
 
@@ -117,7 +113,6 @@ def test_build__sonata_nodes(build_circuit):
 
 
 def test_build__sonata_edges(build_circuit):
-
     actual_files = sorted(Path(BUILD_DIR / "sonata/networks/edges").rglob("**/*.h5"))
     expected_files = sorted(Path(EXPECTED_DIR / "sonata/networks/edges").rglob("**/*.h5"))
 
@@ -130,7 +125,6 @@ def test_build__sonata_edges(build_circuit):
 
 
 def test_build__config(build_circuit):
-
     expected_sonata_config = {
         "manifest": {
             "$BASE_DIR": ".",
@@ -150,6 +144,7 @@ def test_build__config(build_circuit):
                                 "h5v1": f"{DATA_DIR}/circuit/morphologies",
                             },
                             "biophysical_neuron_models_dir": "",
+                            "provenance": {"bioname_dir": f"{BIONAME_DIR}"},
                         },
                     },
                 },
@@ -162,6 +157,7 @@ def test_build__config(build_circuit):
                                 "h5v1": "$BASE_DIR/morphologies/astrocytes/h5"
                             },
                             "microdomains_file": "$BASE_DIR/sonata/networks/nodes/astrocytes/microdomains.h5",
+                            "provenance": {"bioname_dir": f"{BIONAME_DIR}"},
                         },
                     },
                 },
@@ -172,6 +168,7 @@ def test_build__config(build_circuit):
                             "type": "vasculature",
                             "vasculature_file": f"{DATA_DIR}/atlas/vasculature.h5",
                             "vasculature_mesh": f"{DATA_DIR}/atlas/vasculature.obj",
+                            "provenance": {"bioname_dir": f"{BIONAME_DIR}"},
                         },
                     },
                 },
@@ -183,16 +180,27 @@ def test_build__config(build_circuit):
                         "All": {
                             "type": "chemical",
                             "spatial_synapse_index_dir": "$BASE_DIR/sonata/networks/edges/neocortex_neurons__chemical_synapse/spatial_index",
+                            "provenance": {"bioname_dir": f"{BIONAME_DIR}"},
                         },
                     },
                 },
                 {
                     "edges_file": "$BASE_DIR/sonata/networks/edges/neuroglial/edges.h5",
-                    "populations": {"neuroglial": {"type": "synapse_astrocyte"}},
+                    "populations": {
+                        "neuroglial": {
+                            "type": "synapse_astrocyte",
+                            "provenance": {"bioname_dir": f"{BIONAME_DIR}"},
+                        }
+                    },
                 },
                 {
                     "edges_file": "$BASE_DIR/sonata/networks/edges/glialglial/edges.h5",
-                    "populations": {"glialglial": {"type": "glialglial"}},
+                    "populations": {
+                        "glialglial": {
+                            "type": "glialglial",
+                            "provenance": {"bioname_dir": f"{BIONAME_DIR}"},
+                        }
+                    },
                 },
                 {
                     "edges_file": "$BASE_DIR/sonata/networks/edges/gliovascular/edges.h5",
@@ -200,6 +208,7 @@ def test_build__config(build_circuit):
                         "gliovascular": {
                             "type": "endfoot",
                             "endfeet_meshes_file": "$BASE_DIR/sonata/networks/edges/gliovascular/endfeet_meshes.h5",
+                            "provenance": {"bioname_dir": f"{BIONAME_DIR}"},
                         }
                     },
                 },
@@ -214,7 +223,6 @@ def test_build__config(build_circuit):
 
 @pytest.mark.skip(reason="Disable circuit integrity for now. No atlases in new configs")
 def test_integrity(circuit):
-
     # TODO: remove the atlases checks from archngv
     # the new config does not store the atlases and
     # results in this failing
@@ -222,7 +230,6 @@ def test_integrity(circuit):
 
 
 def test_integrity__neuroglial_connectome__property_dtypes(circuit):
-
     ng_conn = circuit.neuroglial_connectome
 
     prop_dtypes = {
@@ -245,7 +252,6 @@ def test_integrity__neuroglial_connectome__property_dtypes(circuit):
     )
 
     for property_name, expected_dtype in prop_dtypes.items():
-
         arr = ng_conn.get([0, 1], property_name)
         npt.assert_equal(arr.dtype, expected_dtype)
 
@@ -278,7 +284,6 @@ def test_integrity__neuroglial_connectome__annotation_equivalency(circuit):
         segment_offset,
         expected_section_pos,
     ) in data.itertuples():
-
         points = astro_morphs[astrocyte_id].sections[section_id].points
         segment_lengths = np.linalg.norm(points[1:] - points[:-1], axis=1)
 
@@ -296,7 +301,6 @@ def test_integrity__neuroglial_connectome__annotation_equivalency(circuit):
 
 
 def test_integrity__gliovascular_connectome__property_dtypes(circuit):
-
     gv_conn = circuit.gliovascular_connectome
 
     prop_dtypes = {
@@ -348,12 +352,10 @@ def test_integrity__vasculature_representations_consistency(circuit):
     sonata_edges = sonata_vasculature.edges
 
     for aid in range(astrocytes.size):
-
         endfeet_ids = gv_connectivity.astrocyte_endfeet(aid)
         data = gv_connectivity.vasculature_sections_segments(endfeet_ids).to_numpy(dtype=np.int64)
 
         for edge_id, sec_id, seg_id in data:
-
             sonata_segment = sonata_points[sonata_edges[edge_id]]
             morphio_segment = morphio_sections[sec_id].points[seg_id : seg_id + 2]
 

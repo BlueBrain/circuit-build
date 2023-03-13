@@ -22,7 +22,7 @@ Bioname
 
 We address the folder for storing circuit build recipes as circuit `bioname`.
 
-Absolute path to this folder can be found in SONATA in the *provenance* attribute.
+Absolute path to this folder can be found in SONATA in the dictionary in the *provenance* attribute under key *bioname*.
 
 In particular, the following files should be placed there:
 

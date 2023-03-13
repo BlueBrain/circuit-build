@@ -56,10 +56,21 @@ def test_nodes_default():
         population_name="name",
         population_type="type",
         spatial_segment_index_dir="path/to/index",
+        provenance={
+            "bioname_dir": "path/to/dir",
+        },
     )
     assert result == {
         "nodes_file": "file",
-        "populations": {"name": {"spatial_segment_index_dir": "path/to/index", "type": "type"}},
+        "populations": {
+            "name": {
+                "spatial_segment_index_dir": "path/to/index",
+                "type": "type",
+                "provenance": {
+                    "bioname_dir": "path/to/dir",
+                },
+            }
+        },
     }
 
 
@@ -71,6 +82,9 @@ def test_nodes_biophysical():
         morphologies_dir="morphdir",
         biophysical_neuron_models_dir="biomodir",
         spatial_segment_index_dir="path/to/index",
+        provenance={
+            "bioname_dir": "path/to/dir",
+        },
     )
     assert result == {
         "nodes_file": "file",
@@ -80,6 +94,9 @@ def test_nodes_biophysical():
                 "spatial_segment_index_dir": "path/to/index",
                 "morphologies_dir": "morphdir",
                 "biophysical_neuron_models_dir": "biomodir",
+                "provenance": {
+                    "bioname_dir": "path/to/dir",
+                },
             }
         },
     }
@@ -92,6 +109,9 @@ def test_nodes_astrocyte():
         population_type="type",
         morphologies_dir="morphdir",
         microdomains_file="mfile",
+        provenance={
+            "bioname_dir": "path/to/dir",
+        },
     )
     assert result == {
         "nodes_file": "file",
@@ -100,6 +120,9 @@ def test_nodes_astrocyte():
                 "type": "type",
                 "alternate_morphologies": {"h5v1": "morphdir"},
                 "microdomains_file": "mfile",
+                "provenance": {
+                    "bioname_dir": "path/to/dir",
+                },
             }
         },
     }
@@ -112,6 +135,9 @@ def test_nodes_vasculature():
         population_type="type",
         vasculature_file="vfile",
         vasculature_mesh="vmesh",
+        provenance={
+            "bioname_dir": "path/to/dir",
+        },
     )
     assert result == {
         "nodes_file": "file",
@@ -120,6 +146,9 @@ def test_nodes_vasculature():
                 "type": "type",
                 "vasculature_file": "vfile",
                 "vasculature_mesh": "vmesh",
+                "provenance": {
+                    "bioname_dir": "path/to/dir",
+                },
             }
         },
     }
@@ -131,6 +160,9 @@ def tested_edges_config_template():
         population_name="name",
         population_type="type",
         extra1="e1",
+        provenance={
+            "bioname_dir": "path/to/dir",
+        },
     )
     assert result == {
         "edges_file": "file",
@@ -138,6 +170,9 @@ def tested_edges_config_template():
             "name": {
                 "type": "type",
                 "extra1": "e1",
+                "provenance": {
+                    "bioname_dir": "path/to/dir",
+                },
             }
         },
     }
@@ -149,10 +184,21 @@ def tested_edges_default():
         population_name="name",
         population_type="type",
         spatial_synapse_index_dir="path/to/index",
+        provenance={
+            "bioname_dir": "path/to/dir",
+        },
     )
     assert result == {
         "edges_file": "file",
-        "populations": {"name": {"type": "type", "spatial_synapse_index_dir": "path/to/index"}},
+        "populations": {
+            "name": {
+                "type": "type",
+                "spatial_synapse_index_dir": "path/to/index",
+                "provenance": {
+                    "bioname_dir": "path/to/dir",
+                },
+            }
+        },
     }
 
 
@@ -162,10 +208,21 @@ def tested_edges_endfoot():
         population_name="name",
         population_type="type",
         endfeet_meshes_file="mfile",
+        provenance={
+            "bioname_dir": "path/to/dir",
+        },
     )
     assert result == {
         "edges_file": "file",
-        "populations": {"name": {"type": "type", "endfeet_meshes_file": "mfile"}},
+        "populations": {
+            "name": {
+                "type": "type",
+                "endfeet_meshes_file": "mfile",
+                "provenance": {
+                    "bioname_dir": "path/to/dir",
+                },
+            }
+        },
     }
 
 
@@ -192,13 +249,15 @@ def tested_resolve_path(circuit_dir, base_dir, path, expected):
 
 
 def _node_population(circuit_dir, name, kind):
-
     if kind == "virtual":
         return {
             "nodes_file": f"{circuit_dir}/sonata/networks/nodes/{name}/nodes.h5",
             "population_name": name,
             "population_type": "virtual",
             "spatial_segment_index_dir": "path/to/index",
+            "provenance": {
+                "bioname_dir": "path/to/dir",
+            },
         }
     if kind == "biophysical":
         return {
@@ -208,6 +267,9 @@ def _node_population(circuit_dir, name, kind):
             "morphologies_dir": f"{circuit_dir}/morphologies/{name}/swc",
             "biophysical_neuron_models_dir": "/path/to/hoc",
             "spatial_segment_index_dir": "path/to/index",
+            "provenance": {
+                "bioname_dir": "path/to/dir",
+            },
         }
     if kind == "astrocyte":
         return {
@@ -216,6 +278,9 @@ def _node_population(circuit_dir, name, kind):
             "population_type": kind,
             "morphologies_dir": f"{circuit_dir}/morphologies/{name}/h5",
             "microdomains_file": f"{circuit_dir}/sonata/networks/nodes/{name}/microdomains.h5",
+            "provenance": {
+                "bioname_dir": "path/to/dir",
+            },
         }
     if kind == "vasculature":
         return {
@@ -224,6 +289,9 @@ def _node_population(circuit_dir, name, kind):
             "population_type": kind,
             "vasculature_file": "path/to/skeleton",
             "vasculature_mesh": "/path/to/mesh",
+            "provenance": {
+                "bioname_dir": "path/to/dir",
+            },
         }
     raise KeyError(f"kind {kind} is not registered in _node_population helper.")
 
@@ -233,7 +301,13 @@ def _node_population_expected(name, kind):
         return {
             "nodes_file": f"$BASE_DIR/networks/nodes/{name}/nodes.h5",
             "populations": {
-                name: {"type": kind, "spatial_segment_index_dir": "$BASE_DIR/path/to/index"}
+                name: {
+                    "type": kind,
+                    "spatial_segment_index_dir": "$BASE_DIR/path/to/index",
+                    "provenance": {
+                        "bioname_dir": "$BASE_DIR/path/to/dir",
+                    },
+                }
             },
         }
     if kind == "biophysical":
@@ -245,6 +319,9 @@ def _node_population_expected(name, kind):
                     "morphologies_dir": f"$BASE_DIR/../morphologies/{name}/swc",
                     "biophysical_neuron_models_dir": "/path/to/hoc",
                     "spatial_segment_index_dir": "$BASE_DIR/path/to/index",
+                    "provenance": {
+                        "bioname_dir": "$BASE_DIR/path/to/dir",
+                    },
                 },
             },
         }
@@ -256,6 +333,9 @@ def _node_population_expected(name, kind):
                     "type": kind,
                     "alternate_morphologies": {"h5v1": f"$BASE_DIR/../morphologies/{name}/h5"},
                     "microdomains_file": f"$BASE_DIR/networks/nodes/{name}/microdomains.h5",
+                    "provenance": {
+                        "bioname_dir": "$BASE_DIR/path/to/dir",
+                    },
                 },
             },
         }
@@ -267,6 +347,9 @@ def _node_population_expected(name, kind):
                     "type": kind,
                     "vasculature_file": "$BASE_DIR/path/to/skeleton",
                     "vasculature_mesh": "/path/to/mesh",
+                    "provenance": {
+                        "bioname_dir": "$BASE_DIR/path/to/dir",
+                    },
                 },
             },
         }
@@ -274,19 +357,24 @@ def _node_population_expected(name, kind):
 
 
 def _edge_population(circuit_dir, name, kind):
-
     if kind == "chemical":
         return {
             "edges_file": f"{circuit_dir}/sonata/networks/edges/functional/{name}/edges.h5",
             "population_name": name,
             "population_type": kind,
             "spatial_synapse_index_dir": "path/to/index",
+            "provenance": {
+                "bioname_dir": "path/to/dir",
+            },
         }
     if kind == "synapse_astrocyte":
         return {
             "edges_file": f"{circuit_dir}/sonata/networks/edges/{name}/edges.h5",
             "population_name": name,
             "population_type": kind,
+            "provenance": {
+                "bioname_dir": "path/to/dir",
+            },
         }
     if kind == "endfoot":
         return {
@@ -294,19 +382,24 @@ def _edge_population(circuit_dir, name, kind):
             "population_name": name,
             "population_type": kind,
             "endfeet_meshes_file": f"{circuit_dir}/sonata/networks/edges/{name}/endfeet_meshes.h5",
+            "provenance": {
+                "bioname_dir": "path/to/dir",
+            },
         }
     if kind == "glialglial":
         return {
             "edges_file": f"{circuit_dir}/sonata/networks/edges/{name}/edges.h5",
             "population_name": name,
             "population_type": kind,
+            "provenance": {
+                "bioname_dir": "path/to/dir",
+            },
         }
 
     raise KeyError(f"kind {kind} is not registered in _edge_population helper.")
 
 
 def _edge_population_expected(name, kind):
-
     if kind == "chemical":
         return {
             "edges_file": f"$BASE_DIR/networks/edges/functional/{name}/edges.h5",
@@ -314,13 +407,23 @@ def _edge_population_expected(name, kind):
                 name: {
                     "type": kind,
                     "spatial_synapse_index_dir": "$BASE_DIR/path/to/index",
+                    "provenance": {
+                        "bioname_dir": "$BASE_DIR/path/to/dir",
+                    },
                 }
             },
         }
     if kind == "synapse_astrocyte":
         return {
             "edges_file": f"$BASE_DIR/networks/edges/{name}/edges.h5",
-            "populations": {name: {"type": kind}},
+            "populations": {
+                name: {
+                    "type": kind,
+                    "provenance": {
+                        "bioname_dir": "$BASE_DIR/path/to/dir",
+                    },
+                },
+            },
         }
     if kind == "endfoot":
         return {
@@ -329,19 +432,28 @@ def _edge_population_expected(name, kind):
                 name: {
                     "type": kind,
                     "endfeet_meshes_file": f"$BASE_DIR/networks/edges/{name}/endfeet_meshes.h5",
+                    "provenance": {
+                        "bioname_dir": "$BASE_DIR/path/to/dir",
+                    },
                 }
             },
         }
     if kind == "glialglial":
         return {
             "edges_file": f"$BASE_DIR/networks/edges/{name}/edges.h5",
-            "populations": {name: {"type": kind}},
+            "populations": {
+                name: {
+                    "type": kind,
+                    "provenance": {
+                        "bioname_dir": "$BASE_DIR/path/to/dir",
+                    },
+                },
+            },
         }
     raise KeyError(f"kind {kind} is not registered in _edge_population_expected helper.")
 
 
 def _build_write_load_config(filepath, circuit_dir, nodes, edges, node_sets_file):
-
     tested.write_config(filepath, circuit_dir, nodes, edges, node_sets_file)
 
     with open(filepath, "r", encoding="utf-8") as f:
@@ -357,7 +469,6 @@ def mock_circuit_dir(tmp_path_factory):
 
 
 def test_write_config__equivalence(mock_circuit_dir):
-
     filepath1 = mock_circuit_dir / "sonata/test_write_config_1.json"
     filepath2 = mock_circuit_dir / "sonata/test_write_config_2.json"
     circuit_dir = filepath1.resolve().parent.parent
