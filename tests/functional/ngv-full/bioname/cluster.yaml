@@ -78,15 +78,17 @@ touchdetector:
     -n2
     --time 0:05:00
 
+# running on 'prod' instead of 'prod_small' to avoid enqueuing with reason QOSMaxMemoryPerUser
 spykfunc_s2f:
   jobname: s2f
-  salloc: '-A ${{SALLOC_ACCOUNT}} -p prod_small --ntasks-per-node=1 -C nvme --exclusive --mem 0 --time 0:15:00'
+  salloc: '-A ${{SALLOC_ACCOUNT}} -p prod --ntasks-per-node=1 -C nvme --exclusive --mem 0 --time 0:15:00'
 
+# running on 'prod' instead of 'prod_small' to avoid enqueuing with reason QOSMaxMemoryPerUser
 spykfunc_s2s:
   jobname: s2s
-  salloc: '-A ${{SALLOC_ACCOUNT}} -p prod_small --ntasks-per-node=1 -C nvme --exclusive --mem 0 --time 0:15:00'
+  salloc: '-A ${{SALLOC_ACCOUNT}} -p prod --ntasks-per-node=1 -C nvme --exclusive --mem 0 --time 0:15:00'
 
-# running on 'prod' since '-C nvme' is not available on 'prod_small'
+# running on 'prod' instead of 'prod_small' to avoid enqueuing with reason QOSMaxMemoryPerUser
 spykfunc_merge:
   jobname: merge
   salloc: '-A ${{SALLOC_ACCOUNT}} -p prod --ntasks-per-node=1 -C nvme --exclusive --mem 0 --time 0:15:00'
