@@ -103,7 +103,6 @@ def test_validate_edge_population_name_raises():
 
 
 def test_validate_morphology_release(tmp_path):
-
     path = tmp_path / "morphology-release"
     path.mkdir()
 

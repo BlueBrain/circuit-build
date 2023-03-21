@@ -22,7 +22,6 @@ def assert_equal_cells(c0, c1):
 
 
 def test_default_rule(tmp_path):
-
     with cwd(tmp_path):
         runner = CliRunner()
         result = runner.invoke(run, SNAKEMAKE_ARGS + ["assign_emodels"], catch_exceptions=False)
@@ -37,7 +36,6 @@ def test_default_rule(tmp_path):
 
 
 def test_node_sets(tmp_path):
-
     with cwd(tmp_path):
         runner = CliRunner()
         result = runner.invoke(run, SNAKEMAKE_ARGS + ["node_sets"], catch_exceptions=False)

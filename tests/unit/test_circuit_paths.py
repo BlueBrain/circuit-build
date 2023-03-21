@@ -19,14 +19,12 @@ SELF_DIR = Path(__file__).resolve().parent
     ],
 )
 def test_circuit_paths__attributes(attribute, expected):
-
     paths = CircuitPaths(circuit_dir=SELF_DIR / "build", bioname_dir=SELF_DIR / "bioname")
 
     assert getattr(paths, attribute) == expected
 
 
 def test_circuit_paths__methods():
-
     circuit_dir = SELF_DIR / "build"
     bioname_dir = SELF_DIR / "bioname"
 

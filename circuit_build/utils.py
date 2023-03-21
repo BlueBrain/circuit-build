@@ -21,10 +21,32 @@ def dump_yaml(filepath, data, sort_keys=False):
         return yaml.safe_dump(data, fd, sort_keys=sort_keys)
 
 
+def if_then_else(condition, true_value, false_value):
+    """Return ``true_value`` if condition, else ``false_value``.
+
+    This can be used in Snakefile for better formatting.
+    """
+    return true_value if condition else false_value
+
+
 def format_if(template, value, func=None):
     """Return the template formatted, or empty string if value is None."""
     func = func or (lambda x: x)
     return template.format(func(value)) if value is not None else ""
+
+
+def format_dict_to_list(template, values):
+    """Return a list of templates formatted with keys and values from the given dict of values.
+
+    Args:
+        template (str): template to be formatted with keys and values. It should contain
+            `key` and `value` variables, for example: "--atlas-property {key} {value}".
+        values (dict): dict of keys and values to be used to format the template.
+
+    Returns:
+        list of strings obtained after formatting template with each key and value.
+    """
+    return [template.format(key=k, value=v) for k, v in values.items()]
 
 
 def redirect_to_file(cmd, filename="{log}"):

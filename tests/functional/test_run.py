@@ -33,11 +33,9 @@ def _initialize_git(path):
 
 
 def test_functional_all(tmp_path):
-
     data_dir = TEST_PROJ_TINY
 
     with cwd(tmp_path):
-
         data_copy_dir = tmp_path / data_dir.name
         shutil.copytree(data_dir, data_copy_dir)
 
@@ -106,7 +104,6 @@ def test_functional_all(tmp_path):
 
 
 def test_no_emodel(tmp_path):
-
     data_dir = TEST_PROJ_TINY
 
     with cwd(tmp_path):
@@ -123,7 +120,6 @@ def test_no_emodel(tmp_path):
 
 
 def test_custom_module(tmp_path, caplog, capfd):
-
     with cwd(tmp_path):
         args = SNAKEMAKE_ARGS + ["-m", "brainbuilder:invalid_module1:invalid_module_path"]
         runner = CliRunner(mix_stderr=False)
@@ -176,7 +172,6 @@ def test_bioname_ignore_git_if_isolated_phase(tmp_path):
         _assert_git_not_initialized(path=data_copy_dir)
 
         with patch.dict("os.environ", ISOLATED_PHASE="True"):
-
             args = ["--bioname", str(data_copy_dir), "-u", str(data_copy_dir / "cluster.yaml")]
             runner = CliRunner(mix_stderr=False)
 
@@ -263,11 +258,9 @@ def test_snakemake_bioname_with_git(tmp_path):
 
 
 def test_isolated_phase(tmp_path):
-
     data_dir = TEST_PROJ_TINY
 
     with cwd(tmp_path):
-
         data_copy_dir = Path(tmp_path) / data_dir.name
         shutil.copytree(data_dir, data_copy_dir)
 
@@ -275,7 +268,6 @@ def test_isolated_phase(tmp_path):
             del manifest["common"]["morph_release"]
 
         with patch.dict("os.environ", ISOLATED_PHASE="True"):
-
             args = [
                 "--jobs",
                 "8",

@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-from circuit_build.utils import format_if, write_with_log
+from circuit_build.utils import format_dict_to_list, format_if, if_then_else, write_with_log
 
 
 rule init_cells:
@@ -47,26 +47,28 @@ rule place_cells:
                 ctx.ATLAS,
                 "--atlas-cache",
                 ctx.ATLAS_CACHE_DIR,
-                f"--mini-frequencies {ctx.paths.bioname_path('mini_frequencies.tsv')}"
-                if ctx.conf.get(["place_cells", "mini_frequencies"], default=False)
-                else "",
+                if_then_else(
+                    ctx.conf.get(["place_cells", "mini_frequencies"], default=False),
+                    f"--mini-frequencies {ctx.paths.bioname_path('mini_frequencies.tsv')}",
+                    "",
+                ),
                 format_if("--region {}", ctx.conf.get(["common", "region"])),
                 format_if("--mask {}", ctx.conf.get(["common", "mask"])),
                 "--soma-placement",
                 ctx.conf.get(["place_cells", "soma_placement"]),
                 "--density-factor",
                 ctx.conf.get(["place_cells", "density_factor"], default=1.0),
-            ]
-            + [
-                f"--atlas-property {k} {v}"
-                for k, v in ctx.conf.get(
-                    ["place_cells", "atlas_property"], default={"region": "~brain_regions"}
-                ).items()
-            ]
-            + [
-                "--append-hemisphere"
-                if ctx.conf.get(["place_cells", "append_hemisphere"], default=False)
-                else "",
+                *format_dict_to_list(
+                    "--atlas-property {key} {value}",
+                    ctx.conf.get(
+                        ["place_cells", "atlas_property"], default={"region": "~brain_regions"}
+                    ),
+                ),
+                if_then_else(
+                    ctx.conf.get(["place_cells", "append_hemisphere"], default=False),
+                    "--append-hemisphere",
+                    "",
+                ),
                 format_if(
                     "--sort-by {}",
                     value=ctx.conf.get(["place_cells", "sort_by"]),
@@ -517,9 +519,11 @@ rule targetgen:
                     value=ctx.conf.get(["targetgen", "targets"]),
                     func=ctx.paths.bioname_path,
                 ),
-                "--allow-empty"
-                if ctx.conf.get(["targetgen", "allow_empty"], default=False)
-                else "",
+                if_then_else(
+                    ctx.conf.get(["targetgen", "allow_empty"], default=False),
+                    "--allow-empty",
+                    "",
+                ),
                 "--atlas",
                 ctx.ATLAS,
                 "--atlas-cache",
@@ -553,9 +557,11 @@ rule node_sets:
                     value=ctx.conf.get(["targetgen", "targets"]),
                     func=ctx.paths.bioname_path,
                 ),
-                "--allow-empty"
-                if ctx.conf.get(["targetgen", "allow_empty"], default=False)
-                else "",
+                if_then_else(
+                    ctx.conf.get(["targetgen", "allow_empty"], default=False),
+                    "--allow-empty",
+                    "",
+                ),
                 "--population",
                 ctx.nodes_neurons_name,
                 "--atlas",

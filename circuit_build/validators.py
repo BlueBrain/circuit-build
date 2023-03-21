@@ -104,7 +104,6 @@ def validate_morphology_release(directory):
     subdir_to_extension = {"ascii": "asc", "h5v1": "h5"}
 
     def get_morphology_names(path):
-
         suffix = f".{subdir_to_extension[path.stem]}"
         filenames = {f.removesuffix(suffix) for f in os.listdir(path) if f.endswith(suffix)}
 
@@ -128,7 +127,6 @@ def validate_morphology_release(directory):
 
     target_filenames = get_morphology_names(subdir_paths[0])
     for subdir in subdir_paths[1:]:
-
         if target_filenames != get_morphology_names(subdir):
             raise ValidationError(
                 f"Morphology release at {directory} has mismatching files "

@@ -13,11 +13,9 @@ from circuit_build.constants import INDEX_FILES
 
 
 def test_synthesis(tmp_path):
-
     data_dir = TEST_PROJ_SYNTH
 
     with cwd(tmp_path):
-
         data_copy_dir = tmp_path / data_dir.name
         shutil.copytree(data_dir, data_copy_dir)
 
