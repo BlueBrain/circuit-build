@@ -34,7 +34,6 @@ def test_synthesis(tmp_path):
 
         assert tmp_path.joinpath("sonata/node_sets.json").stat().st_size > 100
         assert tmp_path.joinpath("sonata/circuit_config.json").stat().st_size > 100
-        assert tmp_path.joinpath("start.target").stat().st_size > 100
 
         for index_file in INDEX_FILES:
             index_file_path = (

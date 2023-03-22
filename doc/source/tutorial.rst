@@ -137,7 +137,6 @@ After the command above has completed, the following files could be found in cir
 ::
 
     circuit.h5
-    start.target
 
 At this point the circuit is partially complete and should be readable by
 `BluePy <https://bbpteam.epfl.ch/documentation/projects/bluepy/latest/index.html>`_ for analysis not
@@ -221,7 +220,7 @@ instead of:
 .. note::
 
     You can also build structural circuit *in addition* to the functional one.
-    They do not conflict with each other, but share the common files (`circuit.h5`, `start.target` etc).
+    They do not conflict with each other, but share the common files (`circuit.h5`, `node_sets.json` etc).
     Structural circuit would be available via `struct_circuit_config.json` file.
 
 .. raw:: html

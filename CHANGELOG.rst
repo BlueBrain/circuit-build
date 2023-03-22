@@ -1,21 +1,24 @@
 Changelog
 =========
 
-Version 5.0.0.dev0
-------------------
+Version 5.0.0
+-------------
 
 New Features
 ~~~~~~~~~~~~
-- support for python 3.10
-- bioname added to provenance [NSETM-2137]
+- Add bioname path into the provenance dict in circuit config [NSETM-2137]
+- Add explicit support for python 3.10
 
 Improvements
 ~~~~~~~~~~~~
-- Spatial index built by SpatialIndex [NSETM-2101]
+- Build segment and synapse indexes using SpatialIndex [NSETM-2101]
+- The `node_sets` rule requires its own configuration section.
 
 Removed
 ~~~~~~~
-- output of CircuitConfig
+- Remove creation of legacy configuration files CircuitConfig and CircuitConfig_struct.
+- Remove targetgen configuration and start.target output.
+- Move circuit.h5 from the root output directory to `auxiliary`.
 
 
 Version 4.1.0 (2022-12-15)

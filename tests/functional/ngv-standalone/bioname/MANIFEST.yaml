@@ -30,7 +30,7 @@ synthesize_morphologies:
 assign_emodels:
   seed: 0
 
-targetgen:
+node_sets:
   targets: 'targets.yaml'
 
 ngv:

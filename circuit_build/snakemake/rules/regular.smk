@@ -242,17 +242,15 @@ rule synthesize_morphologies:
         )
 
 
-rule assign_emodels_per_type:
+rule assign_emodels:
     message:
         "Assign electrical models"
     input:
         ctx.paths.auxiliary_path("circuit.morphologies.h5"),
     output:
-        "circuit.{ext}",
+        ctx.paths.auxiliary_path("circuit.h5"),
     log:
-        ctx.log_path("assign_emodels_per_type_{ext}"),
-    wildcard_constraints:
-        ext="h5|mvd3",
+        ctx.log_path("assign_emodels_per_type"),
     shell:
         ctx.bbp_env(
             "brainbuilder",
@@ -298,16 +296,11 @@ rule compute_ais_scales:
         )
 
 
-rule assign_emodels:
-    input:
-        expand(["circuit.{ext}"], ext=["h5", "mvd3"]),
-
-
 rule provide_me_info:
     message:
         "Provide MorphoElectrical info for SONATA nodes"
     input:
-        "circuit.h5",
+        ctx.paths.auxiliary_path("circuit.h5"),
     output:
         ctx.nodes_neurons_file,
     log:
@@ -497,44 +490,6 @@ rule spykfunc_merge:
         ctx.run_spykfunc("spykfunc_merge")
 
 
-rule targetgen:
-    message:
-        "Generate start.target file"
-    input:
-        ctx.if_synthesis(
-            ctx.paths.auxiliary_path("circuit.synthesized_morphologies.h5"),
-            "circuit.h5",
-        ),
-    output:
-        "start.target",
-    log:
-        ctx.log_path("targetgen"),
-    shell:
-        ctx.bbp_env(
-            "brainbuilder",
-            [
-                "brainbuilder targets from-input",
-                format_if(
-                    "--targets {}",
-                    value=ctx.conf.get(["targetgen", "targets"]),
-                    func=ctx.paths.bioname_path,
-                ),
-                if_then_else(
-                    ctx.conf.get(["targetgen", "allow_empty"], default=False),
-                    "--allow-empty",
-                    "",
-                ),
-                "--atlas",
-                ctx.ATLAS,
-                "--atlas-cache",
-                ctx.ATLAS_CACHE_DIR,
-                "--output {output}",
-                "{input}",
-            ],
-            slurm_env="targetgen",
-        )
-
-
 rule node_sets:
     message:
         "Generate SONATA node sets"
@@ -554,11 +509,11 @@ rule node_sets:
                 "brainbuilder targets node-sets",
                 format_if(
                     "--targets {}",
-                    value=ctx.conf.get(["targetgen", "targets"]),
+                    value=ctx.conf.get(["node_sets", "targets"]),
                     func=ctx.paths.bioname_path,
                 ),
                 if_then_else(
-                    ctx.conf.get(["targetgen", "allow_empty"], default=False),
+                    ctx.conf.get(["node_sets", "allow_empty"], default=False),
                     "--allow-empty",
                     "",
                 ),
@@ -654,7 +609,7 @@ rule subcellular:
     message:
         "Assign gene expressions / protein concentrations to cells"
     input:
-        file="circuit.h5",
+        file=ctx.paths.auxiliary_path("circuit.h5"),
         directory="subcellular",
     output:
         "subcellular.h5",
@@ -705,10 +660,9 @@ rule circuitconfig_struct_sonata:
 rule functional:
     input:
         "sonata/circuit_config.json",
-        ctx.nodes_neurons_file,
         ctx.NODESETS_FILE,
+        ctx.nodes_neurons_file,
         ctx.edges_neurons_neurons_file(connectome_type="functional"),
-        "start.target",
         ctx.nodes_spatial_index_files,
         ctx.edges_spatial_index_files,
 
@@ -719,6 +673,3 @@ rule structural:
         ctx.NODESETS_FILE,
         ctx.nodes_neurons_file,
         ctx.edges_neurons_neurons_file(connectome_type="structural"),
-        "start.target",
-        ctx.nodes_spatial_index_files,
-        ctx.edges_spatial_index_files,

@@ -15,23 +15,30 @@ A typical circuit release folder would look like:
       node_sets.json
       networks/
         nodes/
-          <nodes Sonata population name, by default 'All'>/
+          <nodes Sonata population name>/
+            spatial_index/
             nodes.h5
         edges/
+          <edges Sonata population name>/
+            spatial_index/
           functional/
-            <edges Sonata population name, by default 'All'>/
+            <edges Sonata population name>/
               edges.h5
-    start.target
-    morphologies.tsv
+          structural/
+            <edges Sonata population name>/
+              edges.h5
+    auxiliary/morphologies.tsv
 
     # the ones below are side-effects of building
     connectome/
-      functional/
-        spykfunc
-    circuit.empty.h5
-    circuit.h5
-    circuit.morphologies.h5
-    circuit.somata.h5
+      <edges Sonata population name>/
+        functional/
+          spykfunc/
+        touches/
+    auxiliary/circuit.empty.h5
+    auxiliary/circuit.h5
+    auxiliary/circuit.morphologies.h5
+    auxiliary/circuit.somata.h5
 
 .. note::
   All of these files are normally produced as a part of circuit build pipeline.
@@ -53,24 +60,25 @@ Roughly equivalent to the legacy CircuitConfig file.
 
 **node_sets.json**
 Generated `Node Sets`_ for the `SONATA`_ circuit.
-Roughly equivalent to the start.targets file.
-
-
-**start.target**
-
-Text file defining cell *targets* (i.e. named collections of cell GIDs), e.g.:
+Roughly equivalent to the legacy `start.target` file.
 
   ::
 
-    Target Cell All
     {
-      SLM_PPA SO_BP
+      "All": {
+        "population": "neocortex_neurons"
+      },
+      "Excitatory": {
+        "synapse_class": "EXC"
+      },
+      "Inhibitory": {
+        "synapse_class": "INH"
+      },
+      "L23_MC": {
+        "mtype": "L23_MC"
+      }
     }
 
-    Target Cell SLM_PPA
-    {
-      a1 a2 a42
-    }
 
 Auxiliary Data
 ~~~~~~~~~~~~~~

@@ -20,7 +20,6 @@ patternProperties:
     spykfunc_s2s|\
     spykfunc_s2f|\
     spykfunc_merge|\
-    targetgen|\
     node_sets|\
     spatial_index_segment|\
     parquet_to_sonata|\

@@ -54,7 +54,6 @@ def test_functional_all(tmp_path):
 
         assert tmp_path.joinpath("sonata/node_sets.json").stat().st_size > 100
         assert tmp_path.joinpath("sonata/circuit_config.json").stat().st_size > 100
-        assert tmp_path.joinpath("start.target").stat().st_size > 100
 
         for index_file in INDEX_FILES:
             index_file_path = (
@@ -96,8 +95,9 @@ def test_functional_all(tmp_path):
                 == f"$BASE_DIR/networks/edges/functional/{edge_population_name}/edges.h5"
             )
 
+        circuit = bluepysnap.Circuit(tmp_path / "sonata/circuit_config.json")
         assert_node_population_morphologies_accessible(
-            circuit=bluepysnap.Circuit(tmp_path / "sonata/circuit_config.json"),
+            circuit,
             population_name=node_population_name,
             extensions=["asc", "h5"],
         )
@@ -116,7 +116,7 @@ def test_no_emodel(tmp_path):
         runner = CliRunner()
         result = runner.invoke(run, args + ["assign_emodels"], catch_exceptions=False)
         assert result.exit_code == 0
-        assert tmp_path.joinpath("circuit.h5").stat().st_size > 100
+        assert tmp_path.joinpath("auxiliary", "circuit.h5").stat().st_size > 100
 
 
 def test_custom_module(tmp_path, caplog, capfd):

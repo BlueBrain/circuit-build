@@ -329,13 +329,13 @@ properties:
         type: integer
         default: 0
 
-  targetgen:
+  node_sets:
     type: object
     additionalProperties: false
     properties:
       targets:
         description: |
-          :ref:`Target definitions <ref-bioname-targets>` file to use for generating ``start.target`` or ``node_sets.json``.
+          :ref:`Target definitions <ref-bioname-targets>` file to use for generating ``node_sets.json``.
 
           Should be located in ``bioname`` folder.
         type: string

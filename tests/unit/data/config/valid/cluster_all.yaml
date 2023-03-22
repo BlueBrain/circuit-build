@@ -30,8 +30,6 @@ spykfunc_s2f:
   salloc: '-p prod_small'
 spykfunc_merge:
   salloc: '-p prod_small'
-targetgen:
-  salloc: '-p prod_small'
 node_sets:
   salloc: '-p prod_small'
 spatial_index_segment:

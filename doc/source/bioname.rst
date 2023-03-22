@@ -35,7 +35,7 @@ In particular, the following files should be placed there:
 * ``mini_frequencies.tsv`` (when `place_cells`: mini_frequencies is used)
 
 Optionally, `bioname` can also contain YAML files with cell target definitions.
-If used, these should be referenced from :ref:`ref-phase-targetgen` section in ``MANIFEST.yaml``.
+If used, these should be referenced from :ref:`ref-phase-node_sets` section in ``MANIFEST.yaml``.
 
 .. _ref-manifest-yaml:
 
@@ -202,7 +202,7 @@ Target definitions (YAML)
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Custom targets to be added to the circuit.
-During circuit build, they are resolved into named GID sets stored in ``start.target``.
+During circuit build, they are resolved into node sets stored in ``node_sets.json``.
 
 Two types of queries are supported:
 
