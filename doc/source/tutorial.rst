@@ -160,7 +160,7 @@ Building connectome involves two phases: :ref:`ref-phase-touchdetector`, followe
 
     $ circuit-build run --bioname /path/to/bioname --cluster-config /path/to/cluster.yaml functional
 
-After the command above has completed, any analysis not involving spatial indices should be possible.
+The command above will build also segment and synapse indices, unless the option ``no_index: true`` is set in ``MANIFEST.yaml``.
 
 
 .. raw:: html
@@ -179,7 +179,7 @@ After the command above has completed, any analysis not involving spatial indice
 Spatial indices
 ~~~~~~~~~~~~~~~
 
-To build *segment* spatial index:
+To build *segment* spatial index alone:
 
 .. code-block:: bash
 
@@ -199,6 +199,15 @@ Segment spatial index requires only cell collection, and thus can be built prior
 .. raw:: html
 
     </details>
+
+
+To build *synapse* spatial index:
+
+.. code-block:: bash
+
+    $ circuit-build run --bioname /path/to/bioname --cluster-config /path/to/cluster.yaml spatial_index_synapse
+
+Synapse spatial index requires the connectome, and thus can be built only after pruning the synapses as in the functional rule.
 
 
 Structural circuit

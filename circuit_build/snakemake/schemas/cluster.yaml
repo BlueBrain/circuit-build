@@ -22,6 +22,7 @@ patternProperties:
     spykfunc_merge|\
     node_sets|\
     spatial_index_segment|\
+    spatial_index_synapse|\
     parquet_to_sonata|\
     subcellular|\
     synthesize_glia$"

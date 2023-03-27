@@ -165,6 +165,7 @@ class Context:
         self.SYNTHESIZE_PROTOCOL_CONFIG = self.paths.bioname_path("protocol_config.yaml")
 
         self.SYNTHESIZE = self.conf.get(["common", "synthesis"], default=False)
+        self.NO_INDEX = self.conf.get(["common", "no_index"], default=False)
         self.SYNTHESIZE_MORPH_DIR = self.paths.nodes_population_morphologies_dir(
             self.nodes_neurons_name
         )
@@ -364,6 +365,10 @@ class Context:
     def if_synthesis(self, true_value, false_value):
         """Return ``true_value`` if synthesis is enabled, else ``false_value``."""
         return true_value if self.SYNTHESIZE else false_value
+
+    def if_no_index(self, true_value, false_value):
+        """Return ``true_value`` if no_index is enabled, else ``false_value``."""
+        return true_value if self.NO_INDEX else false_value
 
     def if_partition(self, true_value, false_value):
         """Return ``true_value`` if partitions are enabled, else ``false_value``."""

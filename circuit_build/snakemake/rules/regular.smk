@@ -663,8 +663,13 @@ rule functional:
         ctx.NODESETS_FILE,
         ctx.nodes_neurons_file,
         ctx.edges_neurons_neurons_file(connectome_type="functional"),
-        ctx.nodes_spatial_index_files,
-        ctx.edges_spatial_index_files,
+        *ctx.if_no_index(
+            [],
+            [
+                ctx.nodes_spatial_index_files,
+                ctx.edges_spatial_index_files,
+            ],
+        ),
 
 
 rule structural:

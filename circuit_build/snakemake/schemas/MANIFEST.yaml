@@ -101,6 +101,11 @@ properties:
                 * ``tmd_parameters.json``
         type: boolean
         default: false
+      no_index:
+        description: |
+          If ``true``,  skip the creation of indexes when executing the `functional` rule.
+        type: boolean
+        default: false
       partition:
         description: |
           | Define the list of non-overlapping nodesets to touchdetect and functionalize separately.
