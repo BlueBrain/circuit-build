@@ -75,6 +75,27 @@ To use an existing custom virtual environment, you can add an ``environments.yam
         env_type: VENV
         path: /absolute/path/to/existing/venv/
 
+The configuration key ``path`` should be set to the directory containing the existing python virtual environment.
+Alternatively, it may be set to any existing file, that will be sourced before executing the commands in the rule.
+
+If needed, it's possible to specify some optional keys as in the following example:
+
+.. code-block:: yaml
+
+    version: 1
+    env_config:
+      brainbuilder:
+        env_type: VENV
+        path: /absolute/path/to/existing/venv/
+        modulepath: /path/to/spack/modules
+        modules:
+        - archive/2023-02
+        - hpe-mpi/2.25.hmpt
+
+.. warning::
+
+    In most cases, you shouldn't load modules that modify PYTHONPATH to avoid issues with conflicting versions of the libraries.
+
 
 Overriding with a custom Apptainer/Singularity image
 ----------------------------------------------------

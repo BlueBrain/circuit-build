@@ -21,6 +21,18 @@ def _escape_single_quotes(value):
     return value.replace("'", "'\\''")
 
 
+def _get_source_file(path):
+    """Return the activation file if the path is a venv directory, or the same path otherwise."""
+    path = Path(path)
+    if path.is_dir():
+        path = path / "bin" / "activate"
+    if not path.is_file():
+        raise ValueError(
+            "The given path must be a virtualenv directory, or a file that will be sourced as is."
+        )
+    return path
+
+
 def _get_slurm_config(cluster_config, slurm_env):
     """Return the slurm configuration corresponding to slurm_env."""
     if not slurm_env or not cluster_config:
@@ -100,11 +112,25 @@ def build_apptainer_cmd(cmd, env_config, cluster_config):
 
 
 def build_venv_cmd(cmd, env_config, cluster_config):
-    """Wrap the command with an existing virtual environment."""
-    path = env_config["path"]
+    """Wrap the command with an existing virtual environment, or source a custom file."""
+    source = _get_source_file(env_config["path"])
+    cmd = f". {source} && {cmd}"
     cmd = _with_env_vars(cmd, env_config, cluster_config)
     cmd = _with_slurm(cmd, cluster_config)
-    cmd = f". {path}/bin/activate && {cmd}"
+    modulepath = env_config.get("modulepath", SPACK_MODULEPATH)
+    modules = env_config.get("modules")
+    if modules:
+        cmd = " && ".join(
+            [
+                ". /etc/profile.d/modules.sh",
+                "module purge",
+                f"export MODULEPATH={modulepath}",
+                f"module load {' '.join(modules)}",
+                f"echo MODULEPATH={modulepath}",
+                "module list",
+                cmd,
+            ]
+        )
     return cmd
 
 

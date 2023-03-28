@@ -1,3 +1,6 @@
+from pathlib import Path
+from unittest.mock import patch
+
 import pytest
 
 from circuit_build import commands as test_module
@@ -9,6 +12,63 @@ from circuit_build.constants import (
     APPTAINER_OPTIONS,
     SPACK_MODULEPATH,
 )
+
+VENV_DIR = "/path/to/venv"
+VENV_ACTIVATE_FILE = f"{VENV_DIR}/bin/activate"
+
+
+def test_get_source_file_with_existing_script(tmp_path):
+    test_path = tmp_path / "test"
+    test_path.touch()
+    assert test_path.is_file()
+
+    result = test_module._get_source_file(str(test_path))
+
+    assert isinstance(result, Path)
+    assert result == test_path
+
+
+def test_get_source_file_with_existing_venv(tmp_path):
+    test_path = tmp_path / "test"
+    expected = test_path / "bin" / "activate"
+    expected.parent.mkdir(parents=True)
+    expected.touch()
+    assert test_path.is_dir()
+    assert expected.is_file()
+
+    result = test_module._get_source_file(str(test_path))
+
+    assert isinstance(result, Path)
+    assert result == expected
+
+
+def test_get_source_file_with_not_existing_venv(tmp_path):
+    test_path = tmp_path / "test"
+    test_path.mkdir()
+    assert test_path.is_dir()
+
+    with pytest.raises(
+        ValueError,
+        match=(
+            "The given path must be a virtualenv directory, "
+            "or a file that will be sourced as is."
+        ),
+    ):
+        test_module._get_source_file(str(test_path))
+
+
+def test_get_source_file_with_not_existing_path(tmp_path):
+    test_path = tmp_path / "test"
+    assert not test_path.is_dir()
+
+    with pytest.raises(
+        ValueError,
+        match=(
+            "The given path must be a virtualenv directory, "
+            "or a file that will be sourced as is."
+        ),
+    ):
+        test_module._get_source_file(str(test_path))
 
 
 @pytest.mark.parametrize("log_all_to_stderr", [True, False])
@@ -151,42 +211,99 @@ from circuit_build.constants import (
             "brainbuilder",
             "brainbuilder",
             {
-                "brainbuilder": {"env_type": "VENV", "path": "/path/to/venv"},
+                "brainbuilder": {"env_type": "VENV", "path": VENV_DIR},
             },
             (
                 "set -ex; "
-                ". /path/to/venv/bin/activate "
-                "&& salloc -J brainbuilder -A ${{SALLOC_ACCOUNT}} -p prod_small --time 0:10:00 "
-                "srun sh -c 'echo mytest'"
+                "salloc -J brainbuilder -A ${{SALLOC_ACCOUNT}} -p prod_small --time 0:10:00 "
+                "srun sh -c '"
+                f". {VENV_ACTIVATE_FILE} "
+                "&& echo mytest'"
             ),
             id="venv",
         ),
         pytest.param(
             "brainbuilder",
+            "brainbuilder",
+            {
+                "brainbuilder": {
+                    "env_type": "VENV",
+                    "path": VENV_DIR,
+                    "modules": ["archive/2023-02", "hpe-mpi/2.25.hmpt"],
+                },
+            },
+            (
+                "set -ex; "
+                ". /etc/profile.d/modules.sh "
+                "&& module purge "
+                f"&& export MODULEPATH={SPACK_MODULEPATH} "
+                "&& module load archive/2023-02 hpe-mpi/2.25.hmpt "
+                f"&& echo MODULEPATH={SPACK_MODULEPATH} "
+                "&& module list "
+                "&& salloc -J brainbuilder -A ${{SALLOC_ACCOUNT}} -p prod_small --time 0:10:00 "
+                "srun sh -c '"
+                f". {VENV_ACTIVATE_FILE} "
+                "&& echo mytest'"
+            ),
+            id="venv_with_modules",
+        ),
+        pytest.param(
+            "brainbuilder",
+            "brainbuilder",
+            {
+                "brainbuilder": {
+                    "env_type": "VENV",
+                    "path": VENV_DIR,
+                    "modules": ["archive/2023-02", "hpe-mpi/2.25.hmpt"],
+                    "env_vars": {"MYVAR2": "VALUE3", "MYVAR3": "VALUE4"},
+                },
+            },
+            (
+                "set -ex; "
+                ". /etc/profile.d/modules.sh "
+                "&& module purge "
+                f"&& export MODULEPATH={SPACK_MODULEPATH} "
+                "&& module load archive/2023-02 hpe-mpi/2.25.hmpt "
+                f"&& echo MODULEPATH={SPACK_MODULEPATH} "
+                "&& module list "
+                "&& salloc -J brainbuilder -A ${{SALLOC_ACCOUNT}} -p prod_small --time 0:10:00 "
+                "srun sh -c '"
+                "export MYVAR2=VALUE3 MYVAR3=VALUE4 "
+                f"&& . {VENV_ACTIVATE_FILE} "
+                "&& echo mytest'"
+            ),
+            id="venv_with_modules_and_env_vars",
+        ),
+        pytest.param(
+            "brainbuilder",
             None,
             {
-                "brainbuilder": {"env_type": "VENV", "path": "/path/to/venv"},
+                "brainbuilder": {"env_type": "VENV", "path": VENV_DIR},
             },
-            "set -ex; . /path/to/venv/bin/activate && echo mytest",
+            f"set -ex; . {VENV_ACTIVATE_FILE} && echo mytest",
             id="venv_without_slurm",
         ),
         pytest.param(
             "touchdetector",
             "touchdetector",
             {
-                "touchdetector": {"env_type": "VENV", "path": "/path/to/venv"},
+                "touchdetector": {"env_type": "VENV", "path": VENV_DIR},
             },
             (
                 "set -ex; "
-                ". /path/to/venv/bin/activate "
-                "&& salloc -J touchdetector -A ${{SALLOC_ACCOUNT}} -p prod_small --time 0:05:00 "
-                "srun sh -c 'echo mytest'"
+                "salloc -J touchdetector -A ${{SALLOC_ACCOUNT}} -p prod_small --time 0:05:00 "
+                "srun sh -c '"
+                f". {VENV_ACTIVATE_FILE} "
+                "&& echo mytest'"
             ),
             id="fallback_to_default_cluster",
         ),
     ],
 )
-def test_build_command(env_name, slurm_env, env_config, expected, log_all_to_stderr, monkeypatch):
+@patch(f"{test_module.__name__}._get_source_file", return_value=Path(VENV_ACTIVATE_FILE))
+def test_build_command(
+    mock_get_source_file, env_name, slurm_env, env_config, expected, log_all_to_stderr, monkeypatch
+):
     if log_all_to_stderr:
         monkeypatch.setenv("LOG_ALL_TO_STDERR", "true")
         expected = f"set -o pipefail; ( {expected} ) 2>&1 | tee -a {{log}} 1>&2"
@@ -216,7 +333,7 @@ def test_build_command(env_name, slurm_env, env_config, expected, log_all_to_std
 def test_build_command_raises_when_slurm_env_is_missing():
     env_name = "brainbuilder"
     slurm_env = "brainbuilder"
-    env_config = {"brainbuilder": {"env_type": "VENV", "path": "/path/to/venv"}}
+    env_config = {"brainbuilder": {"env_type": "VENV", "path": VENV_DIR}}
     cluster_config = {"other": {"salloc": "-A ${{SALLOC_ACCOUNT}} -p prod_small --time 0:10:00"}}
     cmd = ["echo", "mytest"]
     skip_run = False

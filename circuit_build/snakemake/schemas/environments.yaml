@@ -105,9 +105,24 @@ $defs:
         description: Literal value VENV.
         const: VENV
       path:
-        description: Absolute path to the python virtual environment.
+        description: |
+          Absolute path to the python virtual environment (recommended),
+          or absolute path to a custom file that will be sourced before executing the commands.
         type: string
         example: "/path/to/venv"
+      modules:
+        description: |
+          Optional Spack modules to be loaded.
+          Warning: in most cases, you shouldn't load modules that modify PYTHONPATH.
+        type: array
+        items:
+          type: string
+        uniqueItems: true
+        example: [ "archive/2023-02", "hpe-mpi/2.25.hmpt" ]
+      modulepath:
+        description: Optional base path to the spack modules.
+        type: string
+        example: "/gpfs/bbp.cscs.ch/ssd/apps/bsd/modules/_meta"
       env_vars:
         description: Custom environment variables.
         type: object
