@@ -1,5 +1,6 @@
 """Common utilities."""
 import importlib.resources
+import logging
 import os
 import traceback
 from contextlib import contextmanager
@@ -7,6 +8,8 @@ from contextlib import contextmanager
 import yaml
 
 from circuit_build.constants import PACKAGE_NAME, SCHEMAS_DIR
+
+L = logging.getLogger(__name__)
 
 
 def load_yaml(filepath):
@@ -78,3 +81,20 @@ def read_schema(schema_name):
     resource = importlib.resources.files(PACKAGE_NAME) / SCHEMAS_DIR / schema_name
     content = resource.read_text()
     return yaml.safe_load(content)
+
+
+def clean_slurm_env():
+    """Remove PMI/SLURM variables that can cause issues when launching other slurm jobs.
+
+    These variable are unset because launching slurm jobs from a node
+    allocated using salloc may fail with the error:
+        srun: fatal: SLURM_MEM_PER_CPU, SLURM_MEM_PER_GPU, and SLURM_MEM_PER_NODE
+        are mutually exclusive.
+
+    Copied from:
+    https://bbpgitlab.epfl.ch/nse/connectome-tools/-/blob/d311b4b7/connectome_tools/utils.py#L208
+    """
+    for key in os.environ:
+        if key.startswith(("PMI_", "SLURM_")) and not key.endswith(("_ACCOUNT", "_PARTITION")):
+            L.debug("Deleting env variable %s", key)
+            del os.environ[key]

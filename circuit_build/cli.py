@@ -10,6 +10,8 @@ from pathlib import Path
 import click
 import pkg_resources
 
+from circuit_build.utils import clean_slurm_env
+
 L = logging.getLogger()
 
 
@@ -159,6 +161,8 @@ def run(
         snakefile = pkg_resources.resource_filename(__name__, "snakemake/Snakefile")
     assert Path(snakefile).is_file(), f'Snakefile "{snakefile}" does not exist!'
     assert _index(args, "--config", "-C") is None, "snakemake `--config` option is not allowed"
+
+    clean_slurm_env()
 
     base_cmd = [
         "snakemake",
