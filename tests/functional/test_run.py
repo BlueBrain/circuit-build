@@ -57,7 +57,13 @@ def test_functional_all(tmp_path):
 
         for index_file in INDEX_FILES:
             index_file_path = (
-                f"sonata/networks/nodes/{node_population_name}/spatial_index/{index_file}"
+                f"sonata/networks/nodes/{node_population_name}/spatial_segment_index/{index_file}"
+            )
+            assert tmp_path.joinpath(index_file_path).stat().st_size > 100
+        for index_file in INDEX_FILES:
+            index_file_path = (
+                f"sonata/networks/edges/functional/{edge_population_name}/"
+                f"spatial_synapse_index/{index_file}"
             )
             assert tmp_path.joinpath(index_file_path).stat().st_size > 100
 

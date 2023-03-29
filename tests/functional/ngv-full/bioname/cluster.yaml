@@ -65,6 +65,10 @@ spatial_index_segment:
   jobname: segment_index
   salloc: '-A ${{SALLOC_ACCOUNT}} -p prod_small --constraint=cpu --time 0:05:00'
 
+spatial_index_synapse:
+  jobname: synapse_index
+  salloc: '-A ${{SALLOC_ACCOUNT}} -p prod_small --constraint=cpu --time 0:05:00'
+
 synthesize_glia:
   jobname: synthesize_glia
   salloc: '-A ${{SALLOC_ACCOUNT}} -p prod_small -N 1 -n 5 --constraint=cpu --time 0:10:00'

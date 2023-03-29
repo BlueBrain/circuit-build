@@ -47,6 +47,8 @@ ngv:
         node_population_name: All
         edges_file: ../data/circuit/edges.h5
         edge_population_name: All
+        spatial_segment_index_dir: ../data/circuit/spatial_segment_index
+        spatial_synapse_index_dir: ../data/circuit/spatial_synapse_index
 
   assign_emodels:
     templates_dir: ../data/emodels/

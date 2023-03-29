@@ -16,13 +16,12 @@ A typical circuit release folder would look like:
       networks/
         nodes/
           <nodes Sonata population name>/
-            spatial_index/
+            spatial_segment_index/
             nodes.h5
         edges/
-          <edges Sonata population name>/
-            spatial_index/
           functional/
             <edges Sonata population name>/
+              spatial_synapse_index/
               edges.h5
           structural/
             <edges Sonata population name>/

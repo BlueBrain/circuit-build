@@ -183,7 +183,7 @@ def test_write_network_config__release(tmp_path):
                     "nodes_file": "$BASE_DIR/sonata/networks/nodes/neocortex_neurons/nodes.h5",
                     "populations": {
                         "neocortex_neurons": {
-                            "spatial_segment_index_dir": "$BASE_DIR/sonata/networks/nodes/neocortex_neurons/spatial_index",
+                            "spatial_segment_index_dir": "$BASE_DIR/sonata/networks/nodes/neocortex_neurons/spatial_segment_index",
                             "type": "biophysical",
                             "alternate_morphologies": {
                                 "h5v1": "/gpfs/bbp.cscs.ch/project/proj66/entities/morphologies/2018.02.16/h5v1",
@@ -202,7 +202,7 @@ def test_write_network_config__release(tmp_path):
                     "edges_file": "$BASE_DIR/sonata/networks/edges/functional/neocortex_neurons__chemical_synapse/edges.h5",
                     "populations": {
                         "neocortex_neurons__chemical_synapse": {
-                            "spatial_synapse_index_dir": "$BASE_DIR/sonata/networks/edges/neocortex_neurons__chemical_synapse/spatial_index",
+                            "spatial_synapse_index_dir": "$BASE_DIR/sonata/networks/edges/functional/neocortex_neurons__chemical_synapse/spatial_synapse_index",
                             "type": "chemical",
                             "provenance": {
                                 "bioname_dir": f"{bioname}",
@@ -241,7 +241,7 @@ def test_write_network_config__synthesis(tmp_path):
                     "nodes_file": "$BASE_DIR/sonata/networks/nodes/neocortex_neurons/nodes.h5",
                     "populations": {
                         "neocortex_neurons": {
-                            "spatial_segment_index_dir": "$BASE_DIR/sonata/networks/nodes/neocortex_neurons/spatial_index",
+                            "spatial_segment_index_dir": "$BASE_DIR/sonata/networks/nodes/neocortex_neurons/spatial_segment_index",
                             "type": "biophysical",
                             "alternate_morphologies": {
                                 "h5v1": "$BASE_DIR/morphologies/neocortex_neurons",
@@ -260,7 +260,7 @@ def test_write_network_config__synthesis(tmp_path):
                     "edges_file": "$BASE_DIR/sonata/networks/edges/functional/neocortex_neurons__chemical_synapse/edges.h5",
                     "populations": {
                         "neocortex_neurons__chemical_synapse": {
-                            "spatial_synapse_index_dir": "$BASE_DIR/sonata/networks/edges/neocortex_neurons__chemical_synapse/spatial_index",
+                            "spatial_synapse_index_dir": "$BASE_DIR/sonata/networks/edges/functional/neocortex_neurons__chemical_synapse/spatial_synapse_index",
                             "type": "chemical",
                             "provenance": {
                                 "bioname_dir": f"{bioname}",
@@ -299,7 +299,7 @@ def test_write_network_config__ngv_standalone(tmp_path):
                 "All": {
                     "type": "biophysical",
                     "biophysical_neuron_models_dir": "",
-                    "spatial_segment_index_dir": "$BASE_DIR/sonata/networks/nodes/neocortex_neurons/spatial_index",
+                    "spatial_segment_index_dir": f"{data}/circuit/spatial_segment_index",
                     "alternate_morphologies": {
                         "neurolucida-asc": f"{data}/circuit/morphologies",
                         "h5v1": f"{data}/circuit/morphologies",
@@ -343,7 +343,7 @@ def test_write_network_config__ngv_standalone(tmp_path):
             "populations": {
                 "All": {
                     "type": "chemical",
-                    "spatial_synapse_index_dir": "$BASE_DIR/sonata/networks/edges/neocortex_neurons__chemical_synapse/spatial_index",
+                    "spatial_synapse_index_dir": f"{data}/circuit/spatial_synapse_index",
                     "provenance": {
                         "bioname_dir": f"{bioname}",
                     },
@@ -413,7 +413,7 @@ def test_write_network_config__ngv_full(tmp_path):
                 "neocortex_neurons": {
                     "type": "biophysical",
                     "biophysical_neuron_models_dir": "",
-                    "spatial_segment_index_dir": "$BASE_DIR/sonata/networks/nodes/neocortex_neurons/spatial_index",
+                    "spatial_segment_index_dir": "$BASE_DIR/sonata/networks/nodes/neocortex_neurons/spatial_segment_index",
                     "alternate_morphologies": {
                         "neurolucida-asc": "$BASE_DIR/morphologies/neocortex_neurons",
                         "h5v1": "$BASE_DIR/morphologies/neocortex_neurons",
@@ -457,7 +457,7 @@ def test_write_network_config__ngv_full(tmp_path):
             "populations": {
                 "neocortex_neurons__chemical_synapse": {
                     "type": "chemical",
-                    "spatial_synapse_index_dir": "$BASE_DIR/sonata/networks/edges/neocortex_neurons__chemical_synapse/spatial_index",
+                    "spatial_synapse_index_dir": "$BASE_DIR/sonata/networks/edges/functional/neocortex_neurons__chemical_synapse/spatial_synapse_index",
                     "provenance": {
                         "bioname_dir": f"{bioname}",
                     },

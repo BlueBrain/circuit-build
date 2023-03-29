@@ -125,7 +125,7 @@ class CircuitPaths:
 
     def edges_population_connectome_path(self, population_name, path):
         """Return edges population connectome dir."""
-        return self.connectome_dir / f"{population_name}/{path}"
+        return self.connectome_dir / population_name / path
 
     def edges_population_touches_dir(self, population_name):
         """Return touches directory for the population with `population_name`."""
@@ -246,7 +246,7 @@ class Context:
     @property
     def nodes_spatial_index_dir(self):
         """Return directory of nodes spatial index files."""
-        return self.paths.nodes_path(self.nodes_neurons_name, "spatial_index")
+        return self.paths.nodes_path(self.nodes_neurons_name, "spatial_segment_index")
 
     @property
     def nodes_spatial_index_files(self):
@@ -284,7 +284,7 @@ class Context:
 
     def edges_neurons_neurons_file(self, connectome_type):
         """Return edges file for chemical connections."""
-        return self.paths.edges_path(connectome_type, f"{self.edges_neurons_neurons_name}/edges.h5")
+        return self.paths.edges_dir / connectome_type / self.edges_neurons_neurons_name / "edges.h5"
 
     @property
     def edges_neurons_astrocytes_file(self):
@@ -309,7 +309,7 @@ class Context:
     @property
     def edges_spatial_index_dir(self):
         """Return directory of edges spatial index files."""
-        return self.paths.edges_path(self.edges_neurons_neurons_name, "spatial_index")
+        return self.edges_neurons_neurons_file("functional").parent / "spatial_synapse_index"
 
     @property
     def edges_spatial_index_files(self):
@@ -521,6 +521,7 @@ class Context:
             nodes=[
                 self.if_ngv_standalone(
                     {
+                        # TODO: read the values from the ngv.common.base_circuit.config?
                         "nodes_file": _make_abs(
                             self.paths.bioname_dir,
                             self.conf.get(
@@ -531,7 +532,13 @@ class Context:
                         "population_name": self.conf.get(
                             ["ngv", "common", "base_circuit", "node_population_name"]
                         ),
-                        "spatial_segment_index_dir": self.nodes_spatial_index_dir,
+                        "spatial_segment_index_dir": _make_abs(
+                            self.paths.bioname_dir,
+                            self.conf.get(
+                                ["ngv", "common", "base_circuit", "spatial_segment_index_dir"],
+                                default="",
+                            ),
+                        ),
                         "alternate_morphologies": {
                             "h5v1": _make_abs(
                                 self.paths.bioname_dir,
@@ -598,6 +605,7 @@ class Context:
             edges=[
                 self.if_ngv_standalone(
                     {
+                        # TODO: read the values from the ngv.common.base_circuit.config?
                         "edges_file": _make_abs(
                             self.paths.bioname_dir,
                             self.conf.get(
@@ -608,7 +616,13 @@ class Context:
                         "population_name": self.conf.get(
                             ["ngv", "common", "base_circuit", "edge_population_name"]
                         ),
-                        "spatial_synapse_index_dir": self.edges_spatial_index_dir,
+                        "spatial_synapse_index_dir": _make_abs(
+                            self.paths.bioname_dir,
+                            self.conf.get(
+                                ["ngv", "common", "base_circuit", "spatial_synapse_index_dir"],
+                                default="",
+                            ),
+                        ),
                         **self.provenance(),
                     },
                     {

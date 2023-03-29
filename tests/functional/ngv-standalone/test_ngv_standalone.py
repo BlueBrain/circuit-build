@@ -138,7 +138,7 @@ def test_build__config(build_circuit):
                     "populations": {
                         "All": {
                             "type": "biophysical",
-                            "spatial_segment_index_dir": "$BASE_DIR/sonata/networks/nodes/neocortex_neurons/spatial_index",
+                            "spatial_segment_index_dir": f"{DATA_DIR}/circuit/spatial_segment_index",
                             "alternate_morphologies": {
                                 "neurolucida-asc": f"{DATA_DIR}/circuit/morphologies",
                                 "h5v1": f"{DATA_DIR}/circuit/morphologies",
@@ -179,7 +179,7 @@ def test_build__config(build_circuit):
                     "populations": {
                         "All": {
                             "type": "chemical",
-                            "spatial_synapse_index_dir": "$BASE_DIR/sonata/networks/edges/neocortex_neurons__chemical_synapse/spatial_index",
+                            "spatial_synapse_index_dir": f"{DATA_DIR}/circuit/spatial_synapse_index",
                             "provenance": {"bioname_dir": f"{BIONAME_DIR}"},
                         },
                     },

@@ -8,12 +8,22 @@
     "networks": {
         "nodes": [
             {
-                "nodes_file": "$BASE_DIR/nodes.h5"
+                "nodes_file": "$BASE_DIR/nodes.h5",
+                "populations": {
+                    "All": {
+                        "spatial_segment_index_dir": "$BASE_DIR/spatial_segment_index"
+                    }
+                }
             }
         ],
         "edges": [
             {
-                "edges_file": "$BASE_DIR/edges.h5"
+                "edges_file": "$BASE_DIR/edges.h5",
+                "populations": {
+                    "All": {
+                        "spatial_synapse_index_dir": "$BASE_DIR/spatial_synapse_index"
+                    }
+                }
             }
         ]
     }
