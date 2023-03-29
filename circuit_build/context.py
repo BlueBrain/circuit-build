@@ -707,6 +707,7 @@ class Context:
                 "env",
                 "USER=$(whoami)",
                 "SPARK_USER=$(whoami)",
+                "dplace",
                 "functionalizer",
                 self.cluster_config.get(rule, {}).get("functionalizer", ""),
                 "--work-dir {params.output_dir}/.fz",
