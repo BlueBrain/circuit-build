@@ -1,4 +1,6 @@
 """Cli module."""
+import contextlib
+import importlib.resources
 import json
 import logging
 import subprocess
@@ -8,11 +10,24 @@ from functools import partial
 from pathlib import Path
 
 import click
-import pkg_resources
 
 from circuit_build.utils import clean_slurm_env
 
 L = logging.getLogger()
+
+
+@contextlib.contextmanager
+def _snakefile(snakefile):
+    """Ensure that snakefile is available, and deleted if it's a temporary file."""
+    if snakefile is None:
+        ref = importlib.resources.files(__package__) / "snakemake" / "Snakefile"
+        with importlib.resources.as_file(ref) as path:
+            yield path
+    else:
+        path = Path(snakefile)
+        if not path.is_file():
+            raise RuntimeError(f"Snakefile '{path}' does not exist!")
+        yield path
 
 
 def _index(args, *opts):
@@ -122,9 +137,9 @@ Examples:\n
     "--snakefile",
     required=False,
     type=click.Path(exists=True, dir_okay=False),
-    default=pkg_resources.resource_filename(__name__, "snakemake/Snakefile"),
+    default=None,
     show_default=True,
-    help="Path to workflow definition in form of a snakefile.",
+    help="Path to workflow definition in form of a snakefile, needed only to override the builtin.",
 )
 @click.option(
     "-d",
@@ -157,35 +172,33 @@ def run(
     Any additional snakemake arguments or options can be passed at the end of this command's call.
     """
     args = ctx.args
-    if snakefile is None:
-        snakefile = pkg_resources.resource_filename(__name__, "snakemake/Snakefile")
-    assert Path(snakefile).is_file(), f'Snakefile "{snakefile}" does not exist!'
     assert _index(args, "--config", "-C") is None, "snakemake `--config` option is not allowed"
 
     clean_slurm_env()
 
-    base_cmd = [
-        "snakemake",
-        "--snakefile",
-        snakefile,
-        "--cluster-config",
-        cluster_config,
-        "--directory",
-        directory,
-    ]
-    timestamp = f"{datetime.now():%Y%m%dT%H%M%S}"
-    build_cmd = partial(_build_cmd, base_cmd, args, bioname, modules, timestamp)
-    exit_code = _run_snakemake_process(cmd=build_cmd())
-    if with_summary:
-        # snakemake with the --summary/--detailed-summary option does not execute the workflow
-        filepath = Path(f"{directory}/logs/{timestamp}/summary.tsv")
-        L.info("Creating report in %s", filepath)
-        exit_code += _run_summary_process(cmd=build_cmd(skip_check_git=True), filepath=filepath)
-    if with_report:
-        # snakemake with the --report option does not execute the workflow
-        filepath = Path(f"{directory}/logs/{timestamp}/report.html")
-        L.info("Creating summary in %s", filepath)
-        exit_code += _run_report_process(cmd=build_cmd(skip_check_git=True), filepath=filepath)
+    with _snakefile(snakefile) as snakefile_path:
+        base_cmd = [
+            "snakemake",
+            "--snakefile",
+            str(snakefile_path),
+            "--cluster-config",
+            cluster_config,
+            "--directory",
+            directory,
+        ]
+        timestamp = f"{datetime.now():%Y%m%dT%H%M%S}"
+        build_cmd = partial(_build_cmd, base_cmd, args, bioname, modules, timestamp)
+        exit_code = _run_snakemake_process(cmd=build_cmd())
+        if with_summary:
+            # snakemake with the --summary/--detailed-summary option does not execute the workflow
+            filepath = Path(f"{directory}/logs/{timestamp}/summary.tsv")
+            L.info("Creating report in %s", filepath)
+            exit_code += _run_summary_process(cmd=build_cmd(skip_check_git=True), filepath=filepath)
+        if with_report:
+            # snakemake with the --report option does not execute the workflow
+            filepath = Path(f"{directory}/logs/{timestamp}/report.html")
+            L.info("Creating summary in %s", filepath)
+            exit_code += _run_report_process(cmd=build_cmd(skip_check_git=True), filepath=filepath)
 
     # cumulative exit code given by the union of the exit codes, only for internal use
     #   0: success
@@ -193,9 +206,3 @@ def run(
     #   2: summary process failed
     #   4: report process failed
     sys.exit(exit_code)
-
-
-@cli.command()
-def snakefile_path():
-    """Outputs a path to the default Snakefile."""
-    click.echo(pkg_resources.resource_filename(__name__, "snakemake/Snakefile"))

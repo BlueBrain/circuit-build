@@ -1,16 +1,12 @@
 from datetime import datetime
+from pathlib import Path
 from unittest.mock import mock_open, patch
 
 import pytest
 from click.testing import CliRunner
+from utils import SNAKEFILE, SNAKEMAKE_ARGS, TEST_PROJ_TINY
 
-from circuit_build.cli import run, snakefile_path
-
-from utils import (
-    SNAKEMAKE_ARGS,
-    SNAKEFILE,
-    TEST_PROJ_TINY,
-)
+from circuit_build import cli as test_module
 
 
 @patch("circuit_build.cli.Path.mkdir")
@@ -23,7 +19,7 @@ def test_ok(run_mock, datetime_mock, open_mock, mkdir_mock):
     expected_timestamp = "20210421T123456"
     runner = CliRunner()
 
-    result = runner.invoke(run, SNAKEMAKE_ARGS, catch_exceptions=False)
+    result = runner.invoke(test_module.run, SNAKEMAKE_ARGS, catch_exceptions=False)
 
     assert run_mock.call_count == 1
     assert open_mock.call_count == 0
@@ -57,7 +53,9 @@ def test_ok_with_summary(run_mock, datetime_mock, open_mock, mkdir_mock):
     expected_timestamp = "20210421T123456"
     runner = CliRunner()
 
-    result = runner.invoke(run, SNAKEMAKE_ARGS + ["--with-summary"], catch_exceptions=False)
+    result = runner.invoke(
+        test_module.run, SNAKEMAKE_ARGS + ["--with-summary"], catch_exceptions=False
+    )
 
     assert run_mock.call_count == 2
     assert open_mock.call_count == 1
@@ -109,7 +107,9 @@ def test_ok_with_report(run_mock, datetime_mock, open_mock, mkdir_mock):
     expected_timestamp = "20210421T123456"
     runner = CliRunner()
 
-    result = runner.invoke(run, SNAKEMAKE_ARGS + ["--with-report"], catch_exceptions=False)
+    result = runner.invoke(
+        test_module.run, SNAKEMAKE_ARGS + ["--with-report"], catch_exceptions=False
+    )
 
     assert run_mock.call_count == 2
     assert open_mock.call_count == 0
@@ -156,7 +156,7 @@ def test_config_is_set_already():
     runner = CliRunner()
     expected_match = "snakemake `--config` option is not allowed"
     with pytest.raises(AssertionError, match=expected_match):
-        runner.invoke(run, SNAKEMAKE_ARGS + ["--config", "a=b"], catch_exceptions=False)
+        runner.invoke(test_module.run, SNAKEMAKE_ARGS + ["--config", "a=b"], catch_exceptions=False)
 
 
 @patch("circuit_build.cli.Path.mkdir")
@@ -170,7 +170,7 @@ def test_printshellcmds_is_not_set(run_mock, datetime_mock, open_mock, mkdir_moc
     runner = CliRunner()
     args = ["--bioname", str(TEST_PROJ_TINY), "-u", str(TEST_PROJ_TINY / "cluster.yaml")]
 
-    result = runner.invoke(run, args, catch_exceptions=False)
+    result = runner.invoke(test_module.run, args, catch_exceptions=False)
 
     assert run_mock.call_count == 1
     assert open_mock.call_count == 0
@@ -216,7 +216,7 @@ def test_modules(run_mock, datetime_mock, open_mock, mkdir_mock):
         custom_module2,
     ]
 
-    result = runner.invoke(run, args, catch_exceptions=False)
+    result = runner.invoke(test_module.run, args, catch_exceptions=False)
 
     assert run_mock.call_count == 1
     assert open_mock.call_count == 0
@@ -241,8 +241,22 @@ def test_modules(run_mock, datetime_mock, open_mock, mkdir_mock):
     ]
 
 
-def test_snakefile_path():
-    runner = CliRunner()
-    result = runner.invoke(snakefile_path, catch_exceptions=False)
-    assert result.exit_code == 0
-    assert result.output.strip() == SNAKEFILE
+def test_snakefile_none():
+    with test_module._snakefile(None) as result:
+        assert isinstance(result, Path)
+        assert result.name == "Snakefile"
+
+
+def test_snakefile_custom(tmp_path):
+    snakefile = tmp_path / "Custom"
+    snakefile.touch()
+    with test_module._snakefile(snakefile) as result:
+        assert isinstance(result, Path)
+        assert result == snakefile
+
+
+def test_snakefile_missing(tmp_path):
+    snakefile = tmp_path / "Custom"
+    with pytest.raises(RuntimeError, match="Snakefile .* does not exist!"):
+        with test_module._snakefile(snakefile):
+            pass

@@ -24,6 +24,7 @@ Removed
 - Remove creation of legacy configuration files CircuitConfig and CircuitConfig_struct.
 - Remove targetgen configuration and start.target output.
 - Move circuit.h5 from the root output directory to `auxiliary`.
+- Remove `snakefile-path` CLI command.
 
 
 Version 4.1.0 (2022-12-15)
