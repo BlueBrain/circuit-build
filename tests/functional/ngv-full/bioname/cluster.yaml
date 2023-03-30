@@ -63,11 +63,11 @@ spykfunc_merge:
 
 spatial_index_segment:
   jobname: segment_index
-  salloc: '-A ${{SALLOC_ACCOUNT}} -p prod_small --constraint=cpu --time 0:05:00'
+  salloc: '-A ${{SALLOC_ACCOUNT}} -p prod_small --constraint=cpu --time 0:05:00 -n5'
 
 spatial_index_synapse:
   jobname: synapse_index
-  salloc: '-A ${{SALLOC_ACCOUNT}} -p prod_small --constraint=cpu --time 0:05:00'
+  salloc: '-A ${{SALLOC_ACCOUNT}} -p prod_small --constraint=cpu --time 0:05:00 -n5'
 
 synthesize_glia:
   jobname: synthesize_glia

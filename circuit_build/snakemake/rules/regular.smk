@@ -544,6 +544,8 @@ rule spatial_index_segment:
             "spatialindexer",
             [
                 "spatial-index-nodes",
+                "--verbose",
+                "--multi-index",
                 "{input}",
                 ctx.morphology_path(morphology_type="asc"),
                 "-o",
@@ -569,6 +571,8 @@ rule spatial_index_synapse:
             "spatialindexer",
             [
                 "spatial-index-synapses",
+                "--verbose",
+                "--multi-index",
                 "{input}",
                 "-o",
                 ctx.edges_spatial_index_dir,

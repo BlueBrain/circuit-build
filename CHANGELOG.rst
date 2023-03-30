@@ -12,6 +12,7 @@ New Features
 Improvements
 ~~~~~~~~~~~~
 - Build segment and synapse indexes using SpatialIndex [NSETM-2101]
+- Build spatial indices with --multi-index (requires mpi) [NSETM-2159]
 - The `node_sets` rule requires its own configuration section.
 - Some environment variables for Dask and NEURON are set by default in jobs requiring them.
   See https://bbpteam.epfl.ch/documentation/projects/circuit-build/latest/environments.html for the complete list.
