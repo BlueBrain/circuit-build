@@ -536,7 +536,7 @@ rule spatial_index_segment:
     input:
         ctx.nodes_neurons_file,
     output:
-        ctx.nodes_spatial_index_files,
+        ctx.nodes_spatial_index_success_file,
     log:
         ctx.log_path("spatial_index_segment"),
     shell:
@@ -563,7 +563,7 @@ rule spatial_index_synapse:
     input:
         ctx.edges_neurons_neurons_file(connectome_type="functional"),
     output:
-        ctx.edges_spatial_index_files,
+        ctx.edges_spatial_index_success_file,
     log:
         ctx.log_path("spatial_index_synapse"),
     shell:
@@ -670,8 +670,8 @@ rule functional:
         *ctx.if_no_index(
             [],
             [
-                ctx.nodes_spatial_index_files,
-                ctx.edges_spatial_index_files,
+                ctx.nodes_spatial_index_success_file,
+                ctx.edges_spatial_index_success_file,
             ],
         ),
 

@@ -2,7 +2,7 @@
 PACKAGE_NAME = "circuit_build"
 SCHEMAS_DIR = "snakemake/schemas"
 
-INDEX_FILES = ["meta_data.json"]
+INDEX_SUCCESS_FILE = "meta_data.json"
 SPACK_MODULEPATH = "/gpfs/bbp.cscs.ch/ssd/apps/bsd/modules/_meta"
 NIX_MODULEPATH = (
     "/nix/var/nix/profiles/per-user/modules/bb5-x86_64/modules-all/release/share/modulefiles/"

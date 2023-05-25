@@ -1,13 +1,15 @@
 # create graphs using snakemake
 SHELL = /bin/bash -eu
 SELF_DIR = $(dir $(lastword $(MAKEFILE_LIST)))
-BASE_DIR = $(SELF_DIR)/..
+BASE_DIR = $(abspath $(SELF_DIR)/..)
 OUT_DIR = $(BASE_DIR)/doc/build/graphs
 BIONAME = $(BASE_DIR)/tests/functional/data/proj66-tiny/
 BIONAME_SYNTH = $(BASE_DIR)/tests/functional/data/proj66-tiny-synth/
+BIONAME_NGV = $(BASE_DIR)/tests/functional/ngv-full/bioname/
 SNAKEFILE = $(BASE_DIR)/circuit_build/snakemake/Snakefile
 SM = snakemake --snakefile $(SNAKEFILE) --config skip_check_git=1 bioname=$(BIONAME) --cluster-config $(BIONAME)/cluster.yaml
 SM_SYNTH = snakemake --snakefile $(SNAKEFILE) --config skip_check_git=1 bioname=$(BIONAME_SYNTH) --cluster-config $(BIONAME_SYNTH)/cluster.yaml
+SM_NGV = snakemake --snakefile $(SNAKEFILE) --config skip_check_git=1 bioname=$(BIONAME_NGV) --cluster-config $(BIONAME_NGV)/cluster.yaml --directory $(BIONAME_NGV)
 TARGETS = functional structural spatial_index_segment subcellular assign_emodels
 GRAPH = filegraph
 
@@ -20,6 +22,7 @@ graphs:
 	done
 	$(SM_SYNTH) --$(GRAPH) -- functional | sed 's#>/[^<]*/doc/#>#g' > $(OUT_DIR)/functional_synth.dot
 	$(SM_SYNTH) --$(GRAPH) -- structural | sed 's#>/[^<]*/doc/#>#g' > $(OUT_DIR)/structural_synth.dot
+	$(SM_NGV) --$(GRAPH) -- ngv | sed 's#>/[^<]*/bioname/#>#g' > $(OUT_DIR)/ngv.dot
 	rmdir -p subcellular
 	# convert all the dot files to svg
 	for var in $(OUT_DIR)/*.dot; do dot -Tsvg -o$${var%.dot}.svg $$var; done

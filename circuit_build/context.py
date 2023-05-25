@@ -10,7 +10,7 @@ from typing import Dict
 import snakemake
 
 from circuit_build.commands import build_command, load_legacy_env_config
-from circuit_build.constants import ENV_CONFIG, ENV_FILE, INDEX_FILES
+from circuit_build.constants import ENV_CONFIG, ENV_FILE, INDEX_SUCCESS_FILE
 from circuit_build.sonata_config import write_config
 from circuit_build.utils import dump_yaml, load_yaml, redirect_to_file
 from circuit_build.validators import (
@@ -249,9 +249,9 @@ class Context:
         return self.paths.nodes_path(self.nodes_neurons_name, "spatial_segment_index")
 
     @property
-    def nodes_spatial_index_files(self):
-        """Return the list of paths to spatial index files."""
-        return [self.nodes_spatial_index_dir / filename for filename in INDEX_FILES]
+    def nodes_spatial_index_success_file(self):
+        """Return the path to the final spatial index file."""
+        return self.nodes_spatial_index_dir / INDEX_SUCCESS_FILE
 
     @property
     def edges_neurons_neurons_name(self):
@@ -312,9 +312,9 @@ class Context:
         return self.edges_neurons_neurons_file("functional").parent / "spatial_synapse_index"
 
     @property
-    def edges_spatial_index_files(self):
-        """Return the list of paths to spatial index files."""
-        return [self.edges_spatial_index_dir / filename for filename in INDEX_FILES]
+    def edges_spatial_index_success_file(self):
+        """Return the path to the final spatial index file."""
+        return self.edges_spatial_index_dir / INDEX_SUCCESS_FILE
 
     def tmp_edges_neurons_chemical_connectome_path(self, path):
         """Return path relative to the neuronal chemical connectome directory."""

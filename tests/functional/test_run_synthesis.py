@@ -9,7 +9,7 @@ from click.testing import CliRunner
 from utils import TEST_PROJ_SYNTH, cwd, load_yaml
 
 from circuit_build.cli import run
-from circuit_build.constants import INDEX_FILES
+from circuit_build.constants import INDEX_SUCCESS_FILE
 
 
 def test_synthesis(tmp_path):
@@ -35,17 +35,16 @@ def test_synthesis(tmp_path):
         assert tmp_path.joinpath("sonata/node_sets.json").stat().st_size > 100
         assert tmp_path.joinpath("sonata/circuit_config.json").stat().st_size > 100
 
-        for index_file in INDEX_FILES:
-            index_file_path = (
-                f"sonata/networks/nodes/{node_population_name}/spatial_segment_index/{index_file}"
-            )
-            assert tmp_path.joinpath(index_file_path).stat().st_size > 100
-        for index_file in INDEX_FILES:
-            index_file_path = (
-                f"sonata/networks/edges/functional/{edge_population_name}/"
-                f"spatial_synapse_index/{index_file}"
-            )
-            assert tmp_path.joinpath(index_file_path).stat().st_size > 100
+        index_file_path = (
+            f"sonata/networks/nodes/{node_population_name}/"
+            f"spatial_segment_index/{INDEX_SUCCESS_FILE}"
+        )
+        assert tmp_path.joinpath(index_file_path).stat().st_size > 100
+        index_file_path = (
+            f"sonata/networks/edges/functional/{edge_population_name}/"
+            f"spatial_synapse_index/{INDEX_SUCCESS_FILE}"
+        )
+        assert tmp_path.joinpath(index_file_path).stat().st_size > 100
 
         nodes_file = (tmp_path / f"sonata/networks/nodes/{node_population_name}/nodes.h5").resolve()
         assert nodes_file.stat().st_size > 100
