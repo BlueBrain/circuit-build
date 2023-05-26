@@ -50,6 +50,7 @@ ngv:
         spatial_segment_index_dir: ../data/circuit/spatial_segment_index
         spatial_synapse_index_dir: ../data/circuit/spatial_synapse_index
 
+
   assign_emodels:
     templates_dir: ../data/emodels/
     hoc_template: astrocyte.hoc

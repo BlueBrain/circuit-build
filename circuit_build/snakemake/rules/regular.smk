@@ -564,6 +564,7 @@ rule spatial_index_synapse:
         ctx.edges_neurons_neurons_file(connectome_type="functional"),
     output:
         ctx.edges_spatial_index_success_file,
+        directory(ctx.edges_spatial_index_dir),
     log:
         ctx.log_path("spatial_index_synapse"),
     shell:

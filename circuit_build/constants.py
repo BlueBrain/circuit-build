@@ -48,7 +48,7 @@ ENV_CONFIG = {
     "spatialindexer": {
         "env_type": ENV_TYPE_MODULE,
         "modulepath": SPACK_MODULEPATH,
-        "modules": ["unstable", "spatial-index/2.0.0"],
+        "modules": ["archive/2023-04", "spatial-index/2.0.0"],
     },
     "parquet-converters": {
         "env_type": ENV_TYPE_MODULE,
@@ -96,12 +96,12 @@ ENV_CONFIG = {
     "ngv": {
         "env_type": ENV_TYPE_MODULE,
         "modulepath": SPACK_MODULEPATH,
-        "modules": ["archive/2022-06", "py-archngv/2.0.2"],
+        "modules": ["archive/2023-04", "py-archngv/3.0.0"],
     },
     "synthesize-glia": {
         "env_type": ENV_TYPE_MODULE,
         "modulepath": SPACK_MODULEPATH,
-        "modules": ["archive/2022-06", "py-archngv/2.0.2", "py-mpi4py"],
+        "modules": ["archive/2023-04", "py-archngv/3.0.0", "py-mpi4py"],
         "env_vars": {
             **ENV_VARS_DASK_DEFAULT,
             "DASK_DISTRIBUTED__ADMIN__TICK__LIMIT": "1h",
@@ -110,11 +110,11 @@ ENV_CONFIG = {
     "ngv-touchdetector": {
         "env_type": ENV_TYPE_MODULE,
         "modulepath": SPACK_MODULEPATH,
-        "modules": ["archive/2022-06", "py-archngv/2.0.2", "touchdetector/5.6.1"],
+        "modules": ["archive/2023-04", "py-archngv/3.0.0", "touchdetector/5.7.4"],
     },
     "ngv-pytouchreader": {
         "env_type": ENV_TYPE_MODULE,
         "modulepath": SPACK_MODULEPATH,
-        "modules": ["archive/2022-06", "py-archngv/2.0.2"],
+        "modules": ["archive/2023-04", "py-archngv/3.0.0"],
     },
 }

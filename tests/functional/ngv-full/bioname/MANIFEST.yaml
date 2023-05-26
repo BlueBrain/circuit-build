@@ -41,6 +41,7 @@ ngv:
     vasculature: ../atlas/vasculature.h5
     vasculature_mesh: ../atlas/vasculature.obj
 
+
   assign_emodels:
     templates_dir: ../data/emodels/
     hoc_template: astrocyte.hoc

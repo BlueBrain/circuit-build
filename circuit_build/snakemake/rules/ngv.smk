@@ -166,6 +166,10 @@ rule build_neuroglial_connectivity:
             ctx.conf.get(["ngv", "common", "base_circuit", "edges_file"]),
             ctx.edges_neurons_neurons_file(connectome_type="functional"),
         ),
+        spatial_synapse_index_dir=ctx.if_ngv_standalone(
+            ctx.conf.get(["ngv", "common", "base_circuit", "spatial_synapse_index_dir"]),
+            ctx.edges_spatial_index_dir,
+        ),
     output:
         ctx.paths.auxiliary_path("neuroglial.connectivity.h5"),
     log:
@@ -176,6 +180,7 @@ rule build_neuroglial_connectivity:
             [
                 "ngv neuroglial-connectivity",
                 "--neurons-path {input[neurons]}",
+                "--spatial-synapse-index-dir {input[spatial_synapse_index_dir]}",
                 "--astrocytes-path {input[astrocytes]}",
                 "--microdomains-path {input[microdomains]}",
                 "--neuronal-connectivity-path {input[neuronal_synapses]}",
