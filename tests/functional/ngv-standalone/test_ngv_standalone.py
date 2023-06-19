@@ -143,7 +143,7 @@ def test_build__config(build_circuit):
                                 "neurolucida-asc": f"{DATA_DIR}/circuit/morphologies",
                                 "h5v1": f"{DATA_DIR}/circuit/morphologies",
                             },
-                            "biophysical_neuron_models_dir": "",
+                            "biophysical_neuron_models_dir": "/gpfs/bbp.cscs.ch/project/proj82/entities/emodels/test_release/hoc_files",
                             "provenance": {"bioname_dir": f"{BIONAME_DIR}"},
                         },
                     },

@@ -247,7 +247,7 @@ def test_write_network_config__synthesis(tmp_path):
                                 "h5v1": "$BASE_DIR/morphologies/neocortex_neurons",
                                 "neurolucida-asc": "$BASE_DIR/morphologies/neocortex_neurons",
                             },
-                            "biophysical_neuron_models_dir": "",
+                            "biophysical_neuron_models_dir": "/gpfs/bbp.cscs.ch/project/proj82/entities/emodels/test_release/hoc_files",
                             "provenance": {
                                 "bioname_dir": f"{bioname}",
                             },
@@ -298,7 +298,7 @@ def test_write_network_config__ngv_standalone(tmp_path):
             "populations": {
                 "All": {
                     "type": "biophysical",
-                    "biophysical_neuron_models_dir": "",
+                    "biophysical_neuron_models_dir": "/gpfs/bbp.cscs.ch/project/proj82/entities/emodels/test_release/hoc_files",
                     "spatial_segment_index_dir": f"{data}/circuit/spatial_segment_index",
                     "alternate_morphologies": {
                         "neurolucida-asc": f"{data}/circuit/morphologies",
@@ -412,7 +412,7 @@ def test_write_network_config__ngv_full(tmp_path):
             "populations": {
                 "neocortex_neurons": {
                     "type": "biophysical",
-                    "biophysical_neuron_models_dir": "",
+                    "biophysical_neuron_models_dir": "/gpfs/bbp.cscs.ch/project/proj82/entities/emodels/test_release/hoc_files",
                     "spatial_segment_index_dir": "$BASE_DIR/sonata/networks/nodes/neocortex_neurons/spatial_segment_index",
                     "alternate_morphologies": {
                         "neurolucida-asc": "$BASE_DIR/morphologies/neocortex_neurons",

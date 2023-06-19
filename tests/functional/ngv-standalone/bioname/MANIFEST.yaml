@@ -44,6 +44,7 @@ ngv:
         config: ../data/circuit/circuit_config.json
         nodes_file: ../data/circuit/nodes.h5
         morphologies_dir: ../data/circuit/morphologies
+        biophysical_neuron_models_dir: /gpfs/bbp.cscs.ch/project/proj82/entities/emodels/test_release/hoc_files
         node_population_name: All
         edges_file: ../data/circuit/edges.h5
         edge_population_name: All

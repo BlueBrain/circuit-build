@@ -186,6 +186,7 @@ class Context:
         )
         self.EMODEL_RELEASE_MECOMBO = None
         self.EMODEL_RELEASE_HOC = None
+
         if self.EMODEL_RELEASE:
             self.EMODEL_RELEASE_MECOMBO = os.path.join(self.EMODEL_RELEASE, "mecombo_emodel.tsv")
             self.EMODEL_RELEASE_HOC = os.path.join(self.EMODEL_RELEASE, "hoc")
@@ -195,6 +196,9 @@ class Context:
                 raise ValueError(
                     f"{self.EMODEL_RELEASE} must contain 'mecombo_emodel.tsv' file and 'hoc' folder"
                 )
+
+        if self.SYNTHESIZE_EMODEL_RELEASE:
+            self.EMODEL_RELEASE_HOC = os.path.join(self.SYNTHESIZE_EMODEL_RELEASE, "hoc_files")
 
         self.NODESETS_FILE = self.paths.sonata_path("node_sets.json")
         self.ENV_CONFIG = self.load_env_config()
@@ -555,7 +559,13 @@ class Context:
                                 ),
                             ),
                         },
-                        "biophysical_neuron_models_dir": "",
+                        "biophysical_neuron_models_dir": _make_abs(
+                            self.paths.bioname_dir,
+                            self.conf.get(
+                                ["ngv", "common", "base_circuit", "biophysical_neuron_models_dir"],
+                                default="",
+                            ),
+                        ),
                         **self.provenance(),
                     },
                     {

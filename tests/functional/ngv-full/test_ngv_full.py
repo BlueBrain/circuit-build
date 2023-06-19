@@ -75,7 +75,7 @@ def test_ngv_full___config(build_circuit_full):
                                 "neurolucida-asc": "$BASE_DIR/morphologies/neocortex_neurons",
                                 "h5v1": "$BASE_DIR/morphologies/neocortex_neurons",
                             },
-                            "biophysical_neuron_models_dir": "",
+                            "biophysical_neuron_models_dir": "/gpfs/bbp.cscs.ch/project/proj82/entities/emodels/test_release/hoc_files",
                             "provenance": {"bioname_dir": f"{BIONAME_DIR}"},
                         },
                     },
