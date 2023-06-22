@@ -1,8 +1,7 @@
 from pathlib import Path
+import filecmp
 import subprocess
-import jsondiff
 import pytest
-import traceback
 
 import numpy as np
 from numpy import testing as npt
@@ -369,3 +368,10 @@ def test_integrity__vasculature_representations_consistency(circuit):
 
     pdt.assert_frame_equal(v1.node_properties, v2.node_properties, check_dtype=False)
     pdt.assert_frame_equal(v1.edge_properties, v2.edge_properties, check_dtype=False)
+
+
+def test_build__tetrahedral_meshes(build_circuit):
+    actual_file = Path(BUILD_DIR / "auxiliary/ngv_prepared_tetrahedral_mesh.stl")
+    expected_file = Path(EXPECTED_DIR / "ngv_prepared_tetrahedral_mesh.stl")
+
+    assert filecmp.cmp(actual_file, expected_file)

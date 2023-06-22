@@ -1,6 +1,7 @@
 Changelog
 =========
 
+
 Version 5.0.0
 -------------
 
@@ -18,6 +19,7 @@ Improvements
   See https://bbpteam.epfl.ch/documentation/projects/circuit-build/latest/environments.html for the complete list.
 - Custom environment variables can be set in `environments.yaml` or `cluster.yaml`.
   The latter has higher precedence, but it can be used only when requiring a slurm allocation.
+- Add ngv snakemake rules to generate some tetrahedral meshes file that are needed by STEP (dual run). [BBPP152-113]
 
 Removed
 ~~~~~~~

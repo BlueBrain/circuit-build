@@ -123,3 +123,9 @@ ngv:
     resampling:
       enabled: true
       linear-density: 1.0
+
+  tetrahedral_mesh:
+    surface_mesh_subdivision_steps: 0
+    tet_mesh_refinement_steps: 0
+    refinement_subdividing_steps: 1
+

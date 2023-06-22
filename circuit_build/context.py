@@ -320,6 +320,35 @@ class Context:
         """Return the path to the final spatial index file."""
         return self.edges_spatial_index_dir / INDEX_SUCCESS_FILE
 
+    @property
+    def prepared_tetrahedral_mesh_file(self):
+        """Return the path to the prepared tetrahedral meshfile.
+
+        Starting from a voxelized brain region, we extract the surface mesh,
+        i.e. triangular mesh that encloses this brain region.
+        prepared means the extracted surface triangular mesh.
+        """
+        return self.paths.auxiliary_path("ngv_prepared_tetrahedral_mesh.stl")
+
+    @property
+    def tetrahedral_gmsh_script_file(self):
+        """Returns the temporary geo scripting file."""
+        return "ngv_prepared_tetrahedral_mesh.geo"
+
+    @property
+    def tetrahedral_mesh_file(self):
+        """Return the path to the built tetrahedral meshfile."""
+        return self.paths.auxiliary_path("ngv_tetrahedral_mesh.msh")
+
+    @property
+    def refined_tetrahedral_mesh_file(self):
+        """Return the path to the refined tet mesh.
+
+        Refine this mesh by subdividing its edge.
+        refined means the finer surface mesh (more elements).
+        """
+        return self.paths.auxiliary_path("ngv_refined_tetrahedral_mesh.msh")
+
     def tmp_edges_neurons_chemical_connectome_path(self, path):
         """Return path relative to the neuronal chemical connectome directory."""
         return self.paths.edges_population_connectome_path(
@@ -340,6 +369,16 @@ class Context:
         """Return the glialglial touches directory."""
         return self.paths.edges_population_touches_dir(
             population_name=self.edges_astrocytes_vasculature_name
+        )
+
+    @property
+    def refinement_subdividing_steps(self):
+        """Return the refinement_subdividing_steps from config file if exist.
+
+        otherwise return 1.
+        """
+        return int(
+            self.conf.get(["ngv", "tetrahedral_mesh", "refinement_subdividing_steps"], default="1")
         )
 
     def morphology_path(self, morphology_type: str):

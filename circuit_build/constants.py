@@ -117,4 +117,19 @@ ENV_CONFIG = {
         "modulepath": SPACK_MODULEPATH,
         "modules": ["archive/2023-04", "py-archngv/3.0.0"],
     },
+    "ngv-prepare-tetrahedral": {
+        "env_type": ENV_TYPE_MODULE,
+        "modulepath": SPACK_MODULEPATH,
+        "modules": ["unstable", "py-archngv/3.0.2"],
+    },
+    "ngv-build-tetrahedral": {
+        "env_type": ENV_TYPE_MODULE,
+        "modulepath": SPACK_MODULEPATH,
+        "modules": ["archive/2023-03", "gmsh/4.10.3"],
+    },
+    "ngv-refine-tetrahedral": {
+        "env_type": ENV_TYPE_MODULE,
+        "modulepath": SPACK_MODULEPATH,
+        "modules": ["archive/2023-03", "gmsh/4.10.3"],
+    },
 }

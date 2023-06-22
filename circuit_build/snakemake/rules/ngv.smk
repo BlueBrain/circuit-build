@@ -16,6 +16,7 @@ rule ngv:
         ctx.edges_astrocytes_vasculature_endfeet_meshes_file,
         ctx.edges_astrocytes_astrocytes_file,
         ctx.nodes_astrocytes_morphologies_dir,
+        ctx.refined_tetrahedral_mesh_file,
 
 
 rule ngv_config:
@@ -353,5 +354,69 @@ rule glialglial_connectivity:
                 f"--population-name {ctx.edges_astrocytes_astrocytes_name}",
                 "--output-connectivity {output[glialglial_connectivity]}",
                 f"--seed {ctx.conf.get(['ngv', 'common', 'seed'])}",
+            ],
+        )
+
+
+rule prepare_tetrahedral:
+    # generates a mesh file and a gmsh script for the next step
+    output:
+        mesh=ctx.prepared_tetrahedral_mesh_file,
+        script=ctx.tetrahedral_gmsh_script_file,
+    log:
+        ctx.log_path("prepare_tetrahedral"),
+    shell:
+        ctx.bbp_env(
+            "ngv-prepare-tetrahedral",
+            [
+                f"ngv refined-surface-mesh",
+                f"--config-path {ctx.paths.bioname_path('MANIFEST.yaml')}",
+                f"--atlas {ctx.conf.get(['ngv', 'common', 'atlas'])}",
+                "--atlas-cache .atlas",
+                "--output-path {output.mesh}",
+            ],
+        )
+
+
+rule build_tetrahedral:
+    input:
+        mesh_file=ctx.prepared_tetrahedral_mesh_file,
+        script_file=ctx.tetrahedral_gmsh_script_file,
+    output:
+        ctx.tetrahedral_mesh_file,
+    log:
+        ctx.log_path("build_tetrahedral"),
+    shell:
+        ctx.bbp_env(
+            "ngv-build-tetrahedral",
+            [
+                "gmsh",
+                "{input.script_file}",  # input.mesh_file is already set in the input.script_file
+                "-3",  #  Perform mesh generation from 2d (surface) to 3d (tetrahedral).
+                "-o {output}",
+                "-algo initial3d",
+            ],
+        )
+
+
+rule refine_tetrahedral:
+    # this loop refines the provided tetrahedral mesh by subdividing its edges,
+    # i.e. at every iteration every edge is split in two sub-edges
+    input:
+        ctx.tetrahedral_mesh_file,
+    output:
+        ctx.refined_tetrahedral_mesh_file,
+    log:
+        ctx.log_path("refine_tetrahedral"),
+    shell:
+        ctx.bbp_env(
+            "ngv-refine-tetrahedral",
+            [
+                (
+            "cp -v {input} tmp.msh && "
+                    f"for (( c=1; c<={ctx.refinement_subdividing_steps}; c++ )); "
+                    "do gmsh -refine tmp.msh -o tmp.msh; done && "
+                    "mv -v tmp.msh {output}"
+                )
             ],
         )
