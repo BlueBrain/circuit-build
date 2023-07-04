@@ -43,32 +43,32 @@ ENV_CONFIG = {
     "brainbuilder": {
         "env_type": ENV_TYPE_MODULE,
         "modulepath": SPACK_MODULEPATH,
-        "modules": ["archive/2023-02", "brainbuilder/0.18.3"],
+        "modules": ["archive/2023-06", "brainbuilder/0.18.5"],
     },
     "spatialindexer": {
         "env_type": ENV_TYPE_MODULE,
         "modulepath": SPACK_MODULEPATH,
-        "modules": ["archive/2023-04", "spatial-index/2.0.0"],
+        "modules": ["archive/2023-06", "spatial-index/2.1.0"],
     },
     "parquet-converters": {
         "env_type": ENV_TYPE_MODULE,
         "modulepath": SPACK_MODULEPATH,
-        "modules": ["archive/2022-07", "parquet-converters/0.8.0"],
+        "modules": ["archive/2023-06", "parquet-converters/0.8.0"],
     },
     "placement-algorithm": {
         "env_type": ENV_TYPE_MODULE,
         "modulepath": SPACK_MODULEPATH,
-        "modules": ["archive/2022-03", "placement-algorithm/2.3.0"],
+        "modules": ["archive/2023-06", "placement-algorithm/2.3.0"],
     },
     "spykfunc": {
         "env_type": ENV_TYPE_MODULE,
         "modulepath": SPACK_MODULEPATH,
-        "modules": ["archive/2022-10", "spykfunc/0.17.4"],
+        "modules": ["archive/2023-06", "spykfunc/0.18.1"],
     },
     "touchdetector": {
         "env_type": ENV_TYPE_MODULE,
         "modulepath": SPACK_MODULEPATH,
-        "modules": ["archive/2022-07", "touchdetector/5.7.0"],
+        "modules": ["archive/2023-04", "touchdetector/5.7.4"],
     },
     "region-grower": {
         "env_type": ENV_TYPE_MODULE,
@@ -96,12 +96,12 @@ ENV_CONFIG = {
     "ngv": {
         "env_type": ENV_TYPE_MODULE,
         "modulepath": SPACK_MODULEPATH,
-        "modules": ["archive/2023-04", "py-archngv/3.0.0"],
+        "modules": ["archive/2023-06", "py-archngv/3.0.2"],
     },
     "synthesize-glia": {
         "env_type": ENV_TYPE_MODULE,
         "modulepath": SPACK_MODULEPATH,
-        "modules": ["archive/2023-04", "py-archngv/3.0.0", "py-mpi4py"],
+        "modules": ["archive/2023-06", "py-archngv/3.0.2", "py-mpi4py/3.1.4"],
         "env_vars": {
             **ENV_VARS_DASK_DEFAULT,
             "DASK_DISTRIBUTED__ADMIN__TICK__LIMIT": "1h",
@@ -110,26 +110,26 @@ ENV_CONFIG = {
     "ngv-touchdetector": {
         "env_type": ENV_TYPE_MODULE,
         "modulepath": SPACK_MODULEPATH,
-        "modules": ["archive/2023-04", "py-archngv/3.0.0", "touchdetector/5.7.4"],
+        "modules": ["archive/2023-04", "py-archngv/3.0.2", "touchdetector/5.7.4"],
     },
     "ngv-pytouchreader": {
         "env_type": ENV_TYPE_MODULE,
         "modulepath": SPACK_MODULEPATH,
-        "modules": ["archive/2023-04", "py-archngv/3.0.0"],
+        "modules": ["archive/2023-06", "py-archngv/3.0.2"],
     },
     "ngv-prepare-tetrahedral": {
         "env_type": ENV_TYPE_MODULE,
         "modulepath": SPACK_MODULEPATH,
-        "modules": ["unstable", "py-archngv/3.0.2"],
+        "modules": ["archive/2023-06", "py-archngv/3.0.2"],
     },
     "ngv-build-tetrahedral": {
         "env_type": ENV_TYPE_MODULE,
         "modulepath": SPACK_MODULEPATH,
-        "modules": ["archive/2023-03", "gmsh/4.10.3"],
+        "modules": ["archive/2023-06", "gmsh/4.10.3"],
     },
     "ngv-refine-tetrahedral": {
         "env_type": ENV_TYPE_MODULE,
         "modulepath": SPACK_MODULEPATH,
-        "modules": ["archive/2023-03", "gmsh/4.10.3"],
+        "modules": ["archive/2023-06", "gmsh/4.10.3"],
     },
 }
