@@ -11,7 +11,7 @@ import h5py
 import pytest
 from assertions import assert_node_population_morphologies_accessible
 from click.testing import CliRunner
-from utils import SNAKEFILE, SNAKEMAKE_ARGS, TEST_PROJ_TINY, cwd, edit_yaml, load_yaml
+from utils import TEST_PROJ_TINY, cwd, edit_yaml, load_yaml
 
 from circuit_build.cli import run
 from circuit_build.constants import INDEX_SUCCESS_FILE
@@ -124,9 +124,9 @@ def test_no_emodel(tmp_path):
         assert tmp_path.joinpath("auxiliary", "circuit.h5").stat().st_size > 100
 
 
-def test_custom_module(tmp_path, caplog, capfd):
+def test_custom_module(tmp_path, caplog, capfd, snakemake_args):
     with cwd(tmp_path):
-        args = SNAKEMAKE_ARGS + ["-m", "brainbuilder:invalid_module1:invalid_module_path"]
+        args = snakemake_args + ["-m", "brainbuilder:invalid_module1:invalid_module_path"]
         runner = CliRunner(mix_stderr=False)
 
         result = runner.invoke(
@@ -205,7 +205,7 @@ def test_bioname_with_git(tmp_path):
         assert result.exit_code == 0
 
 
-def test_snakemake_bioname_no_git(tmp_path):
+def test_snakemake_bioname_no_git(tmp_path, snakefile):
     """This test verifies that bioname is checked to be under git when called via `snakemake`."""
 
     data_dir = TEST_PROJ_TINY
@@ -225,7 +225,7 @@ def test_snakemake_bioname_no_git(tmp_path):
             "-u",
             str(data_dir / "cluster.yaml"),
         ]
-        cmd = ["snakemake", "--snakefile", SNAKEFILE] + args
+        cmd = ["snakemake", "--snakefile", snakefile] + args
 
         with pytest.raises(CalledProcessError) as exc_info:
             subprocess.run(cmd, capture_output=True, text=True, check=True)
@@ -233,7 +233,7 @@ def test_snakemake_bioname_no_git(tmp_path):
         assert f"{str(data_copy_dir)} must be under git" in exc_info.value.stderr
 
 
-def test_snakemake_bioname_with_git(tmp_path):
+def test_snakemake_bioname_with_git(tmp_path, snakefile):
     """This test verifies that bioname is valid when initialized with ``git init``."""
 
     data_dir = TEST_PROJ_TINY
@@ -255,14 +255,14 @@ def test_snakemake_bioname_with_git(tmp_path):
             "-u",
             str(data_dir / "cluster.yaml"),
         ]
-        cmd = ["snakemake", "--snakefile", SNAKEFILE] + args
+        cmd = ["snakemake", "--snakefile", snakefile] + args
 
         result = subprocess.run(cmd, capture_output=True, text=True)
 
         assert result.returncode == 0, result.stderr
 
 
-def test_isolated_phase(tmp_path):
+def test_isolated_phase(tmp_path, snakefile):
     data_dir = TEST_PROJ_TINY
 
     with cwd(tmp_path):
@@ -282,7 +282,7 @@ def test_isolated_phase(tmp_path):
                 "-u",
                 str(data_dir / "cluster.yaml"),
             ]
-            cmd = ["snakemake", "--snakefile", SNAKEFILE] + args + ["place_cells"]
+            cmd = ["snakemake", "--snakefile", snakefile] + args + ["place_cells"]
 
             result = subprocess.run(cmd, capture_output=False, text=True)
 

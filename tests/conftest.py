@@ -1,5 +1,8 @@
-from xdist.scheduler.loadscope import LoadScopeScheduling
+import importlib.resources
 
+import pytest
+from utils import TEST_PROJ_TINY
+from xdist.scheduler.loadscope import LoadScopeScheduling
 
 # tests that should not be grouped together, even when they belong to the same module
 PARALLEL_TESTS = {
@@ -20,3 +23,20 @@ class CustomScheduler(LoadScopeScheduling):
 
 def pytest_xdist_make_scheduler(config, log):
     return CustomScheduler(config, log)
+
+
+@pytest.fixture
+def snakefile():
+    ref = importlib.resources.files("circuit_build") / "snakemake" / "Snakefile"
+    with importlib.resources.as_file(ref) as path:
+        yield str(path)
+
+
+@pytest.fixture
+def snakemake_args():
+    return [
+        "--bioname",
+        str(TEST_PROJ_TINY),
+        "-u",
+        str(TEST_PROJ_TINY / "cluster.yaml"),
+    ]

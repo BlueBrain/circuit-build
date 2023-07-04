@@ -4,7 +4,7 @@ from unittest.mock import mock_open, patch
 
 import pytest
 from click.testing import CliRunner
-from utils import SNAKEFILE, SNAKEMAKE_ARGS, TEST_PROJ_TINY
+from utils import TEST_PROJ_TINY
 
 from circuit_build import cli as test_module
 
@@ -13,13 +13,13 @@ from circuit_build import cli as test_module
 @patch("circuit_build.cli.Path.open", new_callable=mock_open)
 @patch("circuit_build.cli.datetime")
 @patch("circuit_build.cli.subprocess.run")
-def test_ok(run_mock, datetime_mock, open_mock, mkdir_mock):
+def test_ok(run_mock, datetime_mock, open_mock, mkdir_mock, snakefile, snakemake_args):
     run_mock.return_value.returncode = 0
     datetime_mock.now.return_value = datetime(2021, 4, 21, 12, 34, 56)
     expected_timestamp = "20210421T123456"
     runner = CliRunner()
 
-    result = runner.invoke(test_module.run, SNAKEMAKE_ARGS, catch_exceptions=False)
+    result = runner.invoke(test_module.run, snakemake_args, catch_exceptions=False)
 
     assert run_mock.call_count == 1
     assert open_mock.call_count == 0
@@ -29,7 +29,7 @@ def test_ok(run_mock, datetime_mock, open_mock, mkdir_mock):
     assert args == [
         "snakemake",
         "--snakefile",
-        SNAKEFILE,
+        snakefile,
         "--cluster-config",
         str(TEST_PROJ_TINY / "cluster.yaml"),
         "--directory",
@@ -47,14 +47,14 @@ def test_ok(run_mock, datetime_mock, open_mock, mkdir_mock):
 @patch("circuit_build.cli.Path.open", new_callable=mock_open)
 @patch("circuit_build.cli.datetime")
 @patch("circuit_build.cli.subprocess.run")
-def test_ok_with_summary(run_mock, datetime_mock, open_mock, mkdir_mock):
+def test_ok_with_summary(run_mock, datetime_mock, open_mock, mkdir_mock, snakefile, snakemake_args):
     run_mock.return_value.returncode = 0
     datetime_mock.now.return_value = datetime(2021, 4, 21, 12, 34, 56)
     expected_timestamp = "20210421T123456"
     runner = CliRunner()
 
     result = runner.invoke(
-        test_module.run, SNAKEMAKE_ARGS + ["--with-summary"], catch_exceptions=False
+        test_module.run, snakemake_args + ["--with-summary"], catch_exceptions=False
     )
 
     assert run_mock.call_count == 2
@@ -65,7 +65,7 @@ def test_ok_with_summary(run_mock, datetime_mock, open_mock, mkdir_mock):
     assert args == [
         "snakemake",
         "--snakefile",
-        SNAKEFILE,
+        snakefile,
         "--cluster-config",
         str(TEST_PROJ_TINY / "cluster.yaml"),
         "--directory",
@@ -81,7 +81,7 @@ def test_ok_with_summary(run_mock, datetime_mock, open_mock, mkdir_mock):
     assert args == [
         "snakemake",
         "--snakefile",
-        SNAKEFILE,
+        snakefile,
         "--cluster-config",
         str(TEST_PROJ_TINY / "cluster.yaml"),
         "--directory",
@@ -101,14 +101,14 @@ def test_ok_with_summary(run_mock, datetime_mock, open_mock, mkdir_mock):
 @patch("circuit_build.cli.Path.open", new_callable=mock_open)
 @patch("circuit_build.cli.datetime")
 @patch("circuit_build.cli.subprocess.run")
-def test_ok_with_report(run_mock, datetime_mock, open_mock, mkdir_mock):
+def test_ok_with_report(run_mock, datetime_mock, open_mock, mkdir_mock, snakefile, snakemake_args):
     run_mock.return_value.returncode = 0
     datetime_mock.now.return_value = datetime(2021, 4, 21, 12, 34, 56)
     expected_timestamp = "20210421T123456"
     runner = CliRunner()
 
     result = runner.invoke(
-        test_module.run, SNAKEMAKE_ARGS + ["--with-report"], catch_exceptions=False
+        test_module.run, snakemake_args + ["--with-report"], catch_exceptions=False
     )
 
     assert run_mock.call_count == 2
@@ -119,7 +119,7 @@ def test_ok_with_report(run_mock, datetime_mock, open_mock, mkdir_mock):
     assert args == [
         "snakemake",
         "--snakefile",
-        SNAKEFILE,
+        snakefile,
         "--cluster-config",
         str(TEST_PROJ_TINY / "cluster.yaml"),
         "--directory",
@@ -135,7 +135,7 @@ def test_ok_with_report(run_mock, datetime_mock, open_mock, mkdir_mock):
     assert args == [
         "snakemake",
         "--snakefile",
-        SNAKEFILE,
+        snakefile,
         "--cluster-config",
         str(TEST_PROJ_TINY / "cluster.yaml"),
         "--directory",
@@ -152,18 +152,18 @@ def test_ok_with_report(run_mock, datetime_mock, open_mock, mkdir_mock):
     ]
 
 
-def test_config_is_set_already():
+def test_config_is_set_already(snakemake_args):
     runner = CliRunner()
     expected_match = "snakemake `--config` option is not allowed"
     with pytest.raises(AssertionError, match=expected_match):
-        runner.invoke(test_module.run, SNAKEMAKE_ARGS + ["--config", "a=b"], catch_exceptions=False)
+        runner.invoke(test_module.run, snakemake_args + ["--config", "a=b"], catch_exceptions=False)
 
 
 @patch("circuit_build.cli.Path.mkdir")
 @patch("circuit_build.cli.Path.open", new_callable=mock_open)
 @patch("circuit_build.cli.datetime")
 @patch("circuit_build.cli.subprocess.run")
-def test_printshellcmds_is_not_set(run_mock, datetime_mock, open_mock, mkdir_mock):
+def test_printshellcmds_is_not_set(run_mock, datetime_mock, open_mock, mkdir_mock, snakefile):
     run_mock.return_value.returncode = 0
     datetime_mock.now.return_value = datetime(2021, 4, 21, 12, 34, 56)
     expected_timestamp = "20210421T123456"
@@ -180,7 +180,7 @@ def test_printshellcmds_is_not_set(run_mock, datetime_mock, open_mock, mkdir_moc
     assert args == [
         "snakemake",
         "--snakefile",
-        SNAKEFILE,
+        snakefile,
         "--cluster-config",
         str(TEST_PROJ_TINY / "cluster.yaml"),
         "--directory",
@@ -198,7 +198,7 @@ def test_printshellcmds_is_not_set(run_mock, datetime_mock, open_mock, mkdir_moc
 @patch("circuit_build.cli.Path.open", new_callable=mock_open)
 @patch("circuit_build.cli.datetime")
 @patch("circuit_build.cli.subprocess.run")
-def test_modules(run_mock, datetime_mock, open_mock, mkdir_mock):
+def test_modules(run_mock, datetime_mock, open_mock, mkdir_mock, snakefile):
     run_mock.return_value.returncode = 0
     datetime_mock.now.return_value = datetime(2021, 4, 21, 12, 34, 56)
     expected_timestamp = "20210421T123456"
@@ -226,7 +226,7 @@ def test_modules(run_mock, datetime_mock, open_mock, mkdir_mock):
     assert args == [
         "snakemake",
         "--snakefile",
-        SNAKEFILE,
+        snakefile,
         "--cluster-config",
         str(TEST_PROJ_TINY / "cluster.yaml"),
         "--directory",

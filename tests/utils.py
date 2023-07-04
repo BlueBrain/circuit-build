@@ -2,9 +2,6 @@ import os
 from contextlib import contextmanager
 from pathlib import Path
 
-import pkg_resources
-
-import circuit_build
 from circuit_build.utils import dump_yaml, load_yaml
 
 TESTS_DIR = Path(__file__).resolve().parent
@@ -14,14 +11,6 @@ TEST_PROJ_TINY = FUNC_TESTS_DATA / "proj66-tiny"
 TEST_PROJ_SYNTH = FUNC_TESTS_DATA / "proj66-tiny-synth"
 TEST_NGV_STANDALONE = TESTS_DIR / "functional/ngv-standalone/bioname"
 TEST_NGV_FULL = TESTS_DIR / "functional/ngv-full/bioname"
-
-SNAKEFILE = pkg_resources.resource_filename(circuit_build.__name__, "snakemake/Snakefile")
-SNAKEMAKE_ARGS = [
-    "--bioname",
-    str(TEST_PROJ_TINY),
-    "-u",
-    str(TEST_PROJ_TINY / "cluster.yaml"),
-]
 
 
 @contextmanager
