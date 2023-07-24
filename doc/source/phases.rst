@@ -168,11 +168,21 @@ Detect touches between neurites using `TouchDetector`_.
 
     ::
 
-        -A <proj> -p prod --constraint=cpu -n<tasks> --time <time>
+        -A <proj> -p prod --constraint=cpu -n<tasks> -c<cpus-per-task> --time <time>
+
+    For example, something like ``tasks=8`` and ``cpus-per-task=20`` can be set to use many threads per MPI rank.
+    TouchDetector should then detect and setup the right environment variables to make everything work inside the SLURM setup.
+
+    If the parameters aren't set correctly, the execution may fail and you should find an error message in the logs like:
+
+    ::
+
+        Please use a minimum of 4 threads with TouchDetector!
+
 
 .. warning::
 
-    Unlike nost other phases, ``TouchDetector`` is stateful: i.e., during the run it writes checkpoints to the disk, and automatically resumes from those on restart.
+    Unlike most other phases, ``TouchDetector`` is stateful: i.e., during the run it writes checkpoints to the disk, and automatically resumes from those on restart.
 
     While it saves a lot of computational time in regular cases when resume from checkpoint is desirable, beware to clean up ``connectome/touches`` folder when you restart `TouchDetector` knowing some input (including `TouchDetector` version itself) has changed.
 

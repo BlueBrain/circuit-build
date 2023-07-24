@@ -15,6 +15,10 @@ from circuit_build.constants import (
 
 VENV_DIR = "/path/to/venv"
 VENV_ACTIVATE_FILE = f"{VENV_DIR}/bin/activate"
+UNSET_CMD = (
+    "unset GOTO_NUM_THREADS MKL_NUM_THREADS NUMEXPR_NUM_THREADS "
+    "OMP_NUM_THREADS OPENBLAS_NUM_THREADS VECLIB_MAXIMUM_THREADS"
+)
 
 
 def test_get_source_file_with_existing_script(tmp_path):
@@ -85,7 +89,7 @@ def test_get_source_file_with_not_existing_path(tmp_path):
                 },
             },
             (
-                "set -ex; "
+                f"set -ex; {UNSET_CMD} && "
                 ". /etc/profile.d/modules.sh "
                 "&& module purge "
                 f"&& export MODULEPATH={SPACK_MODULEPATH} "
@@ -108,7 +112,7 @@ def test_get_source_file_with_not_existing_path(tmp_path):
                 },
             },
             (
-                "set -ex; "
+                f"set -ex; {UNSET_CMD} && "
                 ". /etc/profile.d/modules.sh "
                 "&& module purge "
                 f"&& export MODULEPATH={SPACK_MODULEPATH} "
@@ -134,7 +138,7 @@ def test_get_source_file_with_not_existing_path(tmp_path):
                 },
             },
             (
-                "set -ex; "
+                f"set -ex; {UNSET_CMD} && "
                 ". /etc/profile.d/modules.sh "
                 "&& module purge "
                 f"&& export MODULEPATH={SPACK_MODULEPATH} "
@@ -156,7 +160,7 @@ def test_get_source_file_with_not_existing_path(tmp_path):
                 },
             },
             (
-                "set -ex; "
+                f"set -ex; {UNSET_CMD} && "
                 ". /etc/profile.d/modules.sh "
                 "&& module purge "
                 f"&& export MODULEPATH={SPACK_MODULEPATH} "
@@ -174,7 +178,7 @@ def test_get_source_file_with_not_existing_path(tmp_path):
                 "brainbuilder": {"env_type": "APPTAINER", "image": "nse/brainbuilder_0.17.1.sif"},
             },
             (
-                "set -ex; "
+                f"set -ex; {UNSET_CMD} && "
                 ". /etc/profile.d/modules.sh "
                 "&& module purge "
                 f"&& module use {APPTAINER_MODULEPATH} "
@@ -195,7 +199,7 @@ def test_get_source_file_with_not_existing_path(tmp_path):
                 "brainbuilder": {"env_type": "APPTAINER", "image": "nse/brainbuilder_0.17.1.sif"},
             },
             (
-                "set -ex; "
+                f"set -ex; {UNSET_CMD} && "
                 ". /etc/profile.d/modules.sh "
                 "&& module purge "
                 f"&& module use {APPTAINER_MODULEPATH} "
@@ -214,7 +218,7 @@ def test_get_source_file_with_not_existing_path(tmp_path):
                 "brainbuilder": {"env_type": "VENV", "path": VENV_DIR},
             },
             (
-                "set -ex; "
+                f"set -ex; {UNSET_CMD} && "
                 "salloc -J brainbuilder -A ${{SALLOC_ACCOUNT}} -p prod_small --time 0:10:00 "
                 "srun sh -c '"
                 f". {VENV_ACTIVATE_FILE} "
@@ -233,7 +237,7 @@ def test_get_source_file_with_not_existing_path(tmp_path):
                 },
             },
             (
-                "set -ex; "
+                f"set -ex; {UNSET_CMD} && "
                 ". /etc/profile.d/modules.sh "
                 "&& module purge "
                 f"&& export MODULEPATH={SPACK_MODULEPATH} "
@@ -259,7 +263,7 @@ def test_get_source_file_with_not_existing_path(tmp_path):
                 },
             },
             (
-                "set -ex; "
+                f"set -ex; {UNSET_CMD} && "
                 ". /etc/profile.d/modules.sh "
                 "&& module purge "
                 f"&& export MODULEPATH={SPACK_MODULEPATH} "
@@ -280,7 +284,7 @@ def test_get_source_file_with_not_existing_path(tmp_path):
             {
                 "brainbuilder": {"env_type": "VENV", "path": VENV_DIR},
             },
-            f"set -ex; . {VENV_ACTIVATE_FILE} && echo mytest",
+            f"set -ex; {UNSET_CMD} && " f". {VENV_ACTIVATE_FILE} && echo mytest",
             id="venv_without_slurm",
         ),
         pytest.param(
@@ -290,7 +294,7 @@ def test_get_source_file_with_not_existing_path(tmp_path):
                 "touchdetector": {"env_type": "VENV", "path": VENV_DIR},
             },
             (
-                "set -ex; "
+                f"set -ex; {UNSET_CMD} && "
                 "salloc -J touchdetector -A ${{SALLOC_ACCOUNT}} -p prod_small --time 0:05:00 "
                 "srun sh -c '"
                 f". {VENV_ACTIVATE_FILE} "

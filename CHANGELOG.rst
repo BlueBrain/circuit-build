@@ -2,6 +2,15 @@ Changelog
 =========
 
 
+Version 5.0.1
+-------------
+
+Improvements
+~~~~~~~~~~~~
+- Use touchdetector 6.0. SLURM parameters may need to be adjusted in cluster.yaml [NSETM-2213]
+- Unset the THREADS env variables because they may interfere with jobs.
+
+
 Version 5.0.0
 -------------
 

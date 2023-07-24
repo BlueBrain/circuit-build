@@ -354,11 +354,7 @@ rule touchdetector:
     message:
         "Detect touches between neurites"
     input:
-        **ctx.if_partition({"nodesets": ctx.NODESETS_FILE}, {}),
-        neurons=ctx.if_synthesis(
-            ctx.paths.auxiliary_path("circuit.synthesized_morphologies.h5"),
-            ctx.nodes_neurons_file,
-        ),
+        circuit_config=ctx.paths.auxiliary_path("circuit_config_hpc.json"),
     output:
         success=touch(
             ctx.tmp_edges_neurons_chemical_connectome_path(
@@ -373,22 +369,23 @@ rule touchdetector:
         ctx.bbp_env(
             "touchdetector",
             [
-                "omplace",
                 "touchdetector",
+                "--modern",
+                "--circuit-config {input.circuit_config}",
                 "--output {params.output_dir}",
                 "--touchspace",
                 ctx.conf.get(["touchdetector", "touchspace"], default="axodendritic"),
-                f"--from {{input[neurons]}} {ctx.nodes_neurons_name}",
-                f"--to {{input[neurons]}} {ctx.nodes_neurons_name}",
+                f"--from {ctx.nodes_neurons_name}",
+                f"--to {ctx.nodes_neurons_name}",
                 *ctx.if_partition(
                     [
-                        "--from-nodeset {input.nodesets} {wildcards.partition}",
-                        "--to-nodeset {input.nodesets} {wildcards.partition}",
+                        "--from-nodeset {wildcards.partition}",
+                        "--to-nodeset {wildcards.partition}",
                     ],
                     [],
                 ),
+                "--recipe",
                 ctx.BUILDER_RECIPE,
-                ctx.if_synthesis(ctx.SYNTHESIZE_MORPH_DIR, Path(ctx.MORPH_RELEASE, "h5v1")),
             ],
             slurm_env="touchdetector",
         )
@@ -660,6 +657,24 @@ rule circuitconfig_struct_sonata:
     run:
         with write_with_log(output[0], log[0]) as out:
             ctx.write_network_config(connectome_dir="structural", output_file=out)
+
+
+rule circuitconfig_hpc:
+    message:
+        "Generate SONATA network config (touchdetector and spykfunc)"
+    input:
+        **ctx.if_partition({"nodesets": ctx.NODESETS_FILE}, {}),
+        neurons=ctx.if_synthesis(
+            ctx.paths.auxiliary_path("circuit.synthesized_morphologies.h5"),
+            ctx.nodes_neurons_file,
+        ),
+    output:
+        ctx.paths.auxiliary_path("circuit_config_hpc.json"),
+    log:
+        ctx.log_path("circuitconfig_hpc"),
+    run:
+        with write_with_log(output[0], log[0]) as out:
+            ctx.write_network_config(connectome_dir=None, output_file=out, nodes_file=input.neurons)
 
 
 rule functional:

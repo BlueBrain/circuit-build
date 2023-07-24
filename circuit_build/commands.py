@@ -21,6 +21,24 @@ def _escape_single_quotes(value):
     return value.replace("'", "'\\''")
 
 
+def _unset_threads_vars(cmd):
+    """Unset the THREADS env variables because they may interfere with jobs.
+
+    They are automatically set by Snakemake, depending on the `threads` configuration,
+    see https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#threads
+    and https://github.com/snakemake/snakemake/blob/e9f67318/snakemake/shell.py#L216-L221
+    """
+    env_vars = [
+        "GOTO_NUM_THREADS",
+        "MKL_NUM_THREADS",
+        "NUMEXPR_NUM_THREADS",
+        "OMP_NUM_THREADS",
+        "OPENBLAS_NUM_THREADS",
+        "VECLIB_MAXIMUM_THREADS",
+    ]
+    return f"unset {' '.join(env_vars)} && {cmd}"
+
+
 def _get_source_file(path):
     """Return the activation file if the path is a venv directory, or the same path otherwise."""
     path = Path(path)
@@ -157,6 +175,7 @@ def build_command(cmd, env_config, env_name, cluster_config, slurm_env=None):
         env_config=selected_env_config,
         cluster_config=selected_cluster_config,
     )
+    cmd = _unset_threads_vars(cmd)
     cmd = redirect_to_file(cmd)
     return cmd
 

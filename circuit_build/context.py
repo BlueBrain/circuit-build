@@ -513,7 +513,7 @@ class Context:
             slurm_env=slurm_env,
         )
 
-    def write_network_config(self, connectome_dir, output_file):
+    def write_network_config(self, connectome_dir, output_file, nodes_file=None):
         """Return the SONATA circuit configuration for neurons."""
         morphologies_entry = self.if_synthesis(
             {
@@ -535,7 +535,7 @@ class Context:
             circuit_dir=self.paths.circuit_dir,
             nodes=[
                 {
-                    "nodes_file": self.nodes_neurons_file,
+                    "nodes_file": nodes_file or self.nodes_neurons_file,
                     "population_type": "biophysical",
                     "population_name": self.nodes_neurons_name,
                     **morphologies_entry,
@@ -552,7 +552,9 @@ class Context:
                     "spatial_synapse_index_dir": self.edges_spatial_index_dir,
                     **self.provenance(),
                 },
-            ],
+            ]
+            if connectome_dir
+            else [],
             node_sets_file=self.NODESETS_FILE,
         )
 

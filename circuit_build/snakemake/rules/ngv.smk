@@ -315,6 +315,7 @@ rule glial_gap_junctions:
     input:
         astrocytes=ctx.nodes_astrocytes_file,
         morphologies_dir=ctx.nodes_astrocytes_morphologies_dir,
+        circuit_config="ngv_config.json",
     output:
         touches_dir=directory(ctx.tmp_edges_astrocytes_glialglial_touches_dir),
     log:
@@ -324,12 +325,13 @@ rule glial_gap_junctions:
             "ngv-touchdetector",
             [
                 "touchdetector",
+                "--modern",
+                "--circuit-config {input.circuit_config}",
                 "--output {output[touches_dir]}",
-                "--save-state",
-                f"--from {{input[astrocytes]}} {ctx.nodes_astrocytes_name}",
-                f"--to {{input[astrocytes]}} {ctx.nodes_astrocytes_name}",
+                f"--from {ctx.nodes_astrocytes_name}",
+                f"--to {ctx.nodes_astrocytes_name}",
+                "--recipe",
                 ctx.paths.bioname_path("astrocyte_gap_junction_recipe.xml"),
-                "{input[morphologies_dir]}",
             ],
             slurm_env="ngv-touchdetector",
         )

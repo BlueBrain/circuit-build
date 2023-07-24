@@ -43,7 +43,18 @@ touchdetector:
     -A ${{SALLOC_ACCOUNT}}
     -p prod_small
     -C cpu
-    -n2
+    -n4
+    -c20
+    --time 0:05:00
+
+ngv-touchdetector:
+  jobname: ngv-td
+  salloc: >-
+    -A ${{SALLOC_ACCOUNT}}
+    -p prod_small
+    -C cpu
+    -n4
+    -c20
     --time 0:05:00
 
 # running on 'prod' instead of 'prod_small' to avoid enqueuing with reason QOSMaxMemoryPerUser
