@@ -68,7 +68,7 @@ ENV_CONFIG = {
     "touchdetector": {
         "env_type": ENV_TYPE_MODULE,
         "modulepath": SPACK_MODULEPATH,
-        "modules": ["unstable", "touchdetector/6.0.2"],
+        "modules": ["archive/2023-08", "touchdetector/6.0.2"],
     },
     "region-grower": {
         "env_type": ENV_TYPE_MODULE,
@@ -110,7 +110,7 @@ ENV_CONFIG = {
     "ngv-touchdetector": {
         "env_type": ENV_TYPE_MODULE,
         "modulepath": SPACK_MODULEPATH,
-        "modules": ["unstable", "py-archngv/3.0.2", "touchdetector/6.0.2"],
+        "modules": ["archive/2023-08", "py-archngv/3.0.2", "touchdetector/6.0.2"],
     },
     "ngv-pytouchreader": {
         "env_type": ENV_TYPE_MODULE,
