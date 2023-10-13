@@ -1,6 +1,13 @@
 Changelog
 =========
 
+Version 5.0.2
+-------------
+
+New Features
+~~~~~~~~~~~~
+- add new optional parameter `no_emodel` in `MANIFEST.yaml` to bypass any emodel related tasks during synthesis, to be used only for structural connectome
+
 
 Version 5.0.1
 -------------

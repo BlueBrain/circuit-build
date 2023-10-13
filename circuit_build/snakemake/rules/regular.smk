@@ -267,35 +267,6 @@ rule assign_emodels:
         )
 
 
-rule compute_ais_scales:
-    message:
-        "Add the column @dynamics:ais_scaler to SONATA nodes"
-    input:
-        ctx.paths.auxiliary_path("circuit.synthesized_morphologies.h5"),
-    output:
-        ctx.paths.auxiliary_path("circuit.ais_scales.h5"),
-    log:
-        ctx.log_path("compute_ais_scales"),
-    shell:
-        ctx.bbp_env(
-            "bluepyemodel",
-            [
-                "BluePyEModel get_me_combos_scales",
-                "--cells-path",
-                "{input}",
-                "--morphology-path",
-                ctx.SYNTHESIZE_MORPH_DIR,
-                "--release-path",
-                ctx.SYNTHESIZE_EMODEL_RELEASE,
-                "--output-sonata-path",
-                "{output}",
-                "--parallel-lib",
-                "dask_dataframe",
-            ],
-            slurm_env="compute_ais_scales",
-        )
-
-
 rule provide_me_info:
     message:
         "Provide MorphoElectrical info for SONATA nodes"
@@ -319,35 +290,79 @@ rule provide_me_info:
         )
 
 
-rule compute_currents:
-    message:
-        "Compute currents for SONATA Nodes"
-    input:
-        ctx.paths.auxiliary_path("circuit.ais_scales.h5"),
-    output:
-        ctx.nodes_neurons_file,
-    log:
-        ctx.log_path("compute_currents"),
-    shell:
-        ctx.bbp_env(
-            "bluepyemodel",
-            [
-                "BluePyEModel get_me_combos_currents",
-                "--input-sonata-path",
-                "{input}",
-                "--morphology-path",
-                ctx.SYNTHESIZE_MORPH_DIR,
-                "--output-sonata-path",
-                "{output}",
-                "--release-path",
-                ctx.SYNTHESIZE_EMODEL_RELEASE,
-                "--protocol-config-path",
-                ctx.SYNTHESIZE_PROTOCOL_CONFIG,
-                "--parallel-lib",
-                "dask_dataframe",
-            ],
-            slurm_env="compute_currents",
-        )
+if ctx.NO_EMODEL:
+
+    rule bypass_emodel:
+        message:
+            "Bypass any emodel related tasks"
+        input:
+            ctx.paths.auxiliary_path("circuit.synthesized_morphologies.h5"),
+        output:
+            ctx.nodes_neurons_file,
+        log:
+            ctx.log_path("bypass_emodel"),
+        shell:
+            "cp -v {input} {output}"
+
+else:
+
+    rule compute_ais_scales:
+        message:
+            "Add the column @dynamics:ais_scaler to SONATA nodes"
+        input:
+            ctx.paths.auxiliary_path("circuit.synthesized_morphologies.h5"),
+        output:
+            ctx.paths.auxiliary_path("circuit.ais_scales.h5"),
+        log:
+            ctx.log_path("compute_ais_scales"),
+        shell:
+            ctx.bbp_env(
+                "bluepyemodel",
+                [
+                    "BluePyEModel get_me_combos_scales",
+                    "--cells-path",
+                    "{input}",
+                    "--morphology-path",
+                    ctx.SYNTHESIZE_MORPH_DIR,
+                    "--release-path",
+                    ctx.SYNTHESIZE_EMODEL_RELEASE,
+                    "--output-sonata-path",
+                    "{output}",
+                    "--parallel-lib",
+                    "dask_dataframe",
+                ],
+                slurm_env="compute_ais_scales",
+            )
+
+    rule compute_currents:
+        message:
+            "Compute currents for SONATA Nodes"
+        input:
+            ctx.paths.auxiliary_path("circuit.ais_scales.h5"),
+        output:
+            ctx.nodes_neurons_file,
+        log:
+            ctx.log_path("compute_currents"),
+        shell:
+            ctx.bbp_env(
+                "bluepyemodel",
+                [
+                    "BluePyEModel get_me_combos_currents",
+                    "--input-sonata-path",
+                    "{input}",
+                    "--morphology-path",
+                    ctx.SYNTHESIZE_MORPH_DIR,
+                    "--output-sonata-path",
+                    "{output}",
+                    "--release-path",
+                    ctx.SYNTHESIZE_EMODEL_RELEASE,
+                    "--protocol-config-path",
+                    ctx.SYNTHESIZE_PROTOCOL_CONFIG,
+                    "--parallel-lib",
+                    "dask_dataframe",
+                ],
+                slurm_env="compute_currents",
+            )
 
 
 rule touchdetector:
@@ -645,6 +660,7 @@ rule circuitconfig_sonata:
     run:
         with write_with_log(output[0], log[0]) as out:
             ctx.write_network_config(connectome_dir="functional", output_file=out)
+
 
 
 rule circuitconfig_struct_sonata:

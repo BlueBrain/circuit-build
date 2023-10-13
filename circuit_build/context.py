@@ -166,6 +166,7 @@ class Context:
 
         self.SYNTHESIZE = self.conf.get(["common", "synthesis"], default=False)
         self.NO_INDEX = self.conf.get(["common", "no_index"], default=False)
+        self.NO_EMODEL = self.conf.get(["common", "no_emodel"], default=False)
         self.SYNTHESIZE_MORPH_DIR = self.paths.nodes_population_morphologies_dir(
             self.nodes_neurons_name
         )
