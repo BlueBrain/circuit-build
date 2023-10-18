@@ -690,7 +690,12 @@ rule circuitconfig_hpc:
         ctx.log_path("circuitconfig_hpc"),
     run:
         with write_with_log(output[0], log[0]) as out:
-            ctx.write_network_config(connectome_dir=None, output_file=out, nodes_file=input.neurons)
+            ctx.write_network_config(
+                connectome_dir=None,
+                output_file=out,
+                nodes_file=input.neurons,
+                is_partial_config=True,
+            )
 
 
 rule functional:

@@ -157,7 +157,8 @@ def test_context_is_isolated_phase():
         assert ctx.is_isolated_phase()
 
 
-def test_write_network_config__release(tmp_path):
+@pytest.mark.parametrize("is_partial_config", [False, True])
+def test_write_network_config__release(tmp_path, is_partial_config):
     circuit_dir = tmp_path / "test_write_network_config__release"
     circuit_dir.mkdir()
 
@@ -168,13 +169,16 @@ def test_write_network_config__release(tmp_path):
 
         filepath = circuit_dir / "circuit_config.json"
 
-        res = ctx.write_network_config(connectome_dir="functional", output_file=filepath)
+        res = ctx.write_network_config(
+            connectome_dir="functional", output_file=filepath, is_partial_config=is_partial_config
+        )
 
         with open(filepath, "r", encoding="utf-8") as fd:
             config = json.load(fd)
 
     assert config == {
         "version": 2,
+        **({"metadata": {"status": "partial"}} if is_partial_config else {}),
         "manifest": {"$BASE_DIR": "."},
         "node_sets_file": "$BASE_DIR/sonata/node_sets.json",
         "networks": {
@@ -215,7 +219,8 @@ def test_write_network_config__release(tmp_path):
     }
 
 
-def test_write_network_config__synthesis(tmp_path):
+@pytest.mark.parametrize("is_partial_config", [False, True])
+def test_write_network_config__synthesis(tmp_path, is_partial_config):
     circuit_dir = tmp_path / "test_write_network_config__synthesis"
     circuit_dir.mkdir()
 
@@ -226,13 +231,16 @@ def test_write_network_config__synthesis(tmp_path):
 
         filepath = circuit_dir / "circuit_config.json"
 
-        res = ctx.write_network_config(connectome_dir="functional", output_file=filepath)
+        res = ctx.write_network_config(
+            connectome_dir="functional", output_file=filepath, is_partial_config=is_partial_config
+        )
 
         with open(filepath, "r", encoding="utf-8") as fd:
             config = json.load(fd)
 
     assert config == {
         "version": 2,
+        **({"metadata": {"status": "partial"}} if is_partial_config else {}),
         "manifest": {"$BASE_DIR": "."},
         "node_sets_file": "$BASE_DIR/sonata/node_sets.json",
         "networks": {

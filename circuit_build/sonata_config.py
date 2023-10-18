@@ -1,11 +1,12 @@
 """SONATA config building tool."""
 import inspect
 import json
+from copy import deepcopy
 from pathlib import Path
 from typing import Any
 
 
-def build_config(nodes, edges, node_sets_file=None):
+def build_config(nodes, edges, node_sets_file=None, is_partial_config=False):
     """Builds the SONATA config dictionary based on the list of nodes and edges provided.
 
     Args:
@@ -15,6 +16,7 @@ def build_config(nodes, edges, node_sets_file=None):
         edges (List[dict]): A list of dictionaries corresponding to the edge populations to be
             included in the config.
         node_sets_file (str): Node sets filename, e.g. node_sets.json
+        is_partial_config (bool): if True, write a partial config to skip validation when opened.
 
     Returns:
         The SONATA config dictionary.
@@ -40,6 +42,8 @@ def build_config(nodes, edges, node_sets_file=None):
         "version": 2,
         "manifest": {"$BASE_DIR": "."},
     }
+    if is_partial_config:
+        cfg["metadata"] = {"status": "partial"}
 
     if node_sets_file is not None:
         cfg["node_sets_file"] = node_sets_file
@@ -217,6 +221,9 @@ def resolve_config_paths(config, circuit_dir, base_dir):
     Returns:
         A new config with the paths resolved.
     """
+    supported_keys = {"version", "metadata", "manifest", "node_sets_file", "networks"}
+    assert supported_keys.issuperset(config), "Invalid or unsupported keys found"
+
     circuit_dir = Path(circuit_dir)
     base_dir = Path(base_dir)
 
@@ -232,6 +239,9 @@ def resolve_config_paths(config, circuit_dir, base_dir):
     }
 
     assert config["manifest"]["$BASE_DIR"] == "."
+
+    if "metadata" in config:
+        resolved_config["metadata"] = deepcopy(config["metadata"])
 
     if "node_sets_file" in config:
         resolved_config["node_sets_file"] = _resolve_path(
@@ -296,7 +306,9 @@ def _resolve_populations(populations_dict, circuit_dir, base_dir):
     }
 
 
-def write_config(output_file, circuit_dir, nodes, edges, node_sets_file=None):
+def write_config(
+    output_file, circuit_dir, nodes, edges, node_sets_file=None, is_partial_config=False
+):
     """Builds and writes a config to the output file.
 
     Args:
@@ -308,12 +320,22 @@ def write_config(output_file, circuit_dir, nodes, edges, node_sets_file=None):
         edges (List[dict]): A list of dictionaries corresponding to the edge populations to be
             included in the config.
         node_sets_file (str|Path|None): Node sets filepath, e.g. /path/to/node_sets.json
+        is_partial_config (bool): if True, write a partial config to skip validation when opened.
     """
     if isinstance(output_file, (str, Path)):
         with open(output_file, mode="w", encoding="utf-8") as out:
-            write_config(out, circuit_dir, nodes, edges, node_sets_file)
+            write_config(
+                out,
+                circuit_dir,
+                nodes,
+                edges,
+                node_sets_file=node_sets_file,
+                is_partial_config=is_partial_config,
+            )
     else:
-        config = build_config(nodes, edges, node_sets_file=node_sets_file)
+        config = build_config(
+            nodes, edges, node_sets_file=node_sets_file, is_partial_config=is_partial_config
+        )
         resolved_config = resolve_config_paths(
             config=config,
             circuit_dir=circuit_dir,

@@ -514,7 +514,9 @@ class Context:
             slurm_env=slurm_env,
         )
 
-    def write_network_config(self, connectome_dir, output_file, nodes_file=None):
+    def write_network_config(
+        self, connectome_dir, output_file, nodes_file=None, is_partial_config=False
+    ):
         """Return the SONATA circuit configuration for neurons."""
         morphologies_entry = self.if_synthesis(
             {
@@ -557,6 +559,7 @@ class Context:
             if connectome_dir
             else [],
             node_sets_file=self.NODESETS_FILE,
+            is_partial_config=is_partial_config,
         )
 
     def write_network_ngv_config(self, output_file):

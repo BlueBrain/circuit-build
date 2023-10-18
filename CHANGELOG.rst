@@ -8,6 +8,9 @@ New Features
 ~~~~~~~~~~~~
 - add new optional parameter `no_emodel` in `MANIFEST.yaml` to bypass any emodel related tasks during synthesis, to be used only for structural connectome
 
+Bug Fixes
+~~~~~~~~~
+- Always write circuit_config_hpc.json as partial config [BLDTC-283].
 
 Version 5.0.1
 -------------
