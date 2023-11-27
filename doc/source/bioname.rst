@@ -258,3 +258,46 @@ Example:
     default_rotation:
       distr: ["truncnorm", {"mean": 0.0, "sd": 1.0, "low": -3.14159, "high": 3.14159}]
       axis: y
+
+
+Region structure (YAML)
+~~~~~~~~~~~~~~~~~~~~~~~
+
+Optional file, only used for synthesis. The filename should be `region_structure.yaml`. This file contains additional information about the structure of the brain region to synthesize.
+
+Per region (highest level), it should contain the ordered list of layer names which match the `PH[layer].nrrd` file names.
+It should also have the expected layer thicknesses of the reconstructed morphologies. The `region_queries` and `names` entries are optional for this workflow, but used in neurocollage or synthesis-workflow.
+
+Example for O0:
+
+.. code-block:: yaml
+
+    O0:
+      layers:
+      - 1
+      - 2
+      - 3
+      - 4
+      - 5
+      - 6
+      names:
+        1: layer 1
+        2: layer 2
+        3: layer 3
+        4: layer 4
+        5: layer 5
+        6: layer 6
+      region_queries:
+        1: '@.*1$'
+        2: '@.*2[a|b]?$'
+        3: '@.*3$'
+        4: '@.*4$'
+        5: '@.*5$'
+        6: '@.*6[a|b]?$'
+      thicknesses:
+        1: 165
+        2: 149
+        3: 353
+        4: 190
+        5: 525
+        6: 700

@@ -73,7 +73,7 @@ ENV_CONFIG = {
     "region-grower": {
         "env_type": ENV_TYPE_MODULE,
         "modulepath": SPACK_MODULEPATH,
-        "modules": ["archive/2022-03", "py-region-grower/0.3.0"],
+        "modules": ["archive/2023-10", "py-region-grower/1.2.8"],
         "env_vars": {
             **ENV_VARS_NEURON_DEFAULT,
             **ENV_VARS_DASK_DEFAULT,

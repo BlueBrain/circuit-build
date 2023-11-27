@@ -1,6 +1,15 @@
 Changelog
 =========
 
+Version 5.1.0
+-------------
+
+New Features
+~~~~~~~~~~~~
+- Use new version 1.2.8 of region-grower for synthesis, requiring the next two items:
+- Support required configuration file region_structure.yaml
+- Support new versions of tmd_distributions.json and tmd_parameters.json with regions and no thicknesses data (in region_structure.yaml)
+
 Version 5.0.2
 -------------
 

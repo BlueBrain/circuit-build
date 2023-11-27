@@ -328,6 +328,11 @@ properties:
           Pseudo-random generator seed.
         type: integer
         default: 0
+      synthesize_axons:
+        description: |
+          Set to true to synthesize axons instead of grafting
+        type: boolean
+        default: false
 
   assign_emodels:
     type: object

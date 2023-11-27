@@ -178,8 +178,12 @@ rule synthesize_morphologies:
     message:
         "Synthesize morphologies"
     input:
+        **if_then_else(
+            ctx.conf.get(["synthesize_morphologies", "synthesize_axons"], default=False),
+            {},
+            {"morph": ctx.paths.auxiliary_path("axon-morphologies.tsv")},
+        ),
         cells=ctx.paths.auxiliary_path("circuit.somata.h5"),
-        morph=ctx.paths.auxiliary_path("axon-morphologies.tsv"),
     output:
         ctx.paths.auxiliary_path("circuit.synthesized_morphologies.h5"),
     log:
@@ -204,8 +208,13 @@ rule synthesize_morphologies:
                 ctx.paths.bioname_path("tmd_distributions.json"),
                 "--tmd-parameters",
                 ctx.paths.bioname_path("tmd_parameters.json"),
-                "--morph-axon",
-                "{input[morph]}",
+                "--region-structure",
+                ctx.paths.bioname_path("region_structure.yaml"),
+                if_then_else(
+                    ctx.conf.get(["synthesize_morphologies", "synthesize_axons"], default=False),
+                    "",
+                    "--morph-axon {input[morph]}",
+                ),
                 "--base-morph-dir",
                 Path(ctx.MORPH_RELEASE, "h5v1"),
                 "--seed",
@@ -236,6 +245,11 @@ rule synthesize_morphologies:
                 format_if(
                     "--log-level {}",
                     ctx.conf.get(["synthesize_morphologies", "log_level"]),
+                ),
+                if_then_else(
+                    ctx.conf.get(["synthesize_morphologies", "synthesize_axons"], default=False),
+                    "--synthesize-axons",
+                    "",
                 ),
             ],
             slurm_env="synthesize_morphologies",
