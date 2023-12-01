@@ -43,7 +43,7 @@ ENV_CONFIG = {
     "brainbuilder": {
         "env_type": ENV_TYPE_MODULE,
         "modulepath": SPACK_MODULEPATH,
-        "modules": ["archive/2023-06", "brainbuilder/0.18.5"],
+        "modules": ["archive/2023-11", "brainbuilder/0.19.0"],
     },
     "spatialindexer": {
         "env_type": ENV_TYPE_MODULE,
@@ -58,7 +58,7 @@ ENV_CONFIG = {
     "placement-algorithm": {
         "env_type": ENV_TYPE_MODULE,
         "modulepath": SPACK_MODULEPATH,
-        "modules": ["archive/2023-06", "placement-algorithm/2.3.0"],
+        "modules": ["archive/2023-11", "placement-algorithm/2.4.0"],
     },
     "spykfunc": {
         "env_type": ENV_TYPE_MODULE,

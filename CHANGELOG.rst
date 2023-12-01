@@ -6,9 +6,13 @@ Version 5.1.0
 
 New Features
 ~~~~~~~~~~~~
-- Use new version 1.2.8 of region-grower for synthesis, requiring the next two items:
-- Support required configuration file region_structure.yaml
-- Support new versions of tmd_distributions.json and tmd_parameters.json with regions and no thicknesses data (in region_structure.yaml)
+- Use ``brainbuilder/0.19.0`` and ``placement-algorithm/2.4.0`` to enforce layer to be a string in the resulting ``nodes.h5`` file [NSETM-2261]
+- Use ``region-grower/1.2.8`` for synthesis, requiring the following files in the bioname directory:
+
+  - ``region_structure.yaml`` (new file with regions and thicknesses data)
+  - ``tmd_distributions.json`` (new format)
+  - ``tmd_parameters.json`` (new format)
+
 
 Version 5.0.2
 -------------
