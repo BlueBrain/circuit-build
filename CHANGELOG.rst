@@ -13,6 +13,7 @@ New Features
   - ``tmd_distributions.json`` (new format)
   - ``tmd_parameters.json`` (new format)
 
+- Bump to the latest version in ``archive/2023-11`` the other spack modules (except ``py-bluepyemodel``).
 
 Version 5.0.2
 -------------
