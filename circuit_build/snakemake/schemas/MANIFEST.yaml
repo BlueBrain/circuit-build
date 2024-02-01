@@ -176,7 +176,7 @@ properties:
                containing the hemisphere information as the value.
   
                The values of the dataset are converted and assigned to the `hemisphere` property in *Cells*.
-               See also `scalar field <https://bbpteam.epfl.ch/project/spaces/display/NRINF/Scalar+Value+Image>`__
+               See also `scalar field <https://voxcell.readthedocs.io/en/latest/scalar.html>`__
                and :ref:`ref-atlas` for more information about the expected values in the dataset.
   
                ::

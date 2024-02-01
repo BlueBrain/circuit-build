@@ -237,7 +237,7 @@ This file is optional and it can be used to define one or more random angles dis
 * If not specified, the morphologies are rotated by a random angle around the Y-axis (the principal direction of the morphology) using a uniform distribution between ``-pi`` and ``+pi``.
 * If specified, the morphologies are rotated by a random angle around the given axis using the given distribution, or they are not rotated if the distribution is ``null``.
 
-See `Rotation file format <https://bbpteam.epfl.ch/documentation/projects/placement-algorithm/latest/index.html#rotation-file-format>`__ for more details.
+See `Rotation file format <https://bbpteam.epfl.ch/documentation/projects/placement-algorithm/latest/input.html#rotation-file>`__ for more details.
 
 Example:
 

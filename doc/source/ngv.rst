@@ -175,7 +175,7 @@ astrocyte_gap_junction_recipe.xml
 XML file defining the glial gap junction connectivity.
 Used in glialglial connectivity phase by `Touchdetector`_.
 
-Further documentation of the recipe is available in `Circuit Documentation <https://bbpteam.epfl.ch/documentation/projects/Circuit%20Documentation/latest/recipe.html>`_
+Further documentation of the recipe is available in `Circuit Documentation <https://sonata-extension.readthedocs.io/en/latest/recipe.html>`_
 
 tns_parameters.json + tns_distributions.json + tns_context.json
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -200,7 +200,7 @@ Generate a SONATA config for the NGV circuit.
 
 Convert the hdf5 vascular skeleton into a SONATA node population, which is required for generating edge populations between the vasculature and other node populations, like astrocytes.
 
-For more details on the SONATA representation of the vascular geometry, see the `vascular SONATA specification  <https://bbpteam.epfl.ch/documentation/projects/circuit-documentation/latest/sonata_tech.html#fields-for-vasculature-population-model-type-vasculature>`_.
+For more details on the SONATA representation of the vascular geometry, see the `vascular SONATA specification  <https://sonata-extension.readthedocs.io/en/latest/sonata_tech.html#fields-for-vasculature-population-model-type-vasculature>`_.
 
 .. _ref-phase-place-glia:
 
@@ -306,7 +306,7 @@ The last step consists of assigning a thickness to the 2D endfeet surfaces grown
 .. jsonschema:: ../../circuit_build/snakemake/schemas/MANIFEST.yaml#/properties/ngv/properties/endfeet_surface_meshes
 
 A separate HDF5 file is generated for storing the geometry of the endfeet meshes.
-See the `endfeet meshes specification <https://bbpteam.epfl.ch/documentation/projects/circuit-documentation/latest/endfeet_meshes.html>`_ for more details on the outputted data.
+See the `endfeet meshes specification <https://sonata-extension.readthedocs.io/en/latest/endfeet_meshes.html>`_ for more details on the outputted data.
 
 **synthesize_glia**
 ~~~~~~~~~~~~~~~~~~~
@@ -326,7 +326,7 @@ The grown morphology of the astrocyte is required for this phase.
 * endfoot_compartment_diameter
 * endfoot_compartment_perimeter
 
-See the `enfoot edge population type <https://bbpteam.epfl.ch/documentation/projects/circuit-documentation/latest/sonata_tech.html#fields-for-endfoot-connection-type-edges>`_ for a full
+See the `enfoot edge population type <https://sonata-extension.readthedocs.io/en/latest/sonata_tech.html#fields-for-endfoot-connection-type-edges>`_ for a full
 description of all the properties.
 
 
@@ -344,7 +344,7 @@ The grown morphology of the astrocyte is required for this phase.
 * astrocyte_center_y
 * astrocyte_center_z
 
-See the `enfoot synapse_astrocyte population type <https://bbpteam.epfl.ch/documentation/projects/circuit-documentation/latest/sonata_tech.html#fields-for-synapse-astrocyte-connection-type-edges>`_ for a full description of all the properties.
+See the `enfoot synapse_astrocyte population type <https://sonata-extension.readthedocs.io/en/latest/sonata_tech.html#fields-for-synapse-astrocyte-connection-type-edges>`_ for a full description of all the properties.
 
 .. _ref-phase-glial-gap-junctions:
 
@@ -365,4 +365,4 @@ Create an NGV circuit, executing all the phases above plus the ref:`ref-phase-fu
 :ref:`ref-ngv-standalone-vs-full`).
 
 
-.. _TouchDetector: https://bbpteam.epfl.ch/documentation/projects/TouchDetector
+.. _TouchDetector: https://bbpteam.epfl.ch/documentation/projects/TouchDetector/latest/

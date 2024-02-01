@@ -53,7 +53,7 @@ choose_morphologies
 -------------------
 
 If the ``synthesis`` parameter in the ``common`` section is ``False``, choose morphologies for cell positions using `placement_algorithm`_ ``choose-morphologies``.
-This creates the ``morphologies.tsv`` described `here <https://bbpteam.epfl.ch/documentation/projects/placement-algorithm/latest/index.html#choose-morphologies>`_.
+This creates the ``morphologies.tsv`` described `here <https://bbpteam.epfl.ch/documentation/projects/placement-algorithm/latest/usage.html#choose-morphologies>`_.
 
 If the ``synthesis`` parameter in the ``common`` section is ``True``, pick axons for each position using "placement hints" approach.
 In this case it creates the file ``axon-morphologies.tsv``.
@@ -313,7 +313,7 @@ From now on, the data parameters are directly drawn from Nexus. The data are sto
     package. This process ensures that all data are compliant with the dedicated
     ``brainbuilder`` app.
 
-    See: https://bbpteam.epfl.ch/documentation/subcellular-querier-0.0.3/index.html
+    See: https://bbpgitlab.epfl.ch/nse/archive/subcellular-querier
 
 To retrieve data from nexus, just provide the name of the nexus instance. The code will
 automatically look into the correct schemas and download the attachment file.
@@ -338,8 +338,8 @@ Create a `structural`-ized SONATA circuit, based on the ``builderRecipeAllPathwa
 This includes all synapses that satisfy the rules in the recipe file.
 
 
-.. _BrainBuilder: https://bbpteam.epfl.ch/documentation/projects/brainbuilder
-.. _placement_algorithm: https://bbpteam.epfl.ch/documentation/projects/placement-algorithm
-.. _Spykfunc: https://bbpteam.epfl.ch/documentation/projects/spykfunc
-.. _TouchDetector: https://bbpteam.epfl.ch/documentation/projects/TouchDetector
+.. _BrainBuilder: https://bbpteam.epfl.ch/documentation/projects/brainbuilder/latest/
+.. _placement_algorithm: https://bbpteam.epfl.ch/documentation/projects/placement-algorithm/latest/
+.. _Spykfunc: https://bbpteam.epfl.ch/documentation/projects/spykfunc/latest/
+.. _TouchDetector: https://bbpteam.epfl.ch/documentation/projects/TouchDetector/latest/
 .. _touch2parquet salloc recommendation: https://bbpteam.epfl.ch/project/issues/browse/FUNCZ-215?focusedCommentId=90821

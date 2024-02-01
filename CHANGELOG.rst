@@ -1,6 +1,15 @@
 Changelog
 =========
 
+Version 5.1.1
+-------------
+
+Bug Fixes
+~~~~~~~~~
+- Fix convention for hemisphere ids in Atlas documentation.
+- Fix broken links in documentation.
+
+
 Version 5.1.0
 -------------
 

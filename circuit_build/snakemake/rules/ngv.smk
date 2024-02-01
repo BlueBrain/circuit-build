@@ -415,7 +415,7 @@ rule refine_tetrahedral:
             "ngv-refine-tetrahedral",
             [
                 (
-            "cp -v {input} tmp.msh && "
+                    "cp -v {input} tmp.msh && "
                     f"for (( c=1; c<={ctx.refinement_subdividing_steps}; c++ )); "
                     "do gmsh -refine tmp.msh -o tmp.msh; done && "
                     "mv -v tmp.msh {output}"
