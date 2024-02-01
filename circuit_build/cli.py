@@ -1,4 +1,5 @@
 """Cli module."""
+
 import contextlib
 import importlib.resources
 import json

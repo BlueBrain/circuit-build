@@ -1,4 +1,5 @@
 """Utilities to build the commands to execute the Snakemake rules."""
+
 from pathlib import Path
 
 from circuit_build.constants import (

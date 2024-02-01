@@ -1,4 +1,5 @@
 """Context used in Snakefile."""
+
 import logging
 import os.path
 import subprocess
@@ -547,17 +548,21 @@ class Context:
                     **self.provenance(),
                 },
             ],
-            edges=[
-                {
-                    "edges_file": self.edges_neurons_neurons_file(connectome_type=connectome_dir),
-                    "population_type": "chemical",
-                    "population_name": self.edges_neurons_neurons_name,
-                    "spatial_synapse_index_dir": self.edges_spatial_index_dir,
-                    **self.provenance(),
-                },
-            ]
-            if connectome_dir
-            else [],
+            edges=(
+                [
+                    {
+                        "edges_file": self.edges_neurons_neurons_file(
+                            connectome_type=connectome_dir
+                        ),
+                        "population_type": "chemical",
+                        "population_name": self.edges_neurons_neurons_name,
+                        "spatial_synapse_index_dir": self.edges_spatial_index_dir,
+                        **self.provenance(),
+                    },
+                ]
+                if connectome_dir
+                else []
+            ),
             node_sets_file=self.NODESETS_FILE,
             is_partial_config=is_partial_config,
         )

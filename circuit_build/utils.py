@@ -1,4 +1,5 @@
 """Common utilities."""
+
 import importlib.resources
 import logging
 import os

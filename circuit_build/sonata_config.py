@@ -1,4 +1,5 @@
 """SONATA config building tool."""
+
 import inspect
 import json
 from copy import deepcopy

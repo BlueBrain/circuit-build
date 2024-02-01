@@ -1,4 +1,5 @@
 """Constants."""
+
 PACKAGE_NAME = "circuit_build"
 SCHEMAS_DIR = "snakemake/schemas"
 
