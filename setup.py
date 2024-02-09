@@ -33,13 +33,11 @@ setup(
     python_requires=">=3.9",
     install_requires=[
         "click>=7.0",
-        "pyyaml>=5.0",
-        "snakemake>=6.0,<8.0",
         "jsonschema>=3.2.0",
-        # Explicitly pin pulp because:
-        # - snakemake < 8.0 is broken with pulp >= 2.8.0
-        # - snakemake >= 8.0 requires Python >= 3.11
-        'pulp<2.8;python_version<"3.11"',
+        "pyyaml>=5.0",
+        "snakemake>=6.0",
+        # Explicitly pin pulp because snakemake<8.0 is broken with pulp>=2.8.0
+        "pulp<2.8",
     ],
     extras_require={
         "reports": ["snakemake[reports]"],
@@ -52,5 +50,6 @@ setup(
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
     ],
 )

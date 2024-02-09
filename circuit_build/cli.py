@@ -40,9 +40,14 @@ def _index(args, *opts):
     return indices[0]
 
 
-def _build_cmd(base_cmd, args, bioname, modules, timestamp, skip_check_git=False):
+def _build_cmd(base_cmd, args, bioname, modules, timestamp, cluster_config, skip_check_git=False):
     # force the timestamp to the same value in different executions of snakemake
-    extra_args = ["--config", f"bioname={bioname}", f"timestamp={timestamp}"]
+    extra_args = [
+        "--config",
+        f"bioname={bioname}",
+        f"timestamp={timestamp}",
+        f"cluster_config={cluster_config}",
+    ]
     if modules:
         # serialize the list of strings with json to be backward compatible with Snakemake:
         # snakemake >= 5.28.0 loads config using yaml.BaseLoader,
@@ -182,13 +187,11 @@ def run(
             "snakemake",
             "--snakefile",
             str(snakefile_path),
-            "--cluster-config",
-            cluster_config,
             "--directory",
             directory,
         ]
         timestamp = f"{datetime.now():%Y%m%dT%H%M%S}"
-        build_cmd = partial(_build_cmd, base_cmd, args, bioname, modules, timestamp)
+        build_cmd = partial(_build_cmd, base_cmd, args, bioname, modules, timestamp, cluster_config)
         exit_code = _run_snakemake_process(cmd=build_cmd())
         if with_summary:
             # snakemake with the --summary/--detailed-summary option does not execute the workflow

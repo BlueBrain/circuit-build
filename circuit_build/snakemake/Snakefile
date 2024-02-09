@@ -5,7 +5,7 @@ from circuit_build.context import Context
 min_version("6.0.0")
 
 # this code may be executed multiple times in different processes by snakemake
-ctx = Context(workflow=workflow, config=config, cluster_config=cluster_config)
+ctx = Context(config=config)
 
 
 onstart:

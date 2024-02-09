@@ -8,8 +8,6 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict
 
-import snakemake
-
 from circuit_build.commands import build_command, load_legacy_env_config
 from circuit_build.constants import ENV_CONFIG, ENV_FILE, INDEX_SUCCESS_FILE
 from circuit_build.sonata_config import write_config
@@ -136,30 +134,23 @@ class CircuitPaths:
 class Context:
     """Context class."""
 
-    def __init__(self, *, workflow: snakemake.Workflow, config: Dict, cluster_config: Dict):
+    def __init__(self, *, config: Dict):
         """Initialize the object.
 
         Args:
-            workflow: workflow object provided by snakemake.
-            config: configuration dict.
-            cluster_config: cluster config dict.
+            config: config dict containing the CLI parameters passed to Snakemake using --config.
         """
-        self.workflow = workflow
-        self.conf = Config(config=config)
-        self.cluster_config = cluster_config
-
-        self.paths = CircuitPaths(
-            circuit_dir=".",
-            bioname_dir=self.conf.get("bioname", default="bioname"),
-        )
-
-        # Load MANIFEST.yaml into workflow config
-        self.workflow.configfile(self.paths.bioname_path("MANIFEST.yaml"))
-        # Validate the merged configuration and the cluster configuration
+        self.paths = CircuitPaths(circuit_dir=".", bioname_dir=config["bioname"])
+        config = load_yaml(self.paths.bioname_path("MANIFEST.yaml")) | config
+        cluster_config = load_yaml(config["cluster_config"])
 
         if not self.is_isolated_phase():
+            # Validate the merged configuration and the cluster configuration
             validate_config(config, "MANIFEST.yaml")
             validate_config(cluster_config, "cluster.yaml")
+
+        self.conf = Config(config=config)
+        self.cluster_config = cluster_config
 
         self.BUILDER_RECIPE = self.paths.bioname_path("builderRecipeAllPathways.xml")
         self.MORPHDB = self.paths.bioname_path("extNeuronDB.dat")

@@ -558,9 +558,14 @@ properties:
 
   bioname:
     description: |
-      Path to `bioname` folder of a circuit, usually specified from the command line.
+      Path to `bioname` folder of a circuit, to be specified in the command line.
     type: string
     default: 'bioname'
+
+  cluster_config:
+    description: |
+      Path to the cluster configuration file, to be specified in the command line.
+    type: string
 
   timestamp:
     description: |

@@ -37,6 +37,6 @@ def snakemake_args():
     return [
         "--bioname",
         str(TEST_PROJ_TINY),
-        "-u",
+        "--cluster-config",
         str(TEST_PROJ_TINY / "cluster.yaml"),
     ]

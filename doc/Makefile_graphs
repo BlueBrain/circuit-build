@@ -7,9 +7,9 @@ BIONAME = $(BASE_DIR)/tests/functional/data/proj66-tiny/
 BIONAME_SYNTH = $(BASE_DIR)/tests/functional/data/proj66-tiny-synth/
 BIONAME_NGV = $(BASE_DIR)/tests/functional/ngv-full/bioname/
 SNAKEFILE = $(BASE_DIR)/circuit_build/snakemake/Snakefile
-SM = snakemake --snakefile $(SNAKEFILE) --config skip_check_git=1 bioname=$(BIONAME) --cluster-config $(BIONAME)/cluster.yaml
-SM_SYNTH = snakemake --snakefile $(SNAKEFILE) --config skip_check_git=1 bioname=$(BIONAME_SYNTH) --cluster-config $(BIONAME_SYNTH)/cluster.yaml
-SM_NGV = snakemake --snakefile $(SNAKEFILE) --config skip_check_git=1 bioname=$(BIONAME_NGV) --cluster-config $(BIONAME_NGV)/cluster.yaml --directory $(BIONAME_NGV)
+SM = snakemake --snakefile $(SNAKEFILE) --config skip_check_git=1 bioname=$(BIONAME) cluster_config=$(BIONAME)/cluster.yaml
+SM_SYNTH = snakemake --snakefile $(SNAKEFILE) --config skip_check_git=1 bioname=$(BIONAME_SYNTH) cluster_config=$(BIONAME_SYNTH)/cluster.yaml
+SM_NGV = snakemake --snakefile $(SNAKEFILE) --config skip_check_git=1 bioname=$(BIONAME_NGV) cluster_config=$(BIONAME_NGV)/cluster.yaml --directory $(BIONAME_NGV)
 TARGETS = functional structural spatial_index_segment subcellular assign_emodels
 GRAPH = filegraph
 

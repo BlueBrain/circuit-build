@@ -43,7 +43,12 @@ def test_functional_all(tmp_path):
         node_population_name = manifest["common"]["node_population_name"]
         edge_population_name = manifest["common"]["edge_population_name"]
 
-        args = ["--bioname", str(data_copy_dir), "-u", str(data_copy_dir / "cluster.yaml")]
+        args = [
+            "--bioname",
+            str(data_copy_dir),
+            "--cluster-config",
+            str(data_copy_dir / "cluster.yaml"),
+        ]
         runner = CliRunner()
         result = runner.invoke(
             run,
@@ -116,7 +121,12 @@ def test_no_emodel(tmp_path):
         shutil.copytree(data_dir, data_copy_dir)
         with edit_yaml(data_copy_dir / "MANIFEST.yaml") as manifest:
             del manifest["common"]["emodel_release"]
-        args = ["--bioname", str(data_copy_dir), "-u", str(data_copy_dir / "cluster.yaml")]
+        args = [
+            "--bioname",
+            str(data_copy_dir),
+            "--cluster-config",
+            str(data_copy_dir / "cluster.yaml"),
+        ]
 
         runner = CliRunner()
         result = runner.invoke(run, args + ["assign_emodels"], catch_exceptions=False)
@@ -152,7 +162,12 @@ def test_bioname_no_git(tmp_path, caplog, capfd):
         shutil.copytree(data_dir, data_copy_dir)
         _assert_git_not_initialized(path=data_copy_dir)
 
-        args = ["--bioname", str(data_copy_dir), "-u", str(data_copy_dir / "cluster.yaml")]
+        args = [
+            "--bioname",
+            str(data_copy_dir),
+            "--cluster-config",
+            str(data_copy_dir / "cluster.yaml"),
+        ]
         runner = CliRunner(mix_stderr=False)
 
         result = runner.invoke(run, args + ["init_cells"], catch_exceptions=False)
@@ -177,7 +192,12 @@ def test_bioname_ignore_git_if_isolated_phase(tmp_path):
         _assert_git_not_initialized(path=data_copy_dir)
 
         with patch.dict("os.environ", ISOLATED_PHASE="True"):
-            args = ["--bioname", str(data_copy_dir), "-u", str(data_copy_dir / "cluster.yaml")]
+            args = [
+                "--bioname",
+                str(data_copy_dir),
+                "--cluster-config",
+                str(data_copy_dir / "cluster.yaml"),
+            ]
             runner = CliRunner(mix_stderr=False)
 
             result = runner.invoke(run, args + ["init_cells"], catch_exceptions=False)
@@ -197,7 +217,12 @@ def test_bioname_with_git(tmp_path):
         _initialize_git(path=data_copy_dir)
         _assert_git_initialized(path=data_copy_dir)
 
-        args = ["--bioname", str(data_copy_dir), "-u", str(data_copy_dir / "cluster.yaml")]
+        args = [
+            "--bioname",
+            str(data_copy_dir),
+            "--cluster-config",
+            str(data_copy_dir / "cluster.yaml"),
+        ]
         runner = CliRunner(mix_stderr=False)
 
         result = runner.invoke(run, args + ["init_cells"], catch_exceptions=False)
@@ -222,8 +247,7 @@ def test_snakemake_bioname_no_git(tmp_path, snakefile):
             "-p",
             "--config",
             f"bioname={data_copy_dir}",
-            "-u",
-            str(data_dir / "cluster.yaml"),
+            f"cluster_config={data_dir / 'cluster.yaml'}",
         ]
         cmd = ["snakemake", "--snakefile", snakefile] + args
 
@@ -252,8 +276,7 @@ def test_snakemake_bioname_with_git(tmp_path, snakefile):
             "-p",
             "--config",
             f"bioname={data_copy_dir}",
-            "-u",
-            str(data_dir / "cluster.yaml"),
+            f"cluster_config={data_dir / 'cluster.yaml'}",
         ]
         cmd = ["snakemake", "--snakefile", snakefile] + args
 
@@ -279,10 +302,9 @@ def test_isolated_phase(tmp_path, snakefile):
                 "-p",
                 "--config",
                 f"bioname={data_copy_dir}",
-                "-u",
-                str(data_dir / "cluster.yaml"),
+                f"cluster_config={data_dir / 'cluster.yaml'}",
             ]
-            cmd = ["snakemake", "--snakefile", snakefile] + args + ["place_cells"]
+            cmd = ["snakemake", "--snakefile", snakefile] + args + ["--", "place_cells"]
 
             result = subprocess.run(cmd, capture_output=False, text=True)
 

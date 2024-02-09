@@ -37,11 +37,10 @@ def test_make_abs(parent_dir, path, expected):
 
 
 def _get_context(bioname):
-    workflow = Mock()
-    cluster_config = load_yaml(bioname / "cluster.yaml")
     config = load_yaml(bioname / "MANIFEST.yaml")
     config["bioname"] = str(bioname)
-    return test_module.Context(workflow=workflow, config=config, cluster_config=cluster_config)
+    config["cluster_config"] = str(bioname / "cluster.yaml")
+    return test_module.Context(config=config)
 
 
 @pytest.mark.parametrize(

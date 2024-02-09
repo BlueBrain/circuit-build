@@ -23,7 +23,12 @@ def test_synthesis(tmp_path):
         node_population_name = manifest["common"]["node_population_name"]
         edge_population_name = manifest["common"]["edge_population_name"]
 
-        args = ["--bioname", str(data_copy_dir), "-u", str(data_copy_dir / "cluster.yaml")]
+        args = [
+            "--bioname",
+            str(data_copy_dir),
+            "--cluster-config",
+            str(data_copy_dir / "cluster.yaml"),
+        ]
         runner = CliRunner()
         result = runner.invoke(
             run,

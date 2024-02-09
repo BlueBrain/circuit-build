@@ -37,7 +37,7 @@ def build_circuit():
         [
             "--bioname",
             str(BIONAME_DIR),
-            "-u",
+            "--cluster-config",
             str(BIONAME_DIR / "cluster.yaml"),
             "--directory",
             str(BUILD_DIR),

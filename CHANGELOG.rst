@@ -1,6 +1,13 @@
 Changelog
 =========
 
+Version 5.1.2
+-------------
+
+Bug Fixes
+~~~~~~~~~
+- Add support for Snakemake 8.
+
 Version 5.1.1
 -------------
 
