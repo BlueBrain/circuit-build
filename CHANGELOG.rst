@@ -1,6 +1,13 @@
 Changelog
 =========
 
+Version 5.1.3
+-------------
+
+Bug Fixes
+~~~~~~~~~
+- Fix check when the bioname directory contains filenames with spaces.
+
 Version 5.1.2
 -------------
 

@@ -446,7 +446,7 @@ class Context:
             echo "git version: $(git --version)"
             echo "bioname path: $(realpath .)"
             MD5SUM=$(which md5sum 2>/dev/null || which md5 2>/dev/null)
-            [[ -n $MD5SUM ]] && find . -maxdepth 1 -type f | xargs $MD5SUM
+            [[ -n $MD5SUM ]] && find . -maxdepth 1 -type f -print0 | xargs -0 $MD5SUM
             echo "### Git info"
             set -x
             git status
