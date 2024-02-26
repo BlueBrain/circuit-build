@@ -163,19 +163,6 @@ Building connectome involves two phases: :ref:`ref-phase-touchdetector`, followe
 The command above will build also segment and synapse indices, unless the option ``no_index: true`` is set in ``MANIFEST.yaml``.
 
 
-.. raw:: html
-
-    <details open>
-    <summary>Functional</summary>
-
-.. image:: ../build/graphs/functional.svg
-    :target: _images/functional.svg
-
-.. raw:: html
-
-    </details>
-
-
 Spatial indices
 ~~~~~~~~~~~~~~~
 
@@ -187,18 +174,6 @@ To build *segment* spatial index alone:
 
 Segment spatial index requires only cell collection, and thus can be built prior to connectome
 (or in parallel with it).
-
-.. raw:: html
-
-    <details open>
-    <summary>Spatial index segment</summary>
-
-.. image:: ../build/graphs/spatial_index_segment.svg
-    :target: _images/spatial_index_segment.svg
-
-.. raw:: html
-
-    </details>
 
 
 To build *synapse* spatial index:
@@ -232,18 +207,6 @@ instead of:
     They do not conflict with each other, but share the common files (`circuit.h5`, `node_sets.json` etc).
     Structural circuit would be available via `struct_circuit_config.json` file.
 
-.. raw:: html
-
-    <details open>
-    <summary>Structural</summary>
-
-.. image:: ../build/graphs/structural.svg
-    :target: _images/structural.svg
-
-.. raw:: html
-
-    </details>
-
 
 Subcellular
 ~~~~~~~~~~~
@@ -253,18 +216,6 @@ To assign gene expressions and protein concentrations to the cells:
 .. code-block:: bash
 
     $ circuit-build run --bioname /path/to/bioname --cluster-config /path/to/cluster.yaml subcellular
-
-.. raw:: html
-
-    <details open>
-    <summary>Subcellular</summary>
-
-.. image:: ../build/graphs/subcellular.svg
-    :target: _images/subcellular.svg
-
-.. raw:: html
-
-    </details>
 
 
 .. _ref-cluster-config:

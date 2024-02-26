@@ -8,6 +8,10 @@ Bug Fixes
 ~~~~~~~~~
 - Fix check when the bioname directory contains filenames with spaces.
 
+Improvements
+~~~~~~~~~~~~
+- Add graphs page to the documentation.
+
 Version 5.1.2
 -------------
 

@@ -13,6 +13,7 @@ This documentation outline the Blue Brain Project circuit building pipeline.
    tutorial
    phases
    ngv
+   graphs
    environments
    faq
    changelog
