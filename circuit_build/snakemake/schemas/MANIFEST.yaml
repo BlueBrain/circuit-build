@@ -54,6 +54,10 @@ properties:
             also ``h5`` and ``v1`` *aliases* in addition to ``h5v1``.
         type: string
         example: '/gpfs/bbp.cscs.ch/project/proj66/entities/morphologies/2018.02.16'
+      hoc_path:
+        description: |
+          For synthesis, path to emodel folder to store hoc files during `adapt_emodels` and use for `compute_currents`. It will be created if it does not exist.
+        type: string
       emodel_release:
         description: |
           Path to emodel release folder. It should contain:
@@ -64,9 +68,9 @@ properties:
         example: '/gpfs/bbp.cscs.ch/project/proj66/entities/emodels/2018.02.26.dev0'
       synthesize_emodel_release:
         description: |
-          Path to emodel release folder for synthesis. It should contain the output of bluepyemodel.apps.emodel_release.create_emodel_release.
+          Path to emodel release folder for synthesis. It must contains ``config`` folder with model parameters/features/protocols and ``final.json``.
         type: string
-        example: /gpfs/bbp.cscs.ch/project/proj82/entities/emodels/test_release
+        example: '/gpfs/bbp.cscs.ch/project/proj82/entities/emodels/test_release'
 
       node_population_name:
         description: |
@@ -108,7 +112,7 @@ properties:
         default: false
       no_emodel:
         description: |
-          If ``true``,  skip the emodel tasks for synthesis (compute_ais_scales and compute_currents)
+          If ``true``,  skip the emodel tasks for synthesis (`adapt_emodels` and `compute_currents`)
         type: boolean
         default: false
       partition:

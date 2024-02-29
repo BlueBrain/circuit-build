@@ -64,7 +64,8 @@ def test_synthesis(tmp_path):
         assert Path("auxiliary/axon-morphologies.tsv").stat().st_size > 100
         # test output from synthesize_morphologies
         assert Path("auxiliary/circuit.synthesized_morphologies.h5").stat().st_size > 100
-        assert Path("auxiliary/circuit.ais_scales.h5").stat().st_size > 100
+        assert Path("auxiliary/circuit.assign_synthesis_emodels.h5").stat().st_size > 100
+        assert Path("auxiliary/circuit.adapt_emodels.h5").stat().st_size > 100
 
         with h5py.File(edges_file, "r") as h5f:
             assert f"/edges/{edge_population_name}" in h5f

@@ -14,7 +14,7 @@ synthesize_morphologies:
   salloc: '-p prod_small'
 assign_emodels:
   salloc: '-p prod_small'
-compute_ais_scales:
+adapt_emodels:
   salloc: '-p prod_small'
 provide_me_info:
   salloc: '-p prod_small'

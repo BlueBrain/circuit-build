@@ -126,7 +126,7 @@ def test_context_load_env_config_with_custom_env_vars(tmp_path):
     environments = {
         "version": 1,
         "env_config": {
-            "bluepyemodel": {
+            "emodel-generalisation": {
                 "env_vars": {
                     "MY_NEW_VAR": "MY_NEW_VALUE",
                     "NEURON_MODULE_OPTIONS": "OVERRIDDEN",
@@ -139,10 +139,10 @@ def test_context_load_env_config_with_custom_env_vars(tmp_path):
     ctx = _get_context(bioname)
     result = ctx.load_env_config()
     expected = deepcopy(ENV_CONFIG)
-    assert "MY_NEW_VAR" not in expected["bluepyemodel"]["env_vars"]
-    assert expected["bluepyemodel"]["env_vars"]["NEURON_MODULE_OPTIONS"] != "OVERRIDDEN"
-    expected["bluepyemodel"]["env_vars"]["MY_NEW_VAR"] = "MY_NEW_VALUE"
-    expected["bluepyemodel"]["env_vars"]["NEURON_MODULE_OPTIONS"] = "OVERRIDDEN"
+    assert "MY_NEW_VAR" not in expected["emodel-generalisation"]["env_vars"]
+    assert expected["emodel-generalisation"]["env_vars"]["NEURON_MODULE_OPTIONS"] != "OVERRIDDEN"
+    expected["emodel-generalisation"]["env_vars"]["MY_NEW_VAR"] = "MY_NEW_VALUE"
+    expected["emodel-generalisation"]["env_vars"]["NEURON_MODULE_OPTIONS"] = "OVERRIDDEN"
     assert result == expected
 
 
@@ -254,7 +254,7 @@ def test_write_network_config__synthesis(tmp_path, is_partial_config):
                                 "h5v1": "$BASE_DIR/morphologies/neocortex_neurons",
                                 "neurolucida-asc": "$BASE_DIR/morphologies/neocortex_neurons",
                             },
-                            "biophysical_neuron_models_dir": "/gpfs/bbp.cscs.ch/project/proj82/entities/emodels/test_release/hoc_files",
+                            "biophysical_neuron_models_dir": "$BASE_DIR/hoc_files",
                             "provenance": {
                                 "bioname_dir": f"{bioname}",
                             },
@@ -419,7 +419,7 @@ def test_write_network_config__ngv_full(tmp_path):
             "populations": {
                 "neocortex_neurons": {
                     "type": "biophysical",
-                    "biophysical_neuron_models_dir": "/gpfs/bbp.cscs.ch/project/proj82/entities/emodels/test_release/hoc_files",
+                    "biophysical_neuron_models_dir": "$BASE_DIR/hoc_files",
                     "spatial_segment_index_dir": "$BASE_DIR/sonata/networks/nodes/neocortex_neurons/spatial_segment_index",
                     "alternate_morphologies": {
                         "neurolucida-asc": "$BASE_DIR/morphologies/neocortex_neurons",

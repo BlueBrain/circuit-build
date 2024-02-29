@@ -23,7 +23,7 @@ properties:
         spykfunc|\
         touchdetector|\
         region-grower|\
-        bluepyemodel|\
+        emodel-generalisation|\
         ngv|\
         synthesize-glia|\
         ngv-touchdetector$"

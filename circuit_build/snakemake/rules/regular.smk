@@ -320,58 +320,86 @@ if ctx.NO_EMODEL:
 
 else:
 
-    rule compute_ais_scales:
+    rule assign_synthesis_emodels:
         message:
-            "Add the column @dynamics:ais_scaler to SONATA nodes"
+            "Assign emodels for synthesis"
         input:
             ctx.paths.auxiliary_path("circuit.synthesized_morphologies.h5"),
         output:
-            ctx.paths.auxiliary_path("circuit.ais_scales.h5"),
+            ctx.paths.auxiliary_path("circuit.assign_synthesis_emodels.h5"),
         log:
-            ctx.log_path("compute_ais_scales"),
+            ctx.log_path("assign_synthesis_emodel"),
         shell:
             ctx.bbp_env(
-                "bluepyemodel",
+                "emodel-generalisation",
                 [
-                    "BluePyEModel get_me_combos_scales",
-                    "--cells-path",
+                    "emodel-generalisation -v assign",
+                    "--input-node-path",
+                    "{input}",
+                    "--config-path",
+                    Path(ctx.SYNTHESIZE_EMODEL_RELEASE) / "config",
+                    "--output-node-path",
+                    "{output}",
+                ],
+                slurm_env="assign_synthesis_emodels",
+            )
+
+    rule adapt_emodels:
+        message:
+            "Adapt AIS and soma scales and add the column @dynamics:ais_scaler and @dynamics:soma_scale to SONATA nodes"
+        input:
+            ctx.paths.auxiliary_path("circuit.assign_synthesis_emodels.h5"),
+        output:
+            ctx.paths.auxiliary_path("circuit.adapt_emodels.h5"),
+        log:
+            ctx.log_path("adapt_emodels"),
+        shell:
+            ctx.bbp_env(
+                "emodel-generalisation",
+                [
+                    "emodel-generalisation -v adapt",
+                    "--input-node-path",
                     "{input}",
                     "--morphology-path",
                     ctx.SYNTHESIZE_MORPH_DIR,
-                    "--release-path",
-                    ctx.SYNTHESIZE_EMODEL_RELEASE,
-                    "--output-sonata-path",
+                    "--config-path",
+                    Path(ctx.SYNTHESIZE_EMODEL_RELEASE) / "config",
+                    "--output-node-path",
                     "{output}",
+                    "--output-hoc-path",
+                    ctx.EMODEL_RELEASE_HOC,
                     "--parallel-lib",
                     "dask_dataframe",
+                    "--max-scale",
+                    3.0,
+                    "--min-scale",
+                    0.8,
                 ],
-                slurm_env="compute_ais_scales",
+                slurm_env="adapt_emodels",
             )
 
     rule compute_currents:
         message:
-            "Compute currents for SONATA Nodes"
+            "Compute currents for SONATA nodes, assigning the column @dynamics:holding_currents, @dynamics:threshold_currents, @dynamics:resting_potential and @dynamics:input_resistance"
         input:
-            ctx.paths.auxiliary_path("circuit.ais_scales.h5"),
+            ctx.paths.auxiliary_path("circuit.adapt_emodels.h5"),
         output:
             ctx.nodes_neurons_file,
         log:
             ctx.log_path("compute_currents"),
         shell:
             ctx.bbp_env(
-                "bluepyemodel",
+                "emodel-generalisation",
                 [
-                    "BluePyEModel get_me_combos_currents",
-                    "--input-sonata-path",
+                    "emodel-generalisation -v compute_currents",
+                    "--input-path",
                     "{input}",
                     "--morphology-path",
                     ctx.SYNTHESIZE_MORPH_DIR,
-                    "--output-sonata-path",
+                    "--output-path",
                     "{output}",
-                    "--release-path",
-                    ctx.SYNTHESIZE_EMODEL_RELEASE,
-                    "--protocol-config-path",
-                    ctx.SYNTHESIZE_PROTOCOL_CONFIG,
+                    "--hoc-path",
+                    ctx.EMODEL_RELEASE_HOC,
                     "--parallel-lib",
                     "dask_dataframe",
                 ],

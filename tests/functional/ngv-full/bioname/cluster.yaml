@@ -19,14 +19,14 @@ synthesize_morphologies:
     -n20
     --time 0:10:00
 
-compute_ais_scales:
-  jobname: compute_ais_scales
+adapt_emodels:
+  jobname: adapt_emodels
   salloc: >-
     -A ${{SALLOC_ACCOUNT}}
-    -p prod_small
+    -p prod
     -C cpu
-    -n8
-    --time 0:10:00
+    -n 80
+    --time 0:30:00
 
 compute_currents:
   jobname: compute_currents

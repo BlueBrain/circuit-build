@@ -80,14 +80,13 @@ ENV_CONFIG = {
             **ENV_VARS_DASK_DEFAULT,
         },
     },
-    "bluepyemodel": {
+    "emodel-generalisation": {
         "env_type": ENV_TYPE_MODULE,
         "modulepath": SPACK_MODULEPATH,
         "modules": [
-            "archive/2021-09",
-            "py-bluepyemodel/0.0.5",
-            "py-bglibpy/4.4.36",
-            "neurodamus-neocortex/1.4-3.3.2",
+            "unstable",
+            "py-emodel-generalisation/0.2.8",
+            "neurodamus-neocortex/1.15-3.0.0-2.8.1",
         ],
         "env_vars": {
             **ENV_VARS_NEURON_DEFAULT,

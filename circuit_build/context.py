@@ -191,7 +191,7 @@ class Context:
                 )
 
         if self.SYNTHESIZE_EMODEL_RELEASE:
-            self.EMODEL_RELEASE_HOC = os.path.join(self.SYNTHESIZE_EMODEL_RELEASE, "hoc_files")
+            self.EMODEL_RELEASE_HOC = self.conf.get(["common", "hoc_path"], default="hoc_files")
 
         self.NODESETS_FILE = self.paths.sonata_path("node_sets.json")
         self.ENV_CONFIG = self.load_env_config()

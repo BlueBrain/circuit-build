@@ -12,7 +12,7 @@ patternProperties:
     assign_morphologies|\
     synthesize_morphologies|\
     assign_emodels|\
-    compute_ais_scales|\
+    adapt_emodels|\
     provide_me_info|\
     compute_currents|\
     touchdetector|\
