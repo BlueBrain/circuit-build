@@ -84,7 +84,7 @@ ENV_CONFIG = {
         "env_type": ENV_TYPE_MODULE,
         "modulepath": SPACK_MODULEPATH,
         "modules": [
-            "unstable",
+            "archive/2024-02",
             "py-emodel-generalisation/0.2.8",
             "neurodamus-neocortex/1.15-3.0.0-2.8.1",
         ],

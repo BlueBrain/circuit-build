@@ -1,6 +1,15 @@
 Changelog
 =========
 
+Version 5.2.0
+-------------
+
+New Features
+~~~~~~~~~~~~
+
+- Use ``emodel-generalisation`` instead of ``bluepyemodel`` for synthesis emodel steps.
+
+
 Version 5.1.3
 -------------
 
