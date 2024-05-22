@@ -1,6 +1,11 @@
 import json
 from pathlib import Path
-from circuit_build.utils import format_dict_to_list, format_if, if_then_else, write_with_log
+from circuit_build.utils import (
+    format_dict_to_list,
+    format_if,
+    if_then_else,
+    write_with_log,
+)
 
 
 rule init_cells:

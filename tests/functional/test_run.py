@@ -2,6 +2,7 @@ import json
 import shutil
 import subprocess
 import tempfile
+import voxcell
 from pathlib import Path
 from subprocess import CalledProcessError
 from unittest.mock import patch
@@ -30,6 +31,31 @@ def _assert_git_not_initialized(path):
 
 def _initialize_git(path):
     subprocess.run(["git", "init"], cwd=path, capture_output=True, text=True, check=True)
+
+
+def test_place_cells__region_regex(tmp_path):
+    data_dir = TEST_PROJ_TINY
+
+    with cwd(tmp_path):
+        data_copy_dir = tmp_path / data_dir.name
+        shutil.copytree(data_dir, data_copy_dir)
+
+        with edit_yaml(data_copy_dir / "MANIFEST.yaml") as manifest:
+            manifest["common"]["region"] = "@mc2_Column|mc2_Column"
+
+        args = [
+            "--bioname",
+            str(data_copy_dir),
+            "--cluster-config",
+            str(data_copy_dir / "cluster.yaml"),
+        ]
+
+        runner = CliRunner()
+        result = runner.invoke(run, args + ["place_cells"])
+
+        pop = voxcell.CellCollection.load_sonata(tmp_path / "auxiliary/circuit.somata.h5")
+
+        assert pop.properties.region.unique().tolist() == ["L3", "L5"]
 
 
 def test_functional_all(tmp_path):

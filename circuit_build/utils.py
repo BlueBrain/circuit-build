@@ -3,6 +3,7 @@
 import importlib.resources
 import logging
 import os
+import shlex
 import traceback
 from contextlib import contextmanager
 
@@ -36,7 +37,7 @@ def if_then_else(condition, true_value, false_value):
 def format_if(template, value, func=None):
     """Return the template formatted, or empty string if value is None."""
     func = func or (lambda x: x)
-    return template.format(func(value)) if value is not None else ""
+    return template.format(shlex.quote(str(func(value)))) if value is not None else ""
 
 
 def format_dict_to_list(template, values):
