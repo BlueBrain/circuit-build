@@ -301,15 +301,15 @@ def test_write_network_config__ngv_standalone(tmp_path):
     assert config["node_sets_file"] == "$BASE_DIR/sonata/node_sets.json"
     assert config["networks"]["nodes"] == [
         {
-            "nodes_file": f"{data}/circuit/nodes.h5",
+            "nodes_file": "$BASE_DIR/sonata/networks/nodes/All/nodes.h5",
             "populations": {
                 "All": {
                     "type": "biophysical",
-                    "biophysical_neuron_models_dir": "/gpfs/bbp.cscs.ch/project/proj82/entities/emodels/test_release/hoc_files",
-                    "spatial_segment_index_dir": f"{data}/circuit/spatial_segment_index",
+                    "biophysical_neuron_models_dir": "$BASE_DIR/hoc_files",
+                    "spatial_segment_index_dir": "$BASE_DIR/sonata/networks/nodes/All/spatial_segment_index",
                     "alternate_morphologies": {
-                        "neurolucida-asc": f"{data}/circuit/morphologies",
-                        "h5v1": f"{data}/circuit/morphologies",
+                        "neurolucida-asc": "$BASE_DIR/morphologies/All",
+                        "h5v1": "$BASE_DIR/morphologies/All",
                     },
                     "provenance": {
                         "bioname_dir": f"{bioname}",
@@ -346,11 +346,11 @@ def test_write_network_config__ngv_standalone(tmp_path):
     ]
     assert config["networks"]["edges"] == [
         {
-            "edges_file": f"{data}/circuit/edges.h5",
+            "edges_file": "$BASE_DIR/sonata/networks/edges/functional/All/edges.h5",
             "populations": {
                 "All": {
                     "type": "chemical",
-                    "spatial_synapse_index_dir": f"{data}/circuit/spatial_synapse_index",
+                    "spatial_synapse_index_dir": "$BASE_DIR/sonata/networks/edges/functional/All/spatial_synapse_index",
                     "provenance": {
                         "bioname_dir": f"{bioname}",
                     },

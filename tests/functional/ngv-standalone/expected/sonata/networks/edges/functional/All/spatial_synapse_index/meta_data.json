@@ -1,0 +1,11 @@
+{
+  "element_type": "synapse",
+  "multi_index": {
+    "heavy_data_path": "multi_index"
+  },
+  "version": 0,
+  "extended": {
+    "dataset_path": "/gpfs/bbp.cscs.ch/data/scratch/proj134/zisis/NGV/circuit-build/tests/functional/ngv-standalone/build/sonata/networks/edges/functional/All/edges.h5",
+    "population": "All"
+  }
+}

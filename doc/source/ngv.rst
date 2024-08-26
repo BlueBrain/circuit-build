@@ -66,18 +66,24 @@ This is determined by the inclusion or not of the subsection `base_circuit` in t
       common:
         base_circuit:
             config: path/to/neuronal/sonata/config
-            nodes_file: path/to/neuronal/node/population/file
-            morphologies_dir: path/to/neuronal/morhologies/dir
             node_population_name: neuronal-node-population-name
-            edges_file: path/to/neuronal/synapses/edge/population
             edge_population_name: neuronal-edge-population-name
 
 Upon inclusion of the `base_circuit` entry, the neuronal circuit populations and config need to be specified so that the linking is successful.
 The snakemake workflow will change its targets to the provided paths, avoiding running the rules that generates them.
+Paths can be either absolute or relative to the bioname's directory.
 
 .. warning::
 
     If the atlas used for the NGV build (specified under ngv[common][atlas]) is not the same as the one used for the neuronal build, it needs to be ensured that they are co-localized in order to prevent errors that will arise from misaligned volumes.
+
+.. note::
+
+   Node and Edge population names are mandatory in order to uniquely specify the populations that will be used.
+
+
+Although most of the circuit components are mandatory when extracting the paths, spatial indices are not. If no synapse spatial index is present in the config, the respective rule will be executed to compute it.
+
 
 Bioname
 -------

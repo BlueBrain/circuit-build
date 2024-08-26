@@ -10,6 +10,7 @@ from typing import Dict
 
 from circuit_build.commands import build_command, load_legacy_env_config
 from circuit_build.constants import ENV_CONFIG, ENV_FILE, INDEX_SUCCESS_FILE
+from circuit_build.ngv import stage_ngv_base_circuit
 from circuit_build.sonata_config import write_config
 from circuit_build.utils import dump_yaml, load_yaml, redirect_to_file
 from circuit_build.validators import (
@@ -195,6 +196,12 @@ class Context:
 
         self.NODESETS_FILE = self.paths.sonata_path("node_sets.json")
         self.ENV_CONFIG = self.load_env_config()
+
+        # stage the external base circuit to the dag's local target paths in order to only trigger
+        # missing rules if needed by the ngv dag.
+        if self.is_ngv_standalone():
+            base_circuit_config = self.conf.get(["ngv", "common", "base_circuit"])
+            stage_ngv_base_circuit(base_circuit_config, context=self)
 
     @property
     def nodes_neurons_name(self):
@@ -414,10 +421,6 @@ class Context:
         """Return true if there is an entry 'base_circuit' in manifest[ngv][common]."""
         return "base_circuit" in self.conf.get(["ngv", "common"], default={})
 
-    def if_ngv_standalone(self, true_value, false_value):
-        """Return ``true_value`` if ngv standalone is enabled, else ``false_value``."""
-        return true_value if self.is_ngv_standalone() else false_value
-
     def partition_wildcard(self):
         """Return the partition wildcard to be used in snakemake commands."""
         return self.if_partition("_{partition}", "")
@@ -564,74 +567,24 @@ class Context:
             output_file=output_file,
             circuit_dir=self.paths.circuit_dir,
             nodes=[
-                self.if_ngv_standalone(
-                    {
-                        # TODO: read the values from the ngv.common.base_circuit.config?
-                        "nodes_file": _make_abs(
-                            self.paths.bioname_dir,
-                            self.conf.get(
-                                ["ngv", "common", "base_circuit", "nodes_file"], default=""
-                            ),
+                {
+                    "nodes_file": self.nodes_neurons_file,
+                    "population_type": "biophysical",
+                    "population_name": self.nodes_neurons_name,
+                    "spatial_segment_index_dir": self.nodes_spatial_index_dir,
+                    "alternate_morphologies": {
+                        "h5v1": self.if_synthesis(
+                            self.paths.nodes_population_morphologies_dir(self.nodes_neurons_name),
+                            Path(self.MORPH_RELEASE, "h5v1"),
                         ),
-                        "population_type": "biophysical",
-                        "population_name": self.conf.get(
-                            ["ngv", "common", "base_circuit", "node_population_name"]
+                        "neurolucida-asc": self.if_synthesis(
+                            self.paths.nodes_population_morphologies_dir(self.nodes_neurons_name),
+                            Path(self.MORPH_RELEASE, "ascii"),
                         ),
-                        "spatial_segment_index_dir": _make_abs(
-                            self.paths.bioname_dir,
-                            self.conf.get(
-                                ["ngv", "common", "base_circuit", "spatial_segment_index_dir"],
-                                default="",
-                            ),
-                        ),
-                        "alternate_morphologies": {
-                            "h5v1": _make_abs(
-                                self.paths.bioname_dir,
-                                self.conf.get(
-                                    ["ngv", "common", "base_circuit", "morphologies_dir"],
-                                    default="",
-                                ),
-                            ),
-                            "neurolucida-asc": _make_abs(
-                                self.paths.bioname_dir,
-                                self.conf.get(
-                                    ["ngv", "common", "base_circuit", "morphologies_dir"],
-                                    default="",
-                                ),
-                            ),
-                        },
-                        "biophysical_neuron_models_dir": _make_abs(
-                            self.paths.bioname_dir,
-                            self.conf.get(
-                                ["ngv", "common", "base_circuit", "biophysical_neuron_models_dir"],
-                                default="",
-                            ),
-                        ),
-                        **self.provenance(),
                     },
-                    {
-                        "nodes_file": self.nodes_neurons_file,
-                        "population_type": "biophysical",
-                        "population_name": self.nodes_neurons_name,
-                        "spatial_segment_index_dir": self.nodes_spatial_index_dir,
-                        "alternate_morphologies": {
-                            "h5v1": self.if_synthesis(
-                                self.paths.nodes_population_morphologies_dir(
-                                    self.nodes_neurons_name
-                                ),
-                                Path(self.MORPH_RELEASE, "h5v1"),
-                            ),
-                            "neurolucida-asc": self.if_synthesis(
-                                self.paths.nodes_population_morphologies_dir(
-                                    self.nodes_neurons_name
-                                ),
-                                Path(self.MORPH_RELEASE, "ascii"),
-                            ),
-                        },
-                        "biophysical_neuron_models_dir": self.EMODEL_RELEASE_HOC or "",
-                        **self.provenance(),
-                    },
-                ),
+                    "biophysical_neuron_models_dir": self.EMODEL_RELEASE_HOC or "",
+                    **self.provenance(),
+                },
                 {
                     "nodes_file": self.nodes_astrocytes_file,
                     "population_type": "astrocyte",
@@ -654,36 +607,13 @@ class Context:
                 },
             ],
             edges=[
-                self.if_ngv_standalone(
-                    {
-                        # TODO: read the values from the ngv.common.base_circuit.config?
-                        "edges_file": _make_abs(
-                            self.paths.bioname_dir,
-                            self.conf.get(
-                                ["ngv", "common", "base_circuit", "edges_file"], default=""
-                            ),
-                        ),
-                        "population_type": "chemical",
-                        "population_name": self.conf.get(
-                            ["ngv", "common", "base_circuit", "edge_population_name"]
-                        ),
-                        "spatial_synapse_index_dir": _make_abs(
-                            self.paths.bioname_dir,
-                            self.conf.get(
-                                ["ngv", "common", "base_circuit", "spatial_synapse_index_dir"],
-                                default="",
-                            ),
-                        ),
-                        **self.provenance(),
-                    },
-                    {
-                        "edges_file": self.edges_neurons_neurons_file(connectome_type="functional"),
-                        "population_type": "chemical",
-                        "population_name": self.edges_neurons_neurons_name,
-                        "spatial_synapse_index_dir": self.edges_spatial_index_dir,
-                        **self.provenance(),
-                    },
-                ),
+                {
+                    "edges_file": self.edges_neurons_neurons_file(connectome_type="functional"),
+                    "population_type": "chemical",
+                    "population_name": self.edges_neurons_neurons_name,
+                    "spatial_synapse_index_dir": self.edges_spatial_index_dir,
+                    **self.provenance(),
+                },
                 {
                     "edges_file": self.edges_neurons_astrocytes_file,
                     "population_type": "synapse_astrocyte",

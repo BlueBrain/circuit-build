@@ -38,6 +38,7 @@ setup(
         "snakemake>=6.0",
         # Explicitly pin pulp because snakemake<8.0 is broken with pulp>=2.8.0
         "pulp<2.8",
+        "bluepysnap",
     ],
     extras_require={
         "reports": ["snakemake[reports]"],

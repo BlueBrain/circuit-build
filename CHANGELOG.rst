@@ -1,6 +1,24 @@
 Changelog
 =========
 
+Version 5.3.0
+-------------
+
+New Features
+~~~~~~~~~~~~
+
+- Stage ngv base circuit in standalone mode to allow triggering rules for missing datasets
+
+
+Version 5.2.1
+-------------
+
+Improvements
+------------
+
+- Allow region regexes in manifest by sanitizing format_if inputs
+
+
 Version 5.2.0
 -------------
 

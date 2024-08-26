@@ -133,16 +133,16 @@ def test_build__config(build_circuit):
         "networks": {
             "nodes": [
                 {
-                    "nodes_file": f"{DATA_DIR}/circuit/nodes.h5",
+                    "nodes_file": "$BASE_DIR/sonata/networks/nodes/All/nodes.h5",
                     "populations": {
                         "All": {
                             "type": "biophysical",
-                            "spatial_segment_index_dir": f"{DATA_DIR}/circuit/spatial_segment_index",
+                            "spatial_segment_index_dir": "$BASE_DIR/sonata/networks/nodes/All/spatial_segment_index",
                             "alternate_morphologies": {
-                                "neurolucida-asc": f"{DATA_DIR}/circuit/morphologies",
-                                "h5v1": f"{DATA_DIR}/circuit/morphologies",
+                                "neurolucida-asc": "$BASE_DIR/morphologies/All",
+                                "h5v1": "$BASE_DIR/morphologies/All",
                             },
-                            "biophysical_neuron_models_dir": "/gpfs/bbp.cscs.ch/project/proj82/entities/emodels/test_release/hoc_files",
+                            "biophysical_neuron_models_dir": "$BASE_DIR/hoc_files",
                             "provenance": {"bioname_dir": f"{BIONAME_DIR}"},
                         },
                     },
@@ -174,11 +174,11 @@ def test_build__config(build_circuit):
             ],
             "edges": [
                 {
-                    "edges_file": f"{DATA_DIR}/circuit/edges.h5",
+                    "edges_file": f"$BASE_DIR/sonata/networks/edges/functional/All/edges.h5",
                     "populations": {
                         "All": {
                             "type": "chemical",
-                            "spatial_synapse_index_dir": f"{DATA_DIR}/circuit/spatial_synapse_index",
+                            "spatial_synapse_index_dir": "$BASE_DIR/sonata/networks/edges/functional/All/spatial_synapse_index",
                             "provenance": {"bioname_dir": f"{BIONAME_DIR}"},
                         },
                     },

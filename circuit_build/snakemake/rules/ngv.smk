@@ -1,13 +1,8 @@
 rule ngv:
     input:
         "ngv_config.json",
-        *ctx.if_ngv_standalone(
-            [],
-            [
-                ctx.nodes_neurons_file,
-                ctx.edges_neurons_neurons_file(connectome_type="functional"),
-            ],
-        ),
+        ctx.nodes_neurons_file,
+        ctx.edges_neurons_neurons_file(connectome_type="functional"),
         ctx.nodes_astrocytes_file,
         ctx.nodes_vasculature_file,
         ctx.nodes_astrocytes_microdomains_file,
@@ -159,18 +154,9 @@ rule build_neuroglial_connectivity:
     input:
         astrocytes=ctx.nodes_astrocytes_file,
         microdomains=ctx.nodes_astrocytes_microdomains_file,
-        neurons=ctx.if_ngv_standalone(
-            ctx.conf.get(["ngv", "common", "base_circuit", "nodes_file"]),
-            ctx.nodes_neurons_file,
-        ),
-        neuronal_synapses=ctx.if_ngv_standalone(
-            ctx.conf.get(["ngv", "common", "base_circuit", "edges_file"]),
-            ctx.edges_neurons_neurons_file(connectome_type="functional"),
-        ),
-        spatial_synapse_index_dir=ctx.if_ngv_standalone(
-            ctx.conf.get(["ngv", "common", "base_circuit", "spatial_synapse_index_dir"]),
-            ctx.edges_spatial_index_dir,
-        ),
+        neurons=ctx.nodes_neurons_file,
+        neuronal_synapses=ctx.edges_neurons_neurons_file("functional"),
+        spatial_synapse_index_dir=ctx.edges_spatial_index_dir,
     output:
         ctx.paths.auxiliary_path("neuroglial.connectivity.h5"),
     log:
@@ -220,10 +206,7 @@ rule synthesize_glia:
         gliovascular_connectivity=ctx.paths.auxiliary_path("gliovascular.connectivity.h5"),
         neuroglial_connectivity=ctx.paths.auxiliary_path("neuroglial.connectivity.h5"),
         endfeet_meshes=ctx.edges_astrocytes_vasculature_endfeet_meshes_file,
-        neuronal_synapses=ctx.if_ngv_standalone(
-            ctx.conf.get(["ngv", "common", "base_circuit", "edges_file"]),
-            ctx.edges_neurons_neurons_file(connectome_type="functional"),
-        ),
+        neuronal_synapses=ctx.edges_neurons_neurons_file("functional"),
     output:
         morphologies_dir=directory(ctx.nodes_astrocytes_morphologies_dir),
     log:
@@ -286,10 +269,7 @@ rule finalize_neuroglial_connectivity:
         microdomains=ctx.nodes_astrocytes_microdomains_file,
         connectivity=ctx.paths.auxiliary_path("neuroglial.connectivity.h5"),
         morphologies_dir=ctx.nodes_astrocytes_morphologies_dir,
-        neuronal_synapses=ctx.if_ngv_standalone(
-            ctx.conf.get(["ngv", "common", "base_circuit", "edges_file"]),
-            ctx.edges_neurons_neurons_file(connectome_type="functional"),
-        ),
+        neuronal_synapses=ctx.edges_neurons_neurons_file("functional"),
     output:
         ctx.edges_neurons_astrocytes_file,
     log:
