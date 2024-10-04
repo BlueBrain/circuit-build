@@ -1,6 +1,15 @@
 Changelog
 =========
 
+Version 5.3.1
+-------------
+
+Bug Fixes
+~~~~~~~~~
+
+- Fix unit tests and docs to not require files on proj66 not available anymore.
+
+
 Version 5.3.0
 -------------
 

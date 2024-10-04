@@ -12,7 +12,7 @@ from circuit_build.commands import build_command, load_legacy_env_config
 from circuit_build.constants import ENV_CONFIG, ENV_FILE, INDEX_SUCCESS_FILE
 from circuit_build.ngv import stage_ngv_base_circuit
 from circuit_build.sonata_config import write_config
-from circuit_build.utils import dump_yaml, load_yaml, redirect_to_file
+from circuit_build.utils import dump_yaml, env_true, load_yaml, redirect_to_file
 from circuit_build.validators import (
     validate_config,
     validate_edge_population_name,
@@ -145,7 +145,7 @@ class Context:
         config = load_yaml(self.paths.bioname_path("MANIFEST.yaml")) | config
         cluster_config = load_yaml(config["cluster_config"])
 
-        if not self.is_isolated_phase():
+        if not self.skip_config_validation():
             # Validate the merged configuration and the cluster configuration
             validate_config(config, "MANIFEST.yaml")
             validate_config(cluster_config, "cluster.yaml")
@@ -171,8 +171,11 @@ class Context:
 
         self.MORPH_RELEASE = self.conf.get(["common", "morph_release"], default="")
 
-        if not self.is_isolated_phase():
-            self.MORPH_RELEASE = validate_morphology_release(Path(self.MORPH_RELEASE))
+        if self.MORPH_RELEASE:
+            self.MORPH_RELEASE = self.paths.bioname_path(self.MORPH_RELEASE)
+
+        if not self.skip_morphology_release_validation():
+            self.MORPH_RELEASE = validate_morphology_release(self.MORPH_RELEASE)
 
         self.EMODEL_RELEASE = self.if_synthesis("", self.conf.get(["common", "emodel_release"]))
         self.SYNTHESIZE_EMODEL_RELEASE = self.if_synthesis(
@@ -401,9 +404,42 @@ class Context:
             },
         }
 
-    def is_isolated_phase(self):
-        """Return True if there is an env var 'ISOLATED_PHASE' set to 'True'."""
-        return os.getenv("ISOLATED_PHASE", "False").lower() == "true"
+    def skip_morphology_release_validation(self):
+        """Return True if the morphology release validation should be skipped.
+
+        This happens when any of the following env variables are set to 'true':
+
+            - CIRCUIT_BUILD_SKIP_MORPHOLOGY_RELEASE_VALIDATION
+            - ISOLATED_PHASE
+        """
+        return env_true("ISOLATED_PHASE") or env_true(
+            "CIRCUIT_BUILD_SKIP_MORPHOLOGY_RELEASE_VALIDATION"
+        )
+
+    def skip_config_validation(self):
+        """Return True if the config validation should be skipped.
+
+        This happens when any of the following env variables are set to 'true':
+
+            - CIRCUIT_BUILD_SKIP_CONFIG_VALIDATION
+            - ISOLATED_PHASE
+        """
+        return env_true("ISOLATED_PHASE") or env_true("CIRCUIT_BUILD_SKIP_CONFIG_VALIDATION")
+
+    def skip_git_check(self):
+        """Return True if the git check should be skipped.
+
+        This happens when snakemake is invoked with `--config skip_check_git=1`,
+        or when any of the following env variables are set to 'true':
+
+            - CIRCUIT_BUILD_SKIP_GIT_CHECK
+            - ISOLATED_PHASE
+        """
+        return (
+            self.conf.get("skip_check_git")
+            or env_true("ISOLATED_PHASE")
+            or env_true("CIRCUIT_BUILD_SKIP_GIT_CHECK")
+        )
 
     def if_synthesis(self, true_value, false_value):
         """Return ``true_value`` if synthesis is enabled, else ``false_value``."""
@@ -434,8 +470,7 @@ class Context:
 
     def check_git(self, path):
         """Log some information and raise an exception if bioname is not under git control."""
-        if self.conf.get("skip_check_git") or self.is_isolated_phase():
-            # should be skipped when circuit-build is run with --with-summary or --with-report
+        if self.skip_git_check():
             return
         # strip away any git credentials added by the CI from `git remote get-url origin`
         cmd = """

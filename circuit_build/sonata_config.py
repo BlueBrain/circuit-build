@@ -114,6 +114,7 @@ def _nodes_default(
 
 
 def _nodes_biophysical(
+    *,
     nodes_file,
     population_name,
     population_type,
@@ -145,6 +146,7 @@ def _nodes_biophysical(
 
 
 def _nodes_astrocyte(
+    *,
     nodes_file,
     population_name,
     population_type,
@@ -163,6 +165,7 @@ def _nodes_astrocyte(
 
 
 def _nodes_vasculature(
+    *,
     nodes_file,
     population_name,
     population_type,

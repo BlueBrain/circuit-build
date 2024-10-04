@@ -26,6 +26,12 @@ def dump_yaml(filepath, data, sort_keys=False):
         return yaml.safe_dump(data, fd, sort_keys=sort_keys)
 
 
+def env_true(var_name):
+    """Return True if the given env variable is set to 1 or True (case-insensitive)."""
+    value = os.getenv(var_name, "false")
+    return value.upper() in {"1", "TRUE"}
+
+
 def if_then_else(condition, true_value, false_value):
     """Return ``true_value`` if condition, else ``false_value``.
 
@@ -58,7 +64,7 @@ def redirect_to_file(cmd, filename="{log}"):
     """Return a command string with the right redirection."""
     # very verbose output, but may be useful
     cmd = f"""set -ex; {cmd}"""
-    if os.getenv("LOG_ALL_TO_STDERR") == "true":
+    if env_true("LOG_ALL_TO_STDERR"):
         # Redirect stdout and stderr to file, and propagate everything to stderr.
         # Calling ``set -o pipefail`` is needed to propagate the exit code through the pipe.
         return f"set -o pipefail; ( {cmd} ) 2>&1 | tee -a {filename} 1>&2"

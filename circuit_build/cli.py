@@ -40,7 +40,9 @@ def _index(args, *opts):
     return indices[0]
 
 
-def _build_cmd(base_cmd, args, bioname, modules, timestamp, cluster_config, skip_check_git=False):
+def _build_cmd(
+    base_cmd, *, args, bioname, modules, timestamp, cluster_config, skip_check_git=False
+):
     # force the timestamp to the same value in different executions of snakemake
     extra_args = [
         "--config",
@@ -165,6 +167,7 @@ Examples:\n
 @click.pass_context
 def run(
     ctx,
+    *,
     cluster_config: str,
     bioname: str,
     modules: list,
@@ -191,7 +194,15 @@ def run(
             directory,
         ]
         timestamp = f"{datetime.now():%Y%m%dT%H%M%S}"
-        build_cmd = partial(_build_cmd, base_cmd, args, bioname, modules, timestamp, cluster_config)
+        build_cmd = partial(
+            _build_cmd,
+            base_cmd,
+            args=args,
+            bioname=bioname,
+            modules=modules,
+            timestamp=timestamp,
+            cluster_config=cluster_config,
+        )
         exit_code = _run_snakemake_process(cmd=build_cmd())
         if with_summary:
             # snakemake with the --summary/--detailed-summary option does not execute the workflow

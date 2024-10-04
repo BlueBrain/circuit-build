@@ -2,7 +2,7 @@ import json
 import shutil
 from copy import deepcopy
 from pathlib import Path
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 import pytest
 from utils import (
@@ -146,14 +146,26 @@ def test_context_load_env_config_with_custom_env_vars(tmp_path):
     assert result == expected
 
 
-def test_context_is_isolated_phase():
+@patch(f"{test_module.__name__}.validate_morphology_release")
+def test_context_in_isolated_phase(mocked_validate_morphology_release, monkeypatch):
+    monkeypatch.delenv("ISOLATED_PHASE", raising=False)
+    monkeypatch.delenv("CIRCUIT_BUILD_SKIP_GIT_CHECK", raising=False)
+    monkeypatch.delenv("CIRCUIT_BUILD_SKIP_CONFIG_VALIDATION", raising=False)
+    monkeypatch.delenv("CIRCUIT_BUILD_SKIP_MORPHOLOGY_RELEASE_VALIDATION", raising=False)
+
     bioname = TEST_PROJ_TINY
     ctx = _get_context(bioname)
+    assert mocked_validate_morphology_release.call_count == 1
 
-    assert not ctx.is_isolated_phase()
+    assert ctx.skip_git_check() is False
+    assert ctx.skip_config_validation() is False
+    assert ctx.skip_morphology_release_validation() is False
 
-    with patch.dict("os.environ", ISOLATED_PHASE="True"):
-        assert ctx.is_isolated_phase()
+    monkeypatch.setenv("ISOLATED_PHASE", "true")
+
+    assert ctx.skip_git_check() is True
+    assert ctx.skip_config_validation() is True
+    assert ctx.skip_morphology_release_validation() is True
 
 
 @pytest.mark.parametrize("is_partial_config", [False, True])
