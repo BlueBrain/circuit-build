@@ -1,9 +1,9 @@
 common:
-  atlas: ../atlas/
+  atlas: entities/atlas/
   region: 'mc2_Column'
   mask: '[mask]mc2'
-  morph_release: /gpfs/bbp.cscs.ch/project/proj66/entities/morphologies/2018.02.16
-  synthesize_emodel_release: /gpfs/bbp.cscs.ch/project/proj82/entities/emodels/test_release_v2
+  morph_release: entities/morphologies/
+  synthesize_emodel_release: entities/emodels/
   node_population_name: 'neocortex_neurons'
   edge_population_name: 'neocortex_neurons__chemical_synapse'
   synthesis: True
@@ -37,9 +37,9 @@ ngv:
   common:
     parallel: true
     seed: 0
-    atlas: ../atlas/
-    vasculature: ../atlas/vasculature.h5
-    vasculature_mesh: ../atlas/vasculature.obj
+    atlas: entities/atlas/
+    vasculature: entities/atlas/vasculature.h5
+    vasculature_mesh: entities/atlas/vasculature.obj
 
 
   assign_emodels:

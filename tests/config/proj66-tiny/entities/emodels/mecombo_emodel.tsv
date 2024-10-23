@@ -1,0 +1,4 @@
+morph_name             layer  fullmtype   etype  emodel          combo_name                                            threshold_current holding_current
+C290500B-I3            3      L23_MC      bNAC   bNAC_396608557  bNAC_396608557_L23_MC_3_C290500B-I3                   0.221877800558527 -0.0890753044575833
+sm101020a1-6_INT_idA   3      L23_MC      bAC    bAC_327962063   bAC_327962063_L23_MC_2_sm101020a1-6_INT_idA           0.221877800558527 -0.0890753044575833
+rat_20150119_LH1_cell2 5      L5_TPC:A    cADpyr L5_cADpyr       L5_cADpyr_468120757_L5_TPC:A_5_rat_20150119_LH1_cell2 0.221877800558527 -0.0890753044575833

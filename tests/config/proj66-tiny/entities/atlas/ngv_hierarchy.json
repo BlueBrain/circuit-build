@@ -1,0 +1,37 @@
+{
+  "id": 65535,
+  "acronym": "H",
+  "name": "Hyperrectangle",
+  "children": [
+    {
+      "id": 1,
+      "acronym": "L1",
+      "name": "Hyperrectangle layer1, L1"
+    },
+    {
+      "id": 2,
+      "acronym": "L2",
+      "name": "Hyperrectangle layer2, L2"
+    },
+    {
+      "id": 3,
+      "acronym": "L3",
+      "name": "Hyperrectangle layer3, L3"
+    },
+    {
+      "id": 4,
+      "acronym": "L4",
+      "name": "Hyperrectangle layer4, L4"
+    },
+    {
+      "id": 5,
+      "acronym": "L5",
+      "name": "Hyperrectangle layer5, L5"
+    },
+    {
+      "id": 6,
+      "acronym": "L6",
+      "name": "Hyperrectangle layer6, L6"
+    }
+  ]
+}

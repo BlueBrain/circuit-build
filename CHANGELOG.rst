@@ -4,10 +4,14 @@ Changelog
 Version 5.3.1
 -------------
 
+- Make MANIFEST.yaml handle relative paths
+- clean up tests so less duplication
+
 Bug Fixes
 ~~~~~~~~~
 
 - Fix unit tests and docs to not require files on proj66 not available anymore.
+
 
 
 Version 5.3.0

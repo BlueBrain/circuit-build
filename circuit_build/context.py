@@ -166,7 +166,7 @@ class Context:
         self.SYNTHESIZE_MORPHDB = self.paths.bioname_path("neurondb-axon.dat")
         self.PARTITION = self.if_synthesis(self.conf.get(["common", "partition"]), [])
 
-        self.ATLAS = self.conf.get(["common", "atlas"])
+        self.ATLAS = self.paths.bioname_path(self.conf.get(["common", "atlas"]))
         self.ATLAS_CACHE_DIR = ".atlas"
 
         self.MORPH_RELEASE = self.conf.get(["common", "morph_release"], default="")
@@ -177,22 +177,33 @@ class Context:
         if not self.skip_morphology_release_validation():
             self.MORPH_RELEASE = validate_morphology_release(self.MORPH_RELEASE)
 
-        self.EMODEL_RELEASE = self.if_synthesis("", self.conf.get(["common", "emodel_release"]))
-        self.SYNTHESIZE_EMODEL_RELEASE = self.if_synthesis(
-            self.conf.get(["common", "synthesize_emodel_release"]), ""
-        )
+        self.MORPH_RELEASE = Path(self.MORPH_RELEASE).absolute()
+
+        if self.SYNTHESIZE:
+            self.EMODEL_RELEASE = ""
+            self.SYNTHESIZE_EMODEL_RELEASE = self.paths.bioname_path(
+                self.conf.get(["common", "synthesize_emodel_release"])
+            )
+        else:
+            self.EMODEL_RELEASE = self.conf.get(["common", "emodel_release"])
+            if self.EMODEL_RELEASE:
+                self.EMODEL_RELEASE = self.paths.bioname_path(self.EMODEL_RELEASE)
+            self.SYNTHESIZE_EMODEL_RELEASE = ""
+
         self.EMODEL_RELEASE_MECOMBO = None
         self.EMODEL_RELEASE_HOC = None
 
         if self.EMODEL_RELEASE:
             self.EMODEL_RELEASE_MECOMBO = os.path.join(self.EMODEL_RELEASE, "mecombo_emodel.tsv")
             self.EMODEL_RELEASE_HOC = os.path.join(self.EMODEL_RELEASE, "hoc")
-            if not os.path.exists(self.EMODEL_RELEASE_MECOMBO) or not os.path.exists(
-                self.EMODEL_RELEASE_HOC
-            ):
+            if not os.path.exists(self.EMODEL_RELEASE_MECOMBO):
                 raise ValueError(
-                    f"{self.EMODEL_RELEASE} must contain 'mecombo_emodel.tsv' file and 'hoc' folder"
+                    f"{self.EMODEL_RELEASE} must contain 'mecombo_emodel.tsv' file "
+                    f"{self.EMODEL_RELEASE_MECOMBO}"
                 )
+
+            if not os.path.exists(self.EMODEL_RELEASE_HOC):
+                raise ValueError(f"{self.EMODEL_RELEASE} must contain 'hoc' folder")
 
         if self.SYNTHESIZE_EMODEL_RELEASE:
             self.EMODEL_RELEASE_HOC = self.conf.get(["common", "hoc_path"], default="hoc_files")

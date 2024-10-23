@@ -80,7 +80,7 @@ and follows with separate sections for each phase.
 You can download the complete :download:`schema <../../circuit_build/snakemake/schemas/MANIFEST.yaml>`
 used for validation, and you can see below an example of full ``MANIFEST.yaml``:
 
-.. literalinclude:: ../../tests/functional/data/proj66-tiny/MANIFEST.yaml
+.. literalinclude:: ../../tests/config/proj66-tiny/MANIFEST.yaml
    :language: yaml
 
 If **emodel_release** is not specified then the circuit will be built without emodels. It is strongly

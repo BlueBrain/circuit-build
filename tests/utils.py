@@ -7,7 +7,7 @@ from circuit_build.utils import dump_yaml, load_yaml
 TESTS_DIR = Path(__file__).resolve().parent
 UNIT_TESTS_DATA = TESTS_DIR / "unit" / "data"
 FUNC_TESTS_DATA = TESTS_DIR / "functional" / "data"
-TEST_PROJ_TINY = FUNC_TESTS_DATA / "proj66-tiny"
+TEST_PROJ_TINY = TESTS_DIR / "config/proj66-tiny"
 TEST_PROJ_SYNTH = FUNC_TESTS_DATA / "proj66-tiny-synth"
 TEST_NGV_STANDALONE = TESTS_DIR / "functional/ngv-standalone/bioname"
 TEST_NGV_FULL = TESTS_DIR / "functional/ngv-full/bioname"

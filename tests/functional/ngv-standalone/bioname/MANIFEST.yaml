@@ -1,9 +1,9 @@
 common:
-  atlas: /gpfs/bbp.cscs.ch/project/proj66/entities/dev/atlas/O1-152
+  atlas: entities/atlas/O1-152
   region: 'mc2_Column'
   mask: '[mask]mc2'
-  morph_release: /gpfs/bbp.cscs.ch/project/proj66/entities/morphologies/2018.02.16
-  synthesize_emodel_release: /gpfs/bbp.cscs.ch/project/proj82/entities/emodels/test_release
+  morph_release: entities/morphologies/
+  synthesize_emodel_release: entities/emodels/
   node_population_name: 'All'
   edge_population_name: 'All'
   synthesis: True

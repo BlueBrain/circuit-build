@@ -64,12 +64,8 @@ def test_config_get(config_dict, keys, default, expected):
 def test_context_init(mocked_path_exists):
     cwd = Path().resolve()
     bioname = TEST_PROJ_TINY
-    expected_emodel_release_mecombo = (
-        "/gpfs/bbp.cscs.ch/project/proj66/entities/emodels/2018.02.26.dev0/mecombo_emodel.tsv"
-    )
-    expected_emodel_release_hoc = (
-        "/gpfs/bbp.cscs.ch/project/proj66/entities/emodels/2018.02.26.dev0/hoc"
-    )
+    expected_emodel_release_mecombo = str(TEST_PROJ_TINY / "entities/emodels/mecombo_emodel.tsv")
+    expected_emodel_release_hoc = str(TEST_PROJ_TINY / "entities/emodels/hoc")
     mocked_existing_paths = {expected_emodel_release_mecombo, expected_emodel_release_hoc}
     mocked_path_exists.side_effect = lambda x: x in mocked_existing_paths
 
@@ -85,14 +81,12 @@ def test_context_init(mocked_path_exists):
     assert ctx.SYNTHESIZE_MORPH_DIR == cwd / "morphologies/neocortex_neurons"
     assert ctx.SYNTHESIZE_MORPHDB == bioname / "neurondb-axon.dat"
     assert ctx.PARTITION == []
-    assert ctx.ATLAS == "/gpfs/bbp.cscs.ch/project/proj66/entities/dev/atlas/O1-152"
+    assert ctx.ATLAS == bioname / "entities/atlas/O1-152"
     assert ctx.ATLAS_CACHE_DIR == ".atlas"
     assert ctx.nodes_neurons_name == "neocortex_neurons"
     assert ctx.edges_neurons_neurons_name == "neocortex_neurons__chemical_synapse"
-    assert ctx.MORPH_RELEASE == Path(
-        "/gpfs/bbp.cscs.ch/project/proj66/entities/morphologies/2018.02.16"
-    )
-    assert ctx.EMODEL_RELEASE == "/gpfs/bbp.cscs.ch/project/proj66/entities/emodels/2018.02.26.dev0"
+    assert ctx.MORPH_RELEASE == TEST_PROJ_TINY / "entities/morphologies"
+    assert ctx.EMODEL_RELEASE == TEST_PROJ_TINY / "entities/emodels"
     assert ctx.SYNTHESIZE_EMODEL_RELEASE == ""
     assert ctx.EMODEL_RELEASE_MECOMBO == expected_emodel_release_mecombo
     assert ctx.EMODEL_RELEASE_HOC == expected_emodel_release_hoc
@@ -201,10 +195,14 @@ def test_write_network_config__release(tmp_path, is_partial_config):
                             "spatial_segment_index_dir": "$BASE_DIR/sonata/networks/nodes/neocortex_neurons/spatial_segment_index",
                             "type": "biophysical",
                             "alternate_morphologies": {
-                                "h5v1": "/gpfs/bbp.cscs.ch/project/proj66/entities/morphologies/2018.02.16/h5v1",
-                                "neurolucida-asc": "/gpfs/bbp.cscs.ch/project/proj66/entities/morphologies/2018.02.16/ascii",
+                                "h5v1": str(TEST_PROJ_TINY / "entities/morphologies/h5v1"),
+                                "neurolucida-asc": str(
+                                    TEST_PROJ_TINY / "entities/morphologies/ascii"
+                                ),
                             },
-                            "biophysical_neuron_models_dir": "/gpfs/bbp.cscs.ch/project/proj66/entities/emodels/2018.02.26.dev0/hoc",
+                            "biophysical_neuron_models_dir": str(
+                                TEST_PROJ_TINY / "entities/emodels/hoc"
+                            ),
                             "provenance": {
                                 "bioname_dir": f"{bioname}",
                             },
@@ -411,7 +409,7 @@ def test_write_network_config__ngv_full(tmp_path):
     circuit_dir.mkdir()
 
     bioname = TEST_NGV_FULL
-    atlas = TEST_NGV_FULL.parent / "atlas"
+    atlas = TEST_NGV_FULL / "entities/atlas"
 
     with cwd(circuit_dir):
         ctx = _get_context(bioname)
@@ -461,8 +459,8 @@ def test_write_network_config__ngv_full(tmp_path):
             "populations": {
                 "vasculature": {
                     "type": "vasculature",
-                    "vasculature_file": f"{atlas}/vasculature.h5",
-                    "vasculature_mesh": f"{atlas}/vasculature.obj",
+                    "vasculature_file": str(Path(f"{atlas}/vasculature.h5").resolve()),
+                    "vasculature_mesh": str(Path(f"{atlas}/vasculature.obj").resolve()),
                     "provenance": {
                         "bioname_dir": f"{bioname}",
                     },
