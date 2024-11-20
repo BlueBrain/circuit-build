@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Dict
 
 from circuit_build.commands import build_command, load_legacy_env_config
-from circuit_build.constants import ENV_CONFIG, ENV_FILE, INDEX_SUCCESS_FILE
+from circuit_build.constants import ENV_CONFIG, ENV_FILE, INDEX_SUCCESS_FILE, SPYKFUNC_RULES
 from circuit_build.ngv import stage_ngv_base_circuit
 from circuit_build.sonata_config import write_config
 from circuit_build.utils import dump_yaml, env_true, load_yaml, redirect_to_file
@@ -141,6 +141,7 @@ class Context:
         Args:
             config: config dict containing the CLI parameters passed to Snakemake using --config.
         """
+        # pylint: disable=too-many-statements
         self.paths = CircuitPaths(circuit_dir=".", bioname_dir=config["bioname"])
         config = load_yaml(self.paths.bioname_path("MANIFEST.yaml")) | config
         cluster_config = load_yaml(config["cluster_config"])
@@ -216,6 +217,8 @@ class Context:
         if self.is_ngv_standalone():
             base_circuit_config = self.conf.get(["ngv", "common", "base_circuit"])
             stage_ngv_base_circuit(base_circuit_config, context=self)
+
+        self.spine_morphologies_dir = self.conf.get(["common", "spine_morphologies_dir"])
 
     @property
     def nodes_neurons_name(self):
@@ -573,6 +576,20 @@ class Context:
                 }
             },
         )
+        if connectome_dir:
+            edges_dict = {
+                "edges_file": self.edges_neurons_neurons_file(connectome_type=connectome_dir),
+                "population_type": "chemical",
+                "population_name": self.edges_neurons_neurons_name,
+                "spatial_synapse_index_dir": self.edges_spatial_index_dir,
+                **self.provenance(),
+            }
+            if self.spine_morphologies_dir:
+                edges_dict["spine_morphologies_dir"] = self.spine_morphologies_dir
+            edges_entry = [edges_dict]
+
+        else:
+            edges_entry = []
 
         write_config(
             output_file=output_file,
@@ -588,27 +605,44 @@ class Context:
                     **self.provenance(),
                 },
             ],
-            edges=(
-                [
-                    {
-                        "edges_file": self.edges_neurons_neurons_file(
-                            connectome_type=connectome_dir
-                        ),
-                        "population_type": "chemical",
-                        "population_name": self.edges_neurons_neurons_name,
-                        "spatial_synapse_index_dir": self.edges_spatial_index_dir,
-                        **self.provenance(),
-                    },
-                ]
-                if connectome_dir
-                else []
-            ),
+            edges=edges_entry,
             node_sets_file=self.NODESETS_FILE,
             is_partial_config=is_partial_config,
         )
 
     def write_network_ngv_config(self, output_file):
         """Return the SONATA circuit configuration for the neuro-glia-vascular architecture."""
+        edges_entry = [
+            {
+                "edges_file": self.edges_neurons_neurons_file(connectome_type="functional"),
+                "population_type": "chemical",
+                "population_name": self.edges_neurons_neurons_name,
+                "spatial_synapse_index_dir": self.edges_spatial_index_dir,
+                **self.provenance(),
+            },
+            {
+                "edges_file": self.edges_neurons_astrocytes_file,
+                "population_type": "synapse_astrocyte",
+                "population_name": self.edges_neurons_astrocytes_name,
+                **self.provenance(),
+            },
+            {
+                "edges_file": self.edges_astrocytes_astrocytes_file,
+                "population_type": "glialglial",
+                "population_name": self.edges_astrocytes_astrocytes_name,
+                **self.provenance(),
+            },
+            {
+                "edges_file": self.edges_astrocytes_vasculature_file,
+                "population_type": "endfoot",
+                "population_name": self.edges_astrocytes_vasculature_name,
+                "endfeet_meshes_file": self.edges_astrocytes_vasculature_endfeet_meshes_file,
+                **self.provenance(),
+            },
+        ]
+        if self.spine_morphologies_dir:
+            edges_entry[0]["spine_morphologies_dir"] = self.spine_morphologies_dir
+
         write_config(
             output_file=output_file,
             circuit_dir=self.paths.circuit_dir,
@@ -652,55 +686,27 @@ class Context:
                     **self.provenance(),
                 },
             ],
-            edges=[
-                {
-                    "edges_file": self.edges_neurons_neurons_file(connectome_type="functional"),
-                    "population_type": "chemical",
-                    "population_name": self.edges_neurons_neurons_name,
-                    "spatial_synapse_index_dir": self.edges_spatial_index_dir,
-                    **self.provenance(),
-                },
-                {
-                    "edges_file": self.edges_neurons_astrocytes_file,
-                    "population_type": "synapse_astrocyte",
-                    "population_name": self.edges_neurons_astrocytes_name,
-                    **self.provenance(),
-                },
-                {
-                    "edges_file": self.edges_astrocytes_astrocytes_file,
-                    "population_type": "glialglial",
-                    "population_name": self.edges_astrocytes_astrocytes_name,
-                    **self.provenance(),
-                },
-                {
-                    "edges_file": self.edges_astrocytes_vasculature_file,
-                    "population_type": "endfoot",
-                    "population_name": self.edges_astrocytes_vasculature_name,
-                    "endfeet_meshes_file": self.edges_astrocytes_vasculature_endfeet_meshes_file,
-                    **self.provenance(),
-                },
-            ],
+            edges=edges_entry,
             node_sets_file=self.NODESETS_FILE,
         )
 
     def run_spykfunc(self, rule):
         """Return the spykfunc command as a string."""
-        rules_conf = {
-            "spykfunc_s2s": {
-                "mode": "--s2s",
-                "filters": {"BoutonDistance", "SynapseProperties"},
-            },
-            "spykfunc_s2f": {
-                "mode": "--s2f",
-                "filters": {"BoutonDistance", "TouchRules", "ReduceAndCut", "SynapseProperties"},
-            },
-        }
-        if rule in rules_conf:
-            mode = rules_conf[rule]["mode"]
-            filters = self.conf.get([rule, "filters"], default=[])
+        if rule in SPYKFUNC_RULES:
+            mode = SPYKFUNC_RULES[rule]["mode"]
+            filters: list[str] = self.conf.get([rule, "filters"], default=[])
+            morphologies_dirs = self.if_synthesis(
+                self.SYNTHESIZE_MORPH_DIR, Path(self.MORPH_RELEASE, "h5v1")
+            )
+            if self.spine_morphologies_dir:
+                spine_filters = ["SynapseProperties", "SpineMorphologies"]
+                morphologies_dirs = f"{morphologies_dirs} {self.spine_morphologies_dir}"
+                filters = filters or SPYKFUNC_RULES[rule]["filters"]
+                # append the needed filters without modifying the original list
+                filters = filters + [f for f in spine_filters if f not in filters]
             if filters:
                 # https://bbpteam.epfl.ch/project/issues/browse/FUNCZ-208?focusedCommentId=89736&page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-89736
-                missing_filters = rules_conf[rule]["filters"].difference(filters)
+                missing_filters = set(SPYKFUNC_RULES[rule]["filters"]).difference(filters)
                 if missing_filters:
                     raise ValueError(f"{rule} should have filters {missing_filters}")
                 if any(" " in f for f in filters):
@@ -714,7 +720,7 @@ class Context:
                 "--recipe",
                 self.BUILDER_RECIPE,
                 "--morphologies",
-                self.if_synthesis(self.SYNTHESIZE_MORPH_DIR, Path(self.MORPH_RELEASE, "h5v1")),
+                morphologies_dirs,
             ] + self.if_partition(
                 [
                     f"--from-nodeset {'{input.nodesets}'} {{wildcards.partition}}",

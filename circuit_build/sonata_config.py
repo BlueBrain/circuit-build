@@ -191,8 +191,14 @@ def _edges_config_template(edges_file, population_name, population_type, **kwarg
 
 
 def _edges_default(
-    edges_file, population_name, population_type, provenance, spatial_synapse_index_dir=None
+    edges_file,
+    population_name,
+    population_type,
+    provenance,
+    spatial_synapse_index_dir=None,
+    spine_morphologies_dir=None,
 ):
+
     kwargs = {
         "edges_file": edges_file,
         "population_name": population_name,
@@ -201,6 +207,9 @@ def _edges_default(
     }
     if spatial_synapse_index_dir is not None:
         kwargs["spatial_synapse_index_dir"] = spatial_synapse_index_dir
+    if spine_morphologies_dir is not None:
+        kwargs["spine_morphologies_dir"] = spine_morphologies_dir
+
     return _edges_config_template(**kwargs)
 
 

@@ -128,6 +128,11 @@ properties:
         uniqueItems: true
         default: []
         example: ['left', 'right']
+      spine_morphologies_dir:
+          description: |
+            Path to spine morphologies folder.
+          type: string
+          example: '/gpfs/bbp.cscs.ch/project/proj66/entities/spine_morphologies/2024.05.14'
 
   place_cells:
     type: object
@@ -384,7 +389,9 @@ properties:
           Run a list of custom filters. If specified, the following filters must be included:
           - ``BoutonDistance``
           - ``TouchRules``
+          - ``SpineLength``
           - ``ReduceAndCut``
+          - ``SynapseReposition``
           - ``SynapseProperties``
         type: array
         items:
@@ -400,7 +407,7 @@ properties:
         description: |
           Run a list of custom filters. If specified, the following filters must be included:
           - ``BoutonDistance``
-          - ``SynapseProperties``
+          - ``TouchRules``
         type: array
         items:
           type: string

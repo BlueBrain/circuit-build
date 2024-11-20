@@ -1,7 +1,9 @@
 import json
+import re
 import shutil
 from copy import deepcopy
 from pathlib import Path
+from typing import Any
 from unittest.mock import patch
 
 import pytest
@@ -36,11 +38,20 @@ def test_make_abs(parent_dir, path, expected):
     assert path == expected
 
 
-def _get_context(bioname):
+def _get_context(bioname, override: dict[str, dict[str, Any]] | None = None):
     config = load_yaml(bioname / "MANIFEST.yaml")
     config["bioname"] = str(bioname)
     config["cluster_config"] = str(bioname / "cluster.yaml")
+    if override:
+        for section, subdict in override.items():
+            config.setdefault(section, {}).update(deepcopy(subdict))
     return test_module.Context(config=config)
+
+
+def _get_spine_morphologies_override(spine_morphologies_dir):
+    if spine_morphologies_dir is None:
+        return None
+    return {"common": {"spine_morphologies_dir": spine_morphologies_dir}}
 
 
 @pytest.mark.parametrize(
@@ -162,15 +173,17 @@ def test_context_in_isolated_phase(mocked_validate_morphology_release, monkeypat
     assert ctx.skip_morphology_release_validation() is True
 
 
+@pytest.mark.parametrize("spine_morphologies_dir", [None, "", "/path/to/spine_morphologies"])
 @pytest.mark.parametrize("is_partial_config", [False, True])
-def test_write_network_config__release(tmp_path, is_partial_config):
+def test_write_network_config__release(tmp_path, is_partial_config, spine_morphologies_dir):
     circuit_dir = tmp_path / "test_write_network_config__release"
     circuit_dir.mkdir()
 
     bioname = TEST_PROJ_TINY
 
     with cwd(circuit_dir):
-        ctx = _get_context(bioname)
+        override = _get_spine_morphologies_override(spine_morphologies_dir)
+        ctx = _get_context(bioname, override=override)
 
         filepath = circuit_dir / "circuit_config.json"
 
@@ -220,6 +233,11 @@ def test_write_network_config__release(tmp_path, is_partial_config):
                             "provenance": {
                                 "bioname_dir": f"{bioname}",
                             },
+                            **(
+                                {"spine_morphologies_dir": spine_morphologies_dir}
+                                if spine_morphologies_dir
+                                else {}
+                            ),
                         }
                     },
                 }
@@ -228,15 +246,17 @@ def test_write_network_config__release(tmp_path, is_partial_config):
     }
 
 
+@pytest.mark.parametrize("spine_morphologies_dir", [None, "", "/path/to/spine_morphologies"])
 @pytest.mark.parametrize("is_partial_config", [False, True])
-def test_write_network_config__synthesis(tmp_path, is_partial_config):
+def test_write_network_config__synthesis(tmp_path, is_partial_config, spine_morphologies_dir):
     circuit_dir = tmp_path / "test_write_network_config__synthesis"
     circuit_dir.mkdir()
 
     bioname = TEST_PROJ_SYNTH
 
     with cwd(circuit_dir):
-        ctx = _get_context(bioname)
+        override = _get_spine_morphologies_override(spine_morphologies_dir)
+        ctx = _get_context(bioname, override=override)
 
         filepath = circuit_dir / "circuit_config.json"
 
@@ -282,6 +302,11 @@ def test_write_network_config__synthesis(tmp_path, is_partial_config):
                             "provenance": {
                                 "bioname_dir": f"{bioname}",
                             },
+                            **(
+                                {"spine_morphologies_dir": spine_morphologies_dir}
+                                if spine_morphologies_dir
+                                else {}
+                            ),
                         }
                     },
                 }
@@ -290,7 +315,8 @@ def test_write_network_config__synthesis(tmp_path, is_partial_config):
     }
 
 
-def test_write_network_config__ngv_standalone(tmp_path):
+@pytest.mark.parametrize("spine_morphologies_dir", [None, "", "/path/to/spine_morphologies"])
+def test_write_network_config__ngv_standalone(tmp_path, spine_morphologies_dir):
     circuit_dir = tmp_path / "test_write_network_config__ngv_standalone"
     circuit_dir.mkdir()
 
@@ -298,7 +324,8 @@ def test_write_network_config__ngv_standalone(tmp_path):
     data = TEST_NGV_STANDALONE.parent / "data"
 
     with cwd(circuit_dir):
-        ctx = _get_context(bioname)
+        override = _get_spine_morphologies_override(spine_morphologies_dir)
+        ctx = _get_context(bioname, override=override)
 
         filepath = circuit_dir / "circuit_config.json"
 
@@ -364,6 +391,11 @@ def test_write_network_config__ngv_standalone(tmp_path):
                     "provenance": {
                         "bioname_dir": f"{bioname}",
                     },
+                    **(
+                        {"spine_morphologies_dir": spine_morphologies_dir}
+                        if spine_morphologies_dir
+                        else {}
+                    ),
                 }
             },
         },
@@ -404,7 +436,8 @@ def test_write_network_config__ngv_standalone(tmp_path):
     ]
 
 
-def test_write_network_config__ngv_full(tmp_path):
+@pytest.mark.parametrize("spine_morphologies_dir", [None, "", "/path/to/spine_morphologies"])
+def test_write_network_config__ngv_full(tmp_path, spine_morphologies_dir):
     circuit_dir = tmp_path / "test_write_network_config"
     circuit_dir.mkdir()
 
@@ -412,7 +445,8 @@ def test_write_network_config__ngv_full(tmp_path):
     atlas = TEST_NGV_FULL / "entities/atlas"
 
     with cwd(circuit_dir):
-        ctx = _get_context(bioname)
+        override = _get_spine_morphologies_override(spine_morphologies_dir)
+        ctx = _get_context(bioname, override=override)
 
         filepath = circuit_dir / "circuit_config.json"
 
@@ -478,6 +512,11 @@ def test_write_network_config__ngv_full(tmp_path):
                     "provenance": {
                         "bioname_dir": f"{bioname}",
                     },
+                    **(
+                        {"spine_morphologies_dir": spine_morphologies_dir}
+                        if spine_morphologies_dir
+                        else {}
+                    ),
                 }
             },
         },
@@ -521,3 +560,248 @@ def test_write_network_config__ngv_full(tmp_path):
 def test_provenance():
     context = _get_context(TEST_PROJ_TINY)
     assert context.provenance() == {"provenance": {"bioname_dir": context.paths.bioname_dir}}
+
+
+def test_run_spykfunc_s2s():
+    context = _get_context(TEST_PROJ_TINY)
+
+    cmd = context.run_spykfunc("spykfunc_s2s")
+
+    assert (
+        "dplace functionalizer  "
+        "--work-dir {params.output_dir}/.fz --output-dir {params.output_dir} "
+        "--s2s --output-order post "
+        "--from {input.neurons} neocortex_neurons --to {input.neurons} neocortex_neurons "
+        f"--recipe {context.BUILDER_RECIPE} "
+        f"--morphologies {context.MORPH_RELEASE}/h5v1 "
+        "-- {params.parquet_dirs}"
+    ) in cmd
+
+
+def test_run_spykfunc_s2s_with_custom_filters():
+    filters = expected_filters = [
+        "BoutonDistance",
+        "TouchRules",
+        "SynapseProperties",
+    ]
+    context = _get_context(TEST_PROJ_TINY, override={"spykfunc_s2s": {"filters": filters}})
+
+    cmd = context.run_spykfunc("spykfunc_s2s")
+
+    assert "--s2s" not in cmd
+    assert f" --filters {','.join(expected_filters)} " in cmd
+
+
+def test_run_spykfunc_s2s_with_custom_filters_incomplete():
+    filters = [
+        "TouchRules",
+        "SynapseProperties",
+    ]
+    context = _get_context(TEST_PROJ_TINY, override={"spykfunc_s2s": {"filters": filters}})
+
+    with pytest.raises(
+        ValueError, match=re.escape("spykfunc_s2s should have filters {'BoutonDistance'}")
+    ):
+        context.run_spykfunc("spykfunc_s2s")
+
+
+def test_run_spykfunc_s2f():
+    context = _get_context(TEST_PROJ_TINY)
+
+    cmd = context.run_spykfunc("spykfunc_s2f")
+
+    assert (
+        "dplace functionalizer  "
+        "--work-dir {params.output_dir}/.fz --output-dir {params.output_dir} "
+        "--s2f --output-order post "
+        "--from {input.neurons} neocortex_neurons --to {input.neurons} neocortex_neurons "
+        f"--recipe {context.BUILDER_RECIPE} "
+        f"--morphologies {context.MORPH_RELEASE}/h5v1 "
+        "-- {params.parquet_dirs}"
+    ) in cmd
+
+
+def test_run_spykfunc_s2f_with_custom_filters():
+    filters = expected_filters = [
+        "BoutonDistance",
+        "TouchRules",
+        "SpineLength",
+        "ReduceAndCut",
+        "SynapseReposition",
+        "SynapseProperties",
+        "AddID",  # extra filter
+    ]
+    context = _get_context(TEST_PROJ_TINY, override={"spykfunc_s2f": {"filters": filters}})
+
+    cmd = context.run_spykfunc("spykfunc_s2f")
+
+    assert "--s2f" not in cmd
+    assert f" --filters {','.join(expected_filters)} " in cmd
+
+
+def test_run_spykfunc_s2f_with_custom_filters_incomplete():
+    filters = [
+        "TouchRules",
+        "SpineLength",
+        "ReduceAndCut",
+        "SynapseReposition",
+        "SynapseProperties",
+    ]
+    context = _get_context(TEST_PROJ_TINY, override={"spykfunc_s2f": {"filters": filters}})
+
+    with pytest.raises(
+        ValueError, match=re.escape("spykfunc_s2f should have filters {'BoutonDistance'}")
+    ):
+        context.run_spykfunc("spykfunc_s2f")
+
+
+@pytest.mark.parametrize(
+    ("_name", "rule", "configured_filters", "additional_filters"),
+    [
+        (
+            "s2s_empty_filter",
+            "spykfunc_s2s",
+            [],
+            [
+                "BoutonDistance",
+                "TouchRules",
+                "SynapseProperties",
+                "SpineMorphologies",
+            ],
+        ),
+        (
+            "s2s_full_filter",
+            "spykfunc_s2s",
+            [
+                "BoutonDistance",
+                "TouchRules",
+                "SynapseProperties",
+                "SpineMorphologies",
+            ],
+            [],
+        ),
+        (
+            "s2s_partial_filter",
+            "spykfunc_s2s",
+            [
+                "BoutonDistance",
+                "TouchRules",
+            ],
+            [
+                "SynapseProperties",
+                "SpineMorphologies",
+            ],
+        ),
+        (
+            "s2s_extra_filter",
+            "spykfunc_s2s",
+            [
+                "BoutonDistance",
+                "TouchRules",
+                "AddID",  # extra filter
+            ],
+            [
+                "SynapseProperties",
+                "SpineMorphologies",
+            ],
+        ),
+        (
+            "s2f_empty_filter",
+            "spykfunc_s2f",
+            [],
+            [
+                "BoutonDistance",
+                "TouchRules",
+                "SpineLength",
+                "ReduceAndCut",
+                "SynapseReposition",
+                "SynapseProperties",
+                "SpineMorphologies",
+            ],
+        ),
+        (
+            "s2f_full_filter",
+            "spykfunc_s2f",
+            [
+                "BoutonDistance",
+                "TouchRules",
+                "SpineLength",
+                "ReduceAndCut",
+                "SynapseReposition",
+                "SynapseProperties",
+                "SpineMorphologies",
+            ],
+            [],
+        ),
+        (
+            "s2f_partial_filter",
+            "spykfunc_s2f",
+            [
+                "BoutonDistance",
+                "TouchRules",
+                "SpineLength",
+                "ReduceAndCut",
+                "SynapseReposition",
+                "SynapseProperties",
+            ],
+            [
+                "SpineMorphologies",
+            ],
+        ),
+        (
+            "s2f_extra_filter",
+            "spykfunc_s2f",
+            [
+                "BoutonDistance",
+                "TouchRules",
+                "SpineLength",
+                "ReduceAndCut",
+                "SynapseReposition",
+                "SynapseProperties",
+                "AddID",  # extra filter
+            ],
+            [
+                "SpineMorphologies",
+            ],
+        ),
+    ],
+)
+def test_run_spykfunc_s2x_with_spine_morphologies(
+    _name, rule, configured_filters, additional_filters
+):
+    expected_filters = configured_filters + additional_filters
+    context = _get_context(
+        TEST_PROJ_TINY,
+        override={
+            "common": {
+                "spine_morphologies_dir": "/path/to/spine_morphologies",
+            },
+            rule: {
+                "filters": configured_filters,
+            },
+        },
+    )
+
+    cmd = context.run_spykfunc(rule)
+
+    assert "--s2f" not in cmd
+    assert "--s2s" not in cmd
+    assert f" --filters {','.join(expected_filters)} " in cmd
+
+
+def test_run_spykfunc_merge():
+    context = _get_context(TEST_PROJ_TINY)
+
+    cmd = context.run_spykfunc("spykfunc_merge")
+
+    assert (
+        "dplace functionalizer  "
+        "--work-dir {params.output_dir}/.fz --output-dir {params.output_dir} "
+        "--merge -- {params.parquet_dirs}"
+    ) in cmd
+
+
+def test_run_spykfunc_unknown_rule():
+    context = _get_context(TEST_PROJ_TINY)
+    with pytest.raises(ValueError, match="Unrecognized rule 'unknown' in run_spykfunc"):
+        context.run_spykfunc("unknown")

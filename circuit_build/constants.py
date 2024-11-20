@@ -133,3 +133,26 @@ ENV_CONFIG = {
         "modules": ["archive/2023-11", "gmsh/4.11.1"],
     },
 }
+
+SPYKFUNC_RULES = {
+    "spykfunc_s2s": {
+        "mode": "--s2s",
+        # filters included with the option --s2s in spykfunc/0.18.4
+        "filters": [
+            "BoutonDistance",
+            "TouchRules",
+        ],
+    },
+    "spykfunc_s2f": {
+        "mode": "--s2f",
+        # filters included with the option --s2f in spykfunc/0.18.4
+        "filters": [
+            "BoutonDistance",
+            "TouchRules",
+            "SpineLength",
+            "ReduceAndCut",
+            "SynapseReposition",
+            "SynapseProperties",
+        ],
+    },
+}

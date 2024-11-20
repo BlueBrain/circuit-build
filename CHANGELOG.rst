@@ -1,8 +1,17 @@
 Changelog
 =========
 
-Version 5.3.1
+Version 5.4.0
 -------------
+
+New Features
+~~~~~~~~~~~~
+
+- Support realistic spine morphologies [BBPP152-180].
+
+
+Improvements
+------------
 
 - Make MANIFEST.yaml handle relative paths
 - clean up tests so less duplication
