@@ -1,5 +1,5 @@
 common:
-  atlas: entities/atlas/O1-152
+  atlas: entities/atlas/
   region: 'mc2_Column'
   mask: '[mask]mc2'
   morph_release: entities/morphologies/

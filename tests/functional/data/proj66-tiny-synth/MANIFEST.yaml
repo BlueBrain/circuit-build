@@ -1,5 +1,5 @@
 common:
-  atlas: entities/atlas/O1-152
+  atlas: entities/atlas/
   region: 'mc2_Column'
   mask: '[mask]mc2'
   morph_release: entities/morphologies/
@@ -21,7 +21,7 @@ choose_morphologies:
   seed: 0
 
 synthesize_morphologies:
-  max_drop_ratio: 0.1
+  max_drop_ratio: 0.5
   max_files_per_dir: 1024
   seed: 0
   scaling_jitter_std: 0.2

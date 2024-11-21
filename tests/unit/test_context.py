@@ -92,7 +92,7 @@ def test_context_init(mocked_path_exists):
     assert ctx.SYNTHESIZE_MORPH_DIR == cwd / "morphologies/neocortex_neurons"
     assert ctx.SYNTHESIZE_MORPHDB == bioname / "neurondb-axon.dat"
     assert ctx.PARTITION == []
-    assert ctx.ATLAS == bioname / "entities/atlas/O1-152"
+    assert ctx.ATLAS == bioname / "entities/atlas"
     assert ctx.ATLAS_CACHE_DIR == ".atlas"
     assert ctx.nodes_neurons_name == "neocortex_neurons"
     assert ctx.edges_neurons_neurons_name == "neocortex_neurons__chemical_synapse"
